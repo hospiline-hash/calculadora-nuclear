@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Universal de Decaimento e Gestão de Doses</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Firebase SDK (Módulos v10) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJhp-WJvoxou6pDoLfskXLLuEcd9BY4Y",
+            authDomain: "calculadora-de-dose.firebaseapp.com",
+            projectId: "calculadora-de-dose",
+            storageBucket: "calculadora-de-dose.firebasestorage.app",
+            messagingSenderId: "818896604572",
+            appId: "1:818896604572:web:18495df88d1ed37e310c59",
+            measurementId: "G-R03K5X4YWV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.firebaseFirestoreModules = { doc, getDoc, setDoc };
+        
+        if (window.iniciarAppFirebase) {
+            window.iniciarAppFirebase();
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #64748b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 980px; 
+            margin: 0 auto; 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            -webkit-user-select: none; 
+            -moz-user-select: none; 
+            -ms-user-select: none; 
+            user-select: none; 
+        }
+
+        input, select, button, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; border-top: 4px solid var(--primary-color); }
+        
+        .header { text-align: center; margin-bottom: 20px; }
+        .header img {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            display: block;
+            margin: 0 auto 15px auto;
+        }
+
+        .print-logo { display: none; text-align: center; margin-bottom: 20px; }
+        .print-logo img { max-width: 300px; height: auto; }
+
+        label { display: block; margin-top: 10px; font-weight: 600; color: #334155; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background-color: #fcfcfc; }
+        
+        button { margin-top: 10px; padding: 10px 15px; background: #475569; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; }
+        button:hover { background: #334155; }
+        
+        .btn-success { background: #10b981; }
+        .btn-success:hover { background: #059669; }
+        
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; }
+        
+        .btn-danger { background: #dc2626; color: white; padding: 6px 10px; font-size: 12px; }
+        .btn-danger:hover { background: #b91c1c; }
+
+        .result { margin-top: 20px; padding: 12px; background: #f1f5f9; border-left: 4px solid #3b82f6; border-radius: 6px; font-weight: 600; font-size: 14px; }
+        .stats { background: #f0fdf4; border-top: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .loading { font-size: 12px; color: #64748b; font-style: italic; }
+        .chart-container { position: relative; margin-top: 20px; width: 100%; height: 350px; }
+        .historico-box { background: #fffbeb; padding: 15px; border-radius: 6px; border: 1px solid #fde68a; margin-bottom: 15px; }
+        .config-box { background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 15px; }
+
+        .tabela-container { overflow-x: auto; margin-top: 15px; }
+        table.fleury-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 13px;
+        }
+        table.fleury-table th {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 10px;
+            border: 1px solid #94a3b8;
+            font-weight: 600;
+        }
+        table.fleury-table td {
+            padding: 6px;
+            border: 1px solid #cbd5e1;
+        }
+        table.fleury-table tr td:nth-child(2) input { background-color: #fef2f2; border-color: #fca5a5; font-weight: bold; text-align: center; }
+        table.fleury-table tr td:nth-child(6) { background-color: #065f46; color: white; font-weight: bold; font-size: 14px; }
+
+        .footer-copyright {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: var(--secondary-color);
+            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+        }
+
+        @media print {
+            body { background: white; padding: 0; color: #000; }
+            .card:not(.stats), button, .historico-box, .config-box, .header, .chart-container, .footer-copyright, .btn-acao { display: none !important; }
+            .print-logo { display: block !important; }
+            .stats { box-shadow: none; border: 1px solid #cbd5e1; width: 100%; margin: 0; background: #ffffff !important; border-top: 4px solid #10b981 !important; padding: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="print-logo">
+    <img src="logo.png" alt="Logo Hospiline">
+    <h2 style="color: #1e293b; margin-top: 10px;">Relatório Consolidado de Gestão - <span class="lbl-clinica-print">Clínica</span></h2>
+    <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 15px 0;">
+</div>
+
+<div class="card">
+    <div class="header">
+        <img src="logo.png" alt="Logo Hospiline">
+        <h2>Planejamento e Gestão de Radiofármacos</h2>
+    </div>
+
+    <div class="config-box">
+        <h4 style="margin: 0 0 10px 0; color: #1e3a8a;">Configurações da Unidade & Radiofármaco</h4>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="nomeClinica">Nome da Clínica / Hospital:</label>
+                <!-- Ao alterar o nome da clínica, o sistema recarrega os dados específicos dela do Firebase -->
+                <input type="text" id="nomeClinica" value="Clínica / Hospital" placeholder="Digite o nome da instituição" oninput="aoMudarNomeClinica()">
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <label for="radiofarmaco">Radiofármaco (Isótopo):</label>
+                <select id="radiofarmaco" onchange="aoMudarRadiofarmaco()">
+                    <option value="109.8" data-conc="0.040" selected>¹⁸F-FDG (Meia-vida: 109.8 min)</option>
+                    <option value="360" data-conc="0.250">⁹⁹ᵐTc - Tecnécio (Meia-vida: 360 min)</option>
+                    <option value="408" data-conc="0.030">⁶⁸Ga - Gálio (Meia-vida: 68 min)</option>
+                    <option value="11520" data-conc="0.100">¹³¹I - Iodo (Meia-vida: 8 dias)</option>
+                    <option value="9561.6" data-conc="0.150">¹⁷⁷Lu - Lutécio (Meia-vida: 6.64 dias)</option>
+                    <option value="custom" data-conc="0.040">Outro (Inserir Meia-Vida em minutos)</option>
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 150px; display: none;" id="boxMeiaVidaCustom">
+                <label for="meiaVidaCustom">Meia-Vida (Minutos):</label>
+                <input type="number" id="meiaVidaCustom" value="109.8" step="0.1" oninput="dispararAlteracaoTabela()">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
+            <div style="flex: 1; min-width: 180px;">
+                <label for="doseReposicao">Lote de Reposição (mCi):</label>
+                <input type="number" id="doseReposicao" value="10" step="1" oninput="dispararAlteracaoTabela()">
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+                <label for="tetoMaximo">Teto Máximo Frasco (mCi):</label>
+                <input type="number" id="tetoMaximo" value="20" step="1" oninput="dispararAlteracaoTabela()">
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+                <label for="fatorSubtle">Fator de Redução / Algoritmo:</label>
+                <select id="fatorSubtle" onchange="aoMudarFator()">
+                    <option value="0.8" selected>Subtle / Reduzido (0.8x)</option>
+                    <option value="1.0">Integral / Padrão (1.0x)</option>
+                    <option value="custom">Personalizado (Outro valor)</option>
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 150px; display: none;" id="boxFatorCustom">
+                <label for="fatorCustom">Digite o Fator:</label>
+                <input type="number" id="fatorCustom" value="0.8" step="0.01" oninput="dispararAlteracaoTabela()">
+            </div>
+        </div>
+    </div>
+
+    <div class="historico-box">
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <label for="dataInsercao">Data de Inserção / Atendimento:</label>
+                <input type="date" id="dataInsercao" onchange="aoMudarDataInsercao()">
+            </div>
+            <div style="flex: 1; min-width: 250px;">
+                <label for="filtroData">Consultar Histórico (Visualização):</label>
+                <input type="date" id="filtroData" onchange="carregarDadosPorData()">
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+        <h3 style="margin: 0; color: #1e3a8a;">Tabela de Exames do Dia</h3>
+        <button class="btn-success" onclick="adicionarLinhaTabela()" style="margin-top: 0; width: auto;">+ Adicionar Exame</button>
+    </div>
+
+    <div class="tabela-container">
+        <table class="fleury-table" id="tabelaFleury">
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Exame</th>
+                    <th style="width: 12%;">Peso (kg)</th>
+                    <th style="width: 12%;">Altura (m)</th>
+                    <th style="width: 16%;">Concentração (mCi/Kg)</th>
+                    <th style="width: 18%;">Horário</th>
+                    <th style="width: 13%;">Atividade (mCi)</th>
+                    <th style="width: 7%;" class="btn-acao">Ação</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabelaFleury">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="result" id="resultado">
+        Aguardando inserção de dados dos exames...
+    </div>
+</div>
+
+<div class="card">
+    <h3>Curva do Decaimento e Reposições</h3>
+    <p style="font-size: 13px; color: #475569; margin-top: -5px; line-height: 1.4;">
+        🔴 <b>Bolas Vermelhas:</b> Exames.<br>
+        🔵 <b>Bolas Azuis:</b> Reposições Automáticas.<br>
+        🟠 <b>Bolas Laranjas:</b> Doses Extras Manuais.<br>
+        ✨ <b>Linha do Gráfico:</b> Clique para adicionar nova Reposição Extra.
+    </p>
+    <div class="chart-container">
+        <canvas id="graficoDecaimento"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Lista para Pedido (Distribuidora - TXT)</h3>
+    <textarea id="listaPedido" rows="5" readonly style="background: #f8fafc; font-family: monospace; width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" placeholder="A lista de horários aparecerá aqui..."></textarea>
+    <button class="btn-warning" onclick="baixarTxtPedido()">Baixar Lista em TXT</button>
+</div>
+
+<div class="card stats">
+    <h3>Relatório Consolidado (Firebase) <span id="sync-status" class="loading">Carregando dados...</span></h3>
+    <p><strong>Clínica / Unidade:</strong> <span id="stat-clinica">Clínica / Hospital</span></p>
+    <p><strong>Total de Exames Realizados (7 dias):</strong> <span id="stat-total">0</span></p>
+    <p><strong>Doses Economizadas (Estimativa):</strong> <span id="stat-economia">0</span></p>
+    
+    <button class="btn-success" onclick="window.print()" style="margin-top: 15px;">Imprimir / Salvar Resumo (PDF)</button>
+    <button class="btn-danger" onclick="zerarBancoNuvem()" style="margin-top: 10px;">Zerar / Limpar Histórico Antigo</button>
+</div>
+
+<div class="footer-copyright">
+    Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 3.0 (Isolamento por Clínica)
+</div>
+
+<script>
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) || (e.ctrlKey && ['U','u','S','s'].includes(e.key))) {
+            e.preventDefault(); e.stopPropagation(); return false;
+        }
+    });
+
+    let meuGrafico = null;
+    let bancoDadosRemoto = { historicoDias: {} };
+    let temporizadorSalvamento = null;
+    let carregandoRemoto = false;
+
+    let reposicoesExtrasPorData = {};
+    let overridesAutomáticosPorData = {};
+
+    window.onload = function() {
+        const hojeStr = obterDataAtualStr();
+        document.getElementById('dataInsercao').value = hojeStr;
+        document.getElementById('filtroData').value = hojeStr;
+        
+        window.iniciarAppFirebase = function() {
+            carregarDadosNuvemInicial();
+            setInterval(carregarDadosNuvemBackground, 15000);
+        };
+        
+        if (window.db) { window.iniciarAppFirebase(); }
+    };
+
+    function obterDataAtualStr() { return new Date().toISOString().split('T')[0]; }
+
+    // Converte o nome da clínica em um ID de documento seguro para o Firebase (ex: "Hospital São José" -> "hospital_sao_jose")
+    function obterIdClinicaSeguro() {
+        let nome = document.getElementById('nomeClinica').value || "clinica_padrao";
+        return nome.toLowerCase().trim().replace(/[^a-z0-9]/g, "_");
+    }
+    
+    function obterConcentracaoPadraoRadiofarmaco() {
+        const selObj = document.getElementById('radiofarmaco');
+        const opt = selObj.options[selObj.selectedIndex];
+        return opt ? (opt.getAttribute('data-conc') || "0.04") : "0.04";
+    }
+
+    function aoMudarRadiofarmaco() {
+        const sel = document.getElementById('radiofarmaco').value;
+        const boxCustom = document.getElementById('boxMeiaVidaCustom');
+        boxCustom.style.display = (sel === 'custom') ? 'block' : 'none';
+
+        const concPadrao = obterConcentracaoPadraoRadiofarmaco();
+        document.querySelectorAll('#corpoTabelaFleury .input-conc').forEach(input => {
+            input.value = concPadrao;
+        });
+
+        dispararAlteracaoTabela();
+    }
+
+    function aoMudarFator() {
+        const sel = document.getElementById('fatorSubtle').value;
+        const boxCustom = document.getElementById('boxFatorCustom');
+        boxCustom.style.display = (sel === 'custom') ? 'block' : 'none';
+        dispararAlteracaoTabela();
+    }
+
+    function obterMeiaVidaMinutos() {
+        const sel = document.getElementById('radiofarmaco').value;
+        if (sel === 'custom') {
+            return parseFloat(document.getElementById('meiaVidaCustom').value) || 109.8;
+        }
+        return parseFloat(sel);
+    }
+
+    function obterFatorReducao() {
+        const sel = document.getElementById('fatorSubtle').value;
+        if (sel === 'custom') {
+            return parseFloat(document.getElementById('fatorCustom').value) || 1.0;
+        }
+        return parseFloat(sel);
+    }
+
+    function converterHoraParaMinutos(strHora) {
+        if (!strHora || !strHora.includes(':')) return 480;
+        const partes = strHora.trim().split(':');
+        return parseInt(partes[0]) * 60 + parseInt(partes[1]);
+    }
+
+    function minutosParaHoraStr(minutosTotais) {
+        let h = Math.floor(minutosTotais / 60);
+        let m = minutosTotais % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    function aoMudarDataInsercao() {
+        document.getElementById('filtroData').value = document.getElementById('dataInsercao').value;
+        carregarDadosPorData();
+    }
+
+    function aoMudarNomeClinica() {
+        // Quando o usuário altera o nome da clínica, busca os dados daquela clínica específica no Firebase
+        clearTimeout(temporizadorSalvamento);
+        carregarDadosNuvemInicial();
+    }
+
+    function adicionarLinhaTabela(nome = "", peso = "", altura = "", concentracao = "", hora = "08:00") {
+        const corpo = document.getElementById('corpoTabelaFleury');
+        const concUsar = concentracao || obterConcentracaoPadraoRadiofarmaco();
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" class="input-nome" value="${nome}" placeholder="Exame" oninput="dispararAlteracaoTabela()"></td>
+            <td><input type="number" step="0.1" class="input-peso" value="${peso}" placeholder="0" oninput="dispararAlteracaoTabela()"></td>
+            <td><input type="text" class="input-altura" value="${altura}" placeholder="0.0" oninput="dispararAlteracaoTabela()"></td>
+            <td><input type="number" step="0.001" class="input-conc" value="${concUsar}" oninput="dispararAlteracaoTabela()"></td>
+            <td><input type="text" class="input-hora" value="${hora}" placeholder="08:00" oninput="dispararAlteracaoTabela()"></td>
+            <td class="td-atividade">0,00</td>
+            <td class="btn-acao"><button class="btn-danger" onclick="removerLinhaTabela(this)">X</button></td>
+        `;
+        corpo.appendChild(tr);
+        processarSimulacaoCompleta();
+    }
+
+    function removerLinhaTabela(botao) {
+        botao.closest('tr').remove();
+        dispararAlteracaoTabela();
+    }
+
+    function dispararAlteracaoTabela() {
+        if (carregandoRemoto) return;
+        
+        let nomeClinicaVal = document.getElementById('nomeClinica').value || "Clínica / Hospital";
+        document.getElementById('stat-clinica').innerText = nomeClinicaVal;
+        document.querySelectorAll('.lbl-clinica-print').forEach(el => el.innerText = nomeClinicaVal);
+
+        processarSimulacaoCompleta();
+        clearTimeout(temporizadorSalvamento);
+        temporizadorSalvamento = setTimeout(() => { salvarDadosNuvem(); }, 1000);
+    }
+
+    function obterTextoPacientesDaTabela() {
+        let linhas = document.querySelectorAll('#corpoTabelaFleury tr');
+        let textoArr = [];
+        linhas.forEach(tr => {
+            let nome = tr.querySelector('.input-nome').value.trim();
+            let peso = tr.querySelector('.input-peso').value.trim();
+            let altura = tr.querySelector('.input-altura').value.trim();
+            let conc = tr.querySelector('.input-conc').value.trim();
+            let hora = tr.querySelector('.input-hora').value.trim();
+            if (peso !== "" && hora !== "") {
+                textoArr.push(`${nome || 'Exame'} | ${peso} | ${altura} | ${conc} | ${hora}`);
+            }
+        });
+        return textoArr.join('\n');
+    }
+
+    function carregarDadosPorData() {
+        carregandoRemoto = true;
+        const dataSelecionada = document.getElementById('filtroData').value;
+        const corpo = document.getElementById('corpoTabelaFleury');
+        corpo.innerHTML = "";
+
+        if (bancoDadosRemoto.historicoDias && bancoDadosRemoto.historicoDias[dataSelecionada]) {
+            let dadosDia = bancoDadosRemoto.historicoDias[dataSelecionada];
+            let textoPacientes = dadosDia.textoPacientes || "";
+            reposicoesExtrasPorData[dataSelecionada] = dadosDia.reposicoesExtras || [];
+            overridesAutomáticosPorData[dataSelecionada] = dadosDia.overridesAuto || {};
+
+            if (dadosDia.radiofarmaco) {
+                document.getElementById('radiofarmaco').value = dadosDia.radiofarmaco;
+                aoMudarRadiofarmaco();
+            }
+            if (dadosDia.fatorSubtle) {
+                document.getElementById('fatorSubtle').value = dadosDia.fatorSubtle;
+                aoMudarFator();
+            }
+
+            if (textoPacientes.trim() !== "") {
+                textoPacientes.split('\n').forEach(linha => {
+                    if (linha.includes('|')) {
+                        let partes = linha.split('|');
+                        adicionarLinhaTabela(
+                            partes[0] ? partes[0].trim() : "",
+                            partes[1] ? partes[1].trim() : "",
+                            partes[2] ? partes[2].trim() : "",
+                            partes[3] ? partes[3].trim() : "",
+                            partes[4] ? partes[4].trim() : "08:00"
+                        );
+                    }
+                });
+            }
+        } else {
+            reposicoesExtrasPorData[dataSelecionada] = [];
+            overridesAutomáticosPorData[dataSelecionada] = [];
+        }
+        processarSimulacaoCompleta();
+        carregandoRemoto = false;
+    }
+
+    function processarSimulacaoCompleta() {
+        try {
+            let linhasTr = document.querySelectorAll('#corpoTabelaFleury tr');
+            const dataAtual = document.getElementById('filtroData').value;
+            let reposicoesManuaisArr = reposicoesExtrasPorData[dataAtual] || [];
+            let overridesAuto = overridesAutomáticosPorData[dataAtual] || {};
+
+            let doseLoteReposicao = parseFloat(document.getElementById('doseReposicao').value) || 10;
+            let tetoMaximoFrasco = parseFloat(document.getElementById('tetoMaximo').value) || 20;
+            let fatorReducao = obterFatorReducao();
+
+            if (linhasTr.length === 0) {
+                document.getElementById('resultado').innerHTML = "Adicione exames na tabela acima.";
+                document.getElementById('listaPedido').value = "";
+                if (meuGrafico) meuGrafico.destroy();
+                return;
+            }
+
+            const meiaVidaMin = obterMeiaVidaMinutos();
+            const lambda = 0.693 / meiaVidaMin;
+            let pacientes = [];
+
+            linhasTr.forEach(tr => {
+                let pesoInput = tr.querySelector('.input-peso');
+                let concInput = tr.querySelector('.input-conc');
+                let horaInput = tr.querySelector('.input-hora');
+                let tdAtividade = tr.querySelector('.td-atividade');
+
+                if (pesoInput && horaInput) {
+                    let pesoVal = parseFloat(pesoInput.value);
+                    let concVal = parseFloat(concInput.value) || parseFloat(obterConcentracaoPadraoRadiofarmaco());
+                    let horaStrVal = horaInput.value.trim();
+
+                    if (!isNaN(pesoVal) && horaStrVal.includes(':')) {
+                        let minTotais = converterHoraParaMinutos(horaStrVal);
+                        let horaFormatada = minutosParaHoraStr(minTotais);
+                        let doseCalculada = pesoVal * concVal * fatorReducao;
+
+                        tdAtividade.innerText = doseCalculada.toFixed(2).replace('.', ',');
+
+                        pacientes.push({
+                            minutos: minTotais,
+                            horaStr: horaFormatada,
+                            peso: pesoVal,
+                            doseNecessaria: doseCalculada
+                        });
+                    } else {
+                        tdAtividade.innerText = "0,00";
+                    }
+                }
+            });
+
+            if (pacientes.length === 0) {
+                document.getElementById('resultado').innerHTML = "Preencha os pesos e horários corretamente.";
+                return;
+            }
+
+            pacientes.sort((a, b) => a.minutos - b.minutos);
+
+            let minInicioLote = pacientes[0].minutos;
+            let a0Inicial = doseLoteReposicao;
+            let estoqueAtual = a0Inicial;
+            let ultimoMinutoAvaliado = minInicioLote;
+            
+            let reposicoesAutoSet = new Set();
+            reposicoesAutoSet.add(pacientes[0].horaStr);
+
+            pacientes.forEach((pac, index) => {
+                let deltaT = pac.minutos - ultimoMinutoAvaliado;
+                if (deltaT > 0) {
+                    estoqueAtual = estoqueAtual * Math.exp(-lambda * deltaT);
+                }
+                ultimoMinutoAvaliado = pac.minutos;
+
+                if (reposicoesManuaisArr.includes(pac.horaStr)) {
+                    estoqueAtual += doseLoteReposicao;
+                    if (estoqueAtual > tetoMaximoFrasco) estoqueAtual = tetoMaximoFrasco;
+                }
+
+                if (index === 0) {
+                    // Primeiro exame consome do lote inicial
+                } else if (estoqueAtual < pac.doseNecessaria) {
+                    let horarioAlvo = overridesAuto[pac.horaStr] !== undefined ? overridesAuto[pac.horaStr] : pac.horaStr;
+                    reposicoesAutoSet.add(horarioAlvo);
+                    estoqueAtual += doseLoteReposicao; 
+                    if (estoqueAtual > tetoMaximoFrasco) estoqueAtual = tetoMaximoFrasco;
+                }
+                estoqueAtual -= pac.doseNecessaria;
+                if (estoqueAtual < 0) estoqueAtual = 0;
+            });
+
+            let reposicoesAutoArr = Array.from(reposicoesAutoSet);
+            let todasReposicoes = [...reposicoesAutoArr, ...reposicoesManuaisArr];
+            let pedidosReposicao = Array.from(new Set(todasReposicoes));
+            pedidosReposicao.sort((a, b) => converterHoraParaMinutos(a) - converterHoraParaMinutos(b));
+
+            document.getElementById('listaPedido').value = pedidosReposicao.join('\n');
+            let economiaDia = Math.max(0, pacientes.length - pedidosReposicao.length);
+
+            document.getElementById('resultado').innerHTML = `
+                Simulação atualizada com sucesso!<br>
+                <strong>Total de pedidos de reposição:</strong> ${pedidosReposicao.length} | <strong>Economia do dia:</strong> ${economiaDia} doses
+            `;
+
+            gerarGraficoCorreto(minInicioLote, pacientes, pedidosReposicao, reposicoesManuaisArr, reposicoesAutoArr, a0Inicial, lambda, doseLoteReposicao, tetoMaximoFrasco);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function gerarGraficoCorreto(minInicio, pacientes, pedidosHorarios, reposicoesManuaisArr, reposicoesAutoArr, a0Inicial, lambda, doseLoteReposicao, tetoMaximoFrasco) {
+        let fimSimulacao = minInicio + 420; 
+        let minutosUnicos = new Set();
+        for (let m = minInicio; m <= fimSimulacao; m += 5) { minutosUnicos.add(m); }
+        pacientes.forEach(p => minutosUnicos.add(p.minutos));
+        pedidosHorarios.forEach(h => minutosUnicos.add(converterHoraParaMinutos(h)));
+
+        let minutosArray = Array.from(minutosUnicos).sort((a, b) => a - b);
+        let dadosCurva = [], dadosAtividadePre = [], dadosDosesAutoAcima = [], dadosDosesExtrasAcima = [], dadosPacientesPuntos = [];
+
+        let minutosPacientes = pacientes.map(p => p.minutos);
+        let minutosAuto = reposicoesAutoArr.map(h => converterHoraParaMinutos(h));
+        let minutosExtras = reposicoesManuaisArr.map(h => converterHoraParaMinutos(h));
+
+        minutosArray.forEach(m => {
+            let ativ = 0;
+            if (m >= minInicio) ativ += a0Inicial * Math.exp(-lambda * (m - minInicio));
+            pedidosHorarios.forEach(hp => {
+                let mp = converterHoraParaMinutos(hp);
+                if (mp !== minInicio && m >= mp) ativ += doseLoteReposicao * Math.exp(-lambda * (m - mp));
+            });
+            pacientes.forEach(pac => {
+                if (m > pac.minutos) ativ -= pac.doseNecessaria * Math.exp(-lambda * (m - pac.minutos));
+            });
+            if (ativ > tetoMaximoFrasco) ativ = tetoMaximoFrasco;
+            let ativPre = ativ > 0 ? parseFloat(ativ.toFixed(2)) : 0;
+
+            pacientes.forEach(pac => { if (m === pac.minutos) ativ -= pac.doseNecessaria; });
+            if (ativ < 0) ativ = 0;
+            let valorAtiv = ativ > 0 ? parseFloat(ativ.toFixed(2)) : 0;
+
+            dadosCurva.push({ x: m, y: valorAtiv });
+            dadosPacientesPuntos.push(minutosPacientes.includes(m) ? { x: m, y: valorAtiv } : { x: m, y: null });
+            dadosAtividadePre.push(ativPre);
+            dadosDosesAutoAcima.push(minutosAuto.includes(m) ? { x: m, y: valorAtiv + 1.5 } : { x: m, y: null });
+            dadosDosesExtrasAcima.push(minutosExtras.includes(m) ? { x: m, y: valorAtiv + 1.5 } : { x: m, y: null });
+        });
+
+        const ctx = document.getElementById('graficoDecaimento').getContext('2d');
+        if (meuGrafico) meuGrafico.destroy();
+
+        meuGrafico = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    { label: 'Atividade Restante A(t)', data: dadosCurva, atividadePrePaciente: dadosAtividadePre, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, fill: true, tension: 0.2, pointRadius: 0 },
+                    { label: 'Exames', data: dadosPacientesPuntos, backgroundColor: '#ef4444', pointBackgroundColor: '#ef4444', pointRadius: 7, showLine: false },
+                    { label: 'Doses Automáticas', data: dadosDosesAutoAcima, backgroundColor: '#3b82f6', pointBackgroundColor: '#3b82f6', pointRadius: 7, showLine: false },
+                    { label: 'Doses Extras', data: dadosDosesExtrasAcima, backgroundColor: '#f59e0b', pointBackgroundColor: '#f59e0b', pointRadius: 7, showLine: false }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(ctx) { return minutosParaHoraStr(ctx[0].parsed.x); },
+                            label: function(ctx) {
+                                let val = ctx.parsed.y !== null ? ctx.parsed.y : 0;
+                                if (ctx.datasetIndex === 2 || ctx.datasetIndex === 3) val -= 1.5;
+                                return `${ctx.dataset.label}: ${Math.max(0, val).toFixed(2).replace('.',' ,')} mCi`;
+                            }
+                        }
+                    }
+                },
+                onClick: (e, elements) => {
+                    const dataAtual = document.getElementById('filtroData').value;
+                    if (!reposicoesExtrasPorData[dataAtual]) reposicoesExtrasPorData[dataAtual] = [];
+                    if (elements && elements.length > 0) {
+                        let hit = elements[0];
+                        let minC = meuGrafico.data.datasets[hit.datasetIndex].data[hit.index].x;
+                        let hC = minutosParaHoraStr(minC);
+                        if (hit.datasetIndex === 3 && confirm(`Remover dose extra às ${hC}?`)) {
+                            reposicoesExtrasPorData[dataAtual] = reposicoesExtrasPorData[dataAtual].filter(h => h !== hC);
+                            dispararAlteracaoTabela();
+                        }
+                        return;
+                    }
+                    let canvasPos = Chart.helpers.getRelativePosition(e, meuGrafico);
+                    let dataX = meuGrafico.scales.x.getValueForPixel(canvasPos.x);
+                    if (dataX !== undefined) {
+                        let hC = minutosParaHoraStr(Math.round(dataX / 5) * 5);
+                        if (confirm(`Adicionar Reposição Extra de ${doseLoteReposicao} mCi às ${hC}?`)) {
+                            reposicoesExtrasPorData[dataAtual].push(hC);
+                            dispararAlteracaoTabela();
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: tetoMaximoFrasco + 5, title: { display: true, text: 'Atividade (mCi)' } },
+                    x: { type: 'linear', position: 'bottom', ticks: { callback: v => minutosParaHoraStr(v), stepSize: 30 } }
+                }
+            }
+        });
+    }
+
+    function baixarTxtPedido() {
+        let clinicaStr = (document.getElementById('nomeClinica').value || "clinica").replace(/\s+/g, '_').toLowerCase();
+        let blob = new Blob([document.getElementById('listaPedido').value], { type: 'text/plain;charset=utf-8' });
+        let link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `pedido_radiofarmaco_${clinicaStr}_${document.getElementById('dataInsercao').value}.txt`;
+        link.click();
+    }
+
+    async function carregarDadosNuvemInicial() {
+        try {
+            document.getElementById('sync-status').innerText = "(Carregando...)";
+            const { doc, getDoc } = window.firebaseFirestoreModules;
+            const idClinica = obterIdClinicaSeguro();
+            
+            // Cada clínica agora possui a sua própria coleção/documento isolado no Firebase
+            const docRef = doc(window.db, "dados_calculadora_clinicas", idClinica);
+            const docSnap = await getDoc(docRef);
+
+            bancoDadosRemoto = docSnap.exists() ? docSnap.data() : { historicoDias: {} };
+            if (!bancoDadosRemoto.historicoDias) bancoDadosRemoto.historicoDias = {};
+
+            carregarDadosPorData();
+            calcularEstatisticasGlobais();
+            document.getElementById('sync-status').innerText = "(Sincronizado Firebase)";
+        } catch (e) {
+            document.getElementById('sync-status').innerText = "(Erro de conexão)";
+        }
+    }
+
+    async function carregarDadosNuvemBackground() {
+        try {
+            const { doc, getDoc } = window.firebaseFirestoreModules;
+            const idClinica = obterIdClinicaSeguro();
+            const docRef = doc(window.db, "dados_calculadora_clinicas", idClinica);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                bancoDadosRemoto = docSnap.data();
+                calcularEstatisticasGlobais();
+            }
+        } catch (e) {}
+    }
+
+    async function salvarDadosNuvem() {
+        try {
+            const dataInsercao = document.getElementById('dataInsercao').value || obterDataAtualStr();
+            const textoPacientes = obterTextoPacientesDaTabela();
+            const dataAtual = document.getElementById('filtroData').value;
+            const idClinica = obterIdClinicaSeguro();
+
+            if (!bancoDadosRemoto.historicoDias) bancoDadosRemoto.historicoDias = {};
+            bancoDadosRemoto.historicoDias[dataInsercao] = {
+                radiofarmaco: document.getElementById('radiofarmaco').value,
+                fatorSubtle: document.getElementById('fatorSubtle').value,
+                textoPacientes: textoPacientes,
+                reposicoesExtras: reposicoesExtrasPorData[dataAtual] || [],
+                overridesAuto: overridesAutomáticosPorData[dataAtual] || {},
+                atualizadoEm: new Date().toISOString()
+            };
+
+            calcularEstatisticasGlobais();
+            const { doc, setDoc } = window.firebaseFirestoreModules;
+            
+            // Salva especificamente no documento da clínica ativa
+            await setDoc(doc(window.db, "dados_calculadora_clinicas", idClinica), bancoDadosRemoto);
+            document.getElementById('sync-status').innerText = "(Salvo no Firebase)";
+        } catch (e) {
+            document.getElementById('sync-status').innerText = "(Erro ao salvar)";
+        }
+    }
+
+    function calcularEstatisticasGlobais() {
+        let totalPacientesGeral = 0, totalEconomiaGeral = 0;
+        Object.keys(bancoDadosRemoto.historicoDias || {}).forEach(dataStr => {
+            let diaObj = bancoDadosRemoto.historicoDias[dataStr];
+            if (diaObj && diaObj.textoPacientes) {
+                let linhas = diaObj.textoPacientes.trim().split('\n');
+                let pacs = [];
+                linhas.forEach(l => {
+                    let p = l.split('|');
+                    if (p[1] && p[4]) pacs.push({ min: converterHoraParaMinutos(p[4]), dose: parseFloat(p[1]) * parseFloat(p[3] || 0.04) * 0.8 });
+                });
+                if (pacs.length > 0) {
+                    totalPacientesGeral += pacs.length;
+                    totalEconomiaGeral += Math.max(0, pacs.length - 1);
+                }
+            }
+        });
+        document.getElementById('stat-total').innerText = totalPacientesGeral;
+        document.getElementById('stat-economia').innerText = totalEconomiaGeral;
+    }
+
+    async function zerarBancoNuvem() {
+        if (prompt("Digite ZERAR para limpar o histórico do Firebase desta clínica:") === "ZERAR") {
+            bancoDadosRemoto = { historicoDias: {} };
+            await salvarDadosNuvem();
+            carregarDadosPorData();
+            alert("Histórico limpo!");
+        }
+    }
+</script>
+
+</body>
+</html>
