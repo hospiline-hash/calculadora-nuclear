@@ -102,7 +102,6 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getDatabase, ref, get, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Configuração completa do Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCyInTcgD-cIuuXDBUdvITYBO1aQD4Jmh4",
         authDomain: "calculadora-f18.firebaseapp.com",
@@ -118,7 +117,6 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Disponibiliza as instâncias globalmente para as funções do script comum
     window.fbAuth = auth;
     window.fbDb = db;
     window.fbSignIn = signInWithEmailAndPassword;
@@ -131,12 +129,22 @@
     window.fbRemove = remove;
     window.fbOnValue = onValue;
 
-    // Se já estiver logado, poderia redirecionar (opcional)
-    onAuthStateChanged(auth, (user) => {
-        if (user && window.location.pathname.includes('auth.html')) {
-            // Lógica de redirecionamento automático, se necessário
+    window.fbCreateUserSecondary = async (email, password) => {
+        const { initializeApp: initSec, deleteApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+        const { getAuth: getAuthSec, createUserWithEmailAndPassword: createSec } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+        
+        const secApp = initSec(firebaseConfig, "SecondaryApp");
+        const secAuth = getAuthSec(secApp);
+        try {
+            const userCred = await createSec(secAuth, email, password);
+            await secAuth.signOut();
+            await deleteApp(secApp);
+            return userCred;
+        } catch (error) {
+            await deleteApp(secApp);
+            throw error;
         }
-    });
+    };
 </script>
 </head>
 <body>
@@ -171,7 +179,8 @@
         <h2>Solicitar Novo Cadastro</h2>
 
         <label for="regCpfCnpj">CPF ou CNPJ:</label>
-        <input type="text" id="regCpfCnpj" placeholder="Digite CPF ou CNPJ válido" maxlength="18">
+        <!-- MÁSCARA DE CPF/CNPJ -->
+        <input type="text" id="regCpfCnpj" placeholder="Digite CPF ou CNPJ válido" maxlength="18" oninput="aplicarMascaraCpfCnpj(this)">
 
         <label for="regRazaoSocial">Razão Social Completa:</label>
         <input type="text" id="regRazaoSocial" placeholder="Ex: MedScan Servicos Medicos Ltda">
@@ -232,6 +241,29 @@
     <h2>Painel Administrativo - Aprovador</h2>
     <p style="font-size:13px; color:#64748b;">Gerencie acessos, aprove, edite ou exclua clínicas cadastradas na nuvem.</p>
 
+    <!-- Cadastro Manual pelo Admin -->
+    <button type="button" class="btn-success" onclick="alternarCadastroManual()" id="btnToggleManual" style="margin-bottom: 20px;">+ Cadastrar Cliente Manualmente (Definir Senha)</button>
+    
+    <div id="formManualContainer" class="hidden" style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 20px;">
+        <h3 style="margin-top:0;">Criar Acesso Direto</h3>
+        <p style="font-size:12px; color:#64748b;">O cliente criado aqui já entra como <strong>Ativo</strong> e com a senha que você definir.</p>
+        
+        <label for="manNomeClinica">Nome da Clínica:</label>
+        <input type="text" id="manNomeClinica" placeholder="Ex: Clínica MedScan">
+
+        <label for="manNome">Nome do Responsável / Dono:</label>
+        <input type="text" id="manNome" placeholder="Nome do responsável">
+        
+        <label for="manEmail">E-mail de Login:</label>
+        <input type="email" id="manEmail" placeholder="email@cliente.com">
+        
+        <label for="manSenha">Senha Provisória (Mín. 6 caracteres):</label>
+        <input type="text" id="manSenha" placeholder="Senha para o cliente logar">
+        
+        <button type="button" class="btn-success" onclick="adminCadastrarUsuario()">Criar Usuário Ativo</button>
+        <div id="manMsg" class="msg"></div>
+    </div>
+
     <h3>Lista de Solicitações e Usuários</h3>
     <div id="listaUsuariosAdmin">
         <p style="font-style:italic; color:#64748b;">Carregando usuários do Firebase...</p>
@@ -241,12 +273,38 @@
 </div>
 
 <script>
+    // --- FUNÇÃO DA MÁSCARA DE CPF/CNPJ ---
+    function aplicarMascaraCpfCnpj(input) {
+        let valor = input.value.replace(/\D/g, '');
+        const tamanho = valor.length;
+
+        if (tamanho <= 11) {
+            valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+            valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+            valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        } else {
+            valor = valor.replace(/^(\d{2})(\d)/, '$1.$2');
+            valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+            valor = valor.replace(/\.(\d{3})(\d)/, '.$1/$2');
+            valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+        }
+        input.value = valor;
+    }
+
     function alternarFormularioCadastro() {
         const f = document.getElementById('formCadastroContainer');
         const b = document.getElementById('btnToggleCadastro');
         const aberto = !f.classList.contains('hidden');
         f.classList.toggle('hidden', aberto);
         b.innerText = aberto ? 'Novo Cadastro (Clique para abrir)' : 'Ocultar Formulário';
+    }
+
+    function alternarCadastroManual() {
+        const f = document.getElementById('formManualContainer');
+        const b = document.getElementById('btnToggleManual');
+        const aberto = !f.classList.contains('hidden');
+        f.classList.toggle('hidden', aberto);
+        b.innerText = aberto ? '+ Cadastrar Cliente Manualmente (Definir Senha)' : '- Ocultar Formulário';
     }
 
     function mudarAba(aba) {
@@ -267,7 +325,6 @@
             bA.classList.add('active');
             bL.classList.remove('active');
 
-            // Verifica se o admin já está logado na sessão
             const adminLogado = sessionStorage.getItem('admin_logado');
             if (adminLogado === 'true') {
                 alogin.classList.add('hidden');
@@ -295,7 +352,7 @@
         }
     }
 
-    // --- SOLICITAR CADASTRO ---
+    // --- SOLICITAR CADASTRO (COM LIMPEZA DE CAMPOS) ---
     async function solicitarCadastroFirebase() {
         const email = document.getElementById('regEmail').value.trim();
         const senha = document.getElementById('regSenha').value;
@@ -314,11 +371,9 @@
         }
 
         try {
-            // Cria usuário no Firebase Auth
             const userCredential = await window.fbCreateUser(window.fbAuth, email, senha);
             const uid = userCredential.user.uid;
 
-            // Salva os dados detalhados da clínica no Realtime Database com status "Pendente"
             const userRef = window.fbRef(window.fbDb, 'usuarios/' + uid);
             await window.fbSet(userRef, {
                 uid, email, nome, cpfCnpj, razaoSocial, cidade, uf, telefone,
@@ -328,6 +383,29 @@
 
             msgEl.className = "msg success";
             msgEl.innerText = "Solicitação enviada com sucesso! Aguarde aprovação do administrador.";
+            
+            // Limpa os campos do formulário
+            document.getElementById('regCpfCnpj').value = "";
+            document.getElementById('regRazaoSocial').value = "";
+            document.getElementById('regNome').value = "";
+            document.getElementById('regCidade').value = "";
+            document.getElementById('regUf').value = "";
+            document.getElementById('regEmail').value = "";
+            document.getElementById('regTelefone').value = "";
+            document.getElementById('regSenha').value = "";
+            
+            // Reseta a barra de força da senha
+            document.getElementById('strengthProgress').style.width = '0%';
+            document.getElementById('strengthHint').innerText = 'Digite uma senha forte.';
+
+            // Desloga o cliente para não bugar a sessão
+            await window.fbSignOut(window.fbAuth);
+
+            // Opcional: Esconder o formulário após o envio
+            setTimeout(() => {
+                alternarFormularioCadastro(); // Fecha o formulário
+            }, 2500); // 2.5 segundos para o usuário ler a mensagem
+
         } catch (error) {
             msgEl.className = "msg error";
             msgEl.innerText = "Erro ao cadastrar: " + error.message;
@@ -344,7 +422,6 @@
             const userCredential = await window.fbSignIn(window.fbAuth, email, senha);
             const uid = userCredential.user.uid;
 
-            // Verifica o status no banco de dados
             const userRef = window.fbRef(window.fbDb, 'usuarios/' + uid);
             const snapshot = await window.fbGet(userRef);
 
@@ -358,11 +435,10 @@
                 }
             }
 
-            // Sucesso -> Vai para a calculadora
             window.location.href = 'calculadora.html';
         } catch (error) {
             msgEl.className = "msg error";
-            msgEl.innerText = "E-mail ou senha incorretos. Detalhe: " + error.message;
+            msgEl.innerText = "E-mail ou senha incorretos.";
         }
     }
 
@@ -372,7 +448,6 @@
         const senha = document.getElementById('adminPass').value;
         const msgEl = document.getElementById('adminLoginMsg');
 
-        // PERMITE O SEU E-MAIL CADASTRADO NO FIREBASE COMO ADMIN
         if (email === "celso.hospiline@gmail.com" || email === "celso.leonel@hospiline.com.br") {
             try {
                 await window.fbSignIn(window.fbAuth, email, senha);
@@ -387,6 +462,50 @@
         } else {
             msgEl.className = "msg error";
             msgEl.innerText = "Este e-mail não possui privilégios administrativos.";
+        }
+    }
+
+    // --- CADASTRO MANUAL PELO ADMIN ---
+    async function adminCadastrarUsuario() {
+        const nomeClinica = document.getElementById('manNomeClinica').value.trim();
+        const nome = document.getElementById('manNome').value.trim();
+        const email = document.getElementById('manEmail').value.trim();
+        const senha = document.getElementById('manSenha').value;
+        const msgEl = document.getElementById('manMsg');
+
+        if (!nomeClinica || !nome || !email || !senha || senha.length < 6) {
+            msgEl.className = "msg error";
+            msgEl.innerText = "Preencha todos os campos. A senha precisa ter no mínimo 6 caracteres.";
+            return;
+        }
+
+        msgEl.className = "msg";
+        msgEl.innerText = "Criando usuário...";
+
+        try {
+            const userCredential = await window.fbCreateUserSecondary(email, senha);
+            const uid = userCredential.user.uid;
+
+            const userRef = window.fbRef(window.fbDb, 'usuarios/' + uid);
+            await window.fbSet(userRef, {
+                uid, email, nome, nomeClinica,
+                status: 'Ativo',
+                dataCadastro: new Date().toLocaleDateString('pt-BR')
+            });
+
+            msgEl.className = "msg success";
+            msgEl.innerText = "Usuário criado e ativado com sucesso!";
+            
+            document.getElementById('manNomeClinica').value = '';
+            document.getElementById('manNome').value = '';
+            document.getElementById('manEmail').value = '';
+            document.getElementById('manSenha').value = '';
+            
+            setTimeout(() => alternarCadastroManual(), 2000);
+
+        } catch (error) {
+            msgEl.className = "msg error";
+            msgEl.innerText = "Erro ao criar: " + error.message;
         }
     }
 
@@ -406,12 +525,13 @@
                 const u = childSnapshot.val();
                 const uid = childSnapshot.key;
                 let corBadge = u.status === 'Ativo' ? '#10b981' : (u.status === 'Bloqueado' ? '#dc2626' : '#f59e0b');
+                let clinicaExibicao = u.nomeClinica ? `<b>${u.nomeClinica}</b> - ` : '';
 
                 html += `
                     <div class="list-item">
                         <div class="list-item-header">
                             <div>
-                                <strong>${u.nome || 'Sem Nome'}</strong> (${u.email})<br>
+                                ${clinicaExibicao}<strong>${u.nome || 'Sem Nome'}</strong> (${u.email})<br>
                                 <span class="badge" style="background:${corBadge};">${u.status}</span>
                                 <small> | Tel: ${u.telefone || 'N/D'} | Cidade: ${u.cidade || 'N/D'}</small>
                             </div>
@@ -429,19 +549,17 @@
             });
             cont.innerHTML = html;
         }, (error) => {
-            cont.innerHTML = `<p class="msg error">Erro ao carregar dados. Verifique as regras do banco de dados no Firebase. Detalhe: ${error.message}</p>`;
+            cont.innerHTML = `<p class="msg error">Erro ao carregar dados. Detalhe: ${error.message}</p>`;
         });
     }
 
-    // --- PAINEL ADMIN: MUDAR STATUS (APROVAR/BLOQUEAR) ---
     async function alterarStatus(uid, novoStatus) {
         const userRef = window.fbRef(window.fbDb, 'usuarios/' + uid);
         await window.fbUpdate(userRef, { status: novoStatus });
     }
 
-    // --- PAINEL ADMIN: EXCLUIR ---
     async function excluirUsuario(uid) {
-        if (!confirm("Deseja realmente excluir este usuário do sistema?")) return;
+        if (!confirm("Deseja realmente excluir este usuário do banco de dados?")) return;
         const userRef = window.fbRef(window.fbDb, 'usuarios/' + uid);
         await window.fbRemove(userRef);
     }
