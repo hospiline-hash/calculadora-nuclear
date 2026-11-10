@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Calculadora F-18</title>
+<style>
+    :root {
+        --primary-color: #3b82f6;
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-color: #1e293b;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0 auto;
+        padding: 20px;
+        max-width: 450px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+    .card {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        width: 100%;
+        border-top: 4px solid var(--primary-color);
+    }
+    h2 {
+        margin-top: 0;
+        color: #1e293b;
+        font-size: 22px;
+        text-align: center;
+    }
+    label {
+        display: block;
+        margin-top: 15px;
+        font-weight: 600;
+        font-size: 13px;
+        color: #475569;
+    }
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+    button {
+        margin-top: 20px;
+        width: 100%;
+        padding: 11px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    button:hover { background: #2563eb; }
+    .msg {
+        margin-top: 15px;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+    }
+    .error { color: #dc2626; }
+    .success { color: #10b981; }
+    .info { color: #3b82f6; font-size: 12px; text-align: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Acesso Restrito - Calculadora F-18</h2>
+    
+    <label for="loginEmail">E-mail:</label>
+    <input type="email" id="loginEmail" placeholder="seu@email.com">
+
+    <label for="loginSenha">Senha:</label>
+    <input type="password" id="loginSenha" placeholder="Sua senha">
+
+    <button type="button" onclick="fazerLoginFirebase()">Entrar no Sistema</button>
+    <div id="loginMsg" class="msg"></div>
+    
+    <div class="info">
+        Certifique-se de que o usuário e a senha foram previamente cadastrados no painel do Firebase Authentication.
+    </div>
+</div>
+
+<!-- Importação e Lógica do Firebase Authentication -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    // Configuração oficial do projeto Calculadora-F18
+    const firebaseConfig = {
+        databaseURL: "https://calculadora-f18-default-rtdb.firebaseio.com"
+        // Caso seu console do Firebase tenha gerado apiKey ou projectId, você pode incluí-los aqui.
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Verifica se já existe uma sessão ativa ao abrir a página
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Se já estiver logado, redireciona direto para a calculadora
+            window.location.href = 'index.html';
+        }
+    });
+
+    // Função global de login chamada pelo botão
+    window.fazerLoginFirebase = async function() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const senha = document.getElementById('loginSenha').value;
+        const msgEl = document.getElementById('loginMsg');
+        msgEl.className = "msg error";
+
+        if (!email || !senha) {
+            msgEl.innerText = "Por favor, preencha o e-mail e a senha.";
+            return;
+        }
+
+        try {
+            msgEl.style.color = "#3b82f6";
+            msgEl.innerText = "Autenticando...";
+
+            await signInWithEmailAndPassword(auth, email, senha);
+            
+            msgEl.className = "msg success";
+            msgEl.innerText = "Login realizado com sucesso! Redirecionando...";
+
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 800);
+
+        } catch (error) {
+            console.error("Erro no login:", error);
+            msgEl.className = "msg error";
+            
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-email') {
+                msgEl.innerText = "E-mail ou senha incorretos.";
+            } else if (error.code === 'auth/too-many-requests') {
+                msgEl.innerText = "Muitas tentativas falhas. Tente novamente mais tarde.";
+            } else {
+                msgEl.innerText = "Erro ao fazer login: " + error.message;
+            }
+        }
+    }
+</script>
+</body>
+</html>
