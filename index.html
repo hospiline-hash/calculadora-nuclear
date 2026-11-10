@@ -360,13 +360,13 @@
     }
 
     // --- LOGIN ADMIN ---
-    async function fazerLoginAdminFirebase() {
+   async function fazerLoginAdminFirebase() {
         const email = document.getElementById('adminEmail').value.trim();
         const senha = document.getElementById('adminPass').value;
         const msgEl = document.getElementById('adminLoginMsg');
 
-        // Defina aqui o e-mail do seu administrador principal ou valide por regra
-        if (email === "celso.leonel@hospiline.com.br" || email.includes("admin")) {
+        // PERMITE O SEU E-MAIL CADASTRADO NO FIREBASE COMO ADMIN
+        if (email === "celso.hospiline@gmail.com" || email === "celso.leonel@hospiline.com.br") {
             try {
                 await window.fbSignIn(window.fbAuth, email, senha);
                 sessionStorage.setItem('admin_logado', 'true');
