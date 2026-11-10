@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login - Calculadora F-18</title>
+<title>Painel de Autenticação - Calculadora F-18</title>
+
 <style>
     :root {
         --primary-color: #3b82f6;
@@ -18,71 +19,134 @@
         color: var(--text-color);
         margin: 0 auto;
         padding: 20px;
-        max-width: 450px;
+        max-width: 700px;
+    }
+
+    .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--bg-color);
+        padding: 12px 0 10px 0;
+        margin: -20px 0 20px 0;
+        min-height: 130px;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
     }
+    .site-header img {
+        width: 450px;
+        max-width: 90vw;
+        height: 110px;
+        object-fit: contain;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        display: block;
+    }
+
     .card {
         background: var(--card-bg);
-        padding: 30px;
+        padding: 25px;
         border-radius: 8px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        width: 100%;
+        margin-bottom: 20px;
         border-top: 4px solid var(--primary-color);
     }
-    h2 {
-        margin-top: 0;
-        color: #1e293b;
-        font-size: 22px;
-        text-align: center;
+    h2 { margin-top: 0; color: #1e293b; font-size: 20px; }
+    h3 { font-size: 16px; margin-top: 20px; color: #334155; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+    label { display: block; margin-top: 12px; font-weight: 600; font-size: 13px; color: #475569; }
+    input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select {
+        width: 100%; padding: 10px; margin-top: 4px;
+        border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
     }
-    label {
-        display: block;
-        margin-top: 15px;
-        font-weight: 600;
-        font-size: 13px;
-        color: #475569;
-    }
-    input {
-        width: 100%;
-        padding: 10px;
-        margin-top: 5px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        font-size: 14px;
-    }
+    input[type="checkbox"] { width: auto; margin-top: 3px; }
     button {
-        margin-top: 20px;
-        width: 100%;
-        padding: 11px;
-        background: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
+        margin-top: 15px; width: 100%; padding: 10px;
+        background: #3b82f6; color: white; border: none;
+        border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;
     }
     button:hover { background: #2563eb; }
-    .msg {
-        margin-top: 15px;
-        font-size: 13px;
-        font-weight: 600;
-        text-align: center;
-    }
+    .btn-success { background: #10b981; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-warning:hover { background: #d97706; }
+    .btn-secondary { background: #64748b; }
+    .btn-secondary:hover { background: #475569; }
+    .msg { margin-top: 10px; font-size: 13px; font-weight: 600; text-align: center; }
     .error { color: #dc2626; }
     .success { color: #10b981; }
-    .info { color: #3b82f6; font-size: 12px; text-align: center; margin-top: 10px; }
+    .list-item { background: #f1f5f9; padding: 12px; border-radius: 6px; margin-top: 10px; }
+    .list-item-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .list-item-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .list-item-actions button { margin-top: 0; width: auto; padding: 6px 10px; font-size: 12px; }
+    .hidden { display: none !important; }
+    .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-buttons button { margin-top: 0; background: #94a3b8; }
+    .tab-buttons button.active { background: #3b82f6; }
+    .password-strength-bar {
+        height: 6px; width: 100%; background: #e2e8f0;
+        border-radius: 3px; margin-top: 6px; overflow: hidden;
+    }
+    .password-strength-progress { height: 100%; width: 0%; transition: width 0.3s, background-color 0.3s; }
+    .password-hint { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media(max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+    .badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; color: #fff; }
 </style>
+
+<!-- Inicialização do Firebase -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getDatabase, ref, get, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        databaseURL: "https://calculadora-f18-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Disponibiliza as instâncias globalmente para as funções do script
+    window.fbAuth = auth;
+    window.fbDb = db;
+    window.fbSignIn = signInWithEmailAndPassword;
+    window.fbCreateUser = createUserWithEmailAndPassword;
+    window.fbSignOut = signOut;
+    window.fbRef = ref;
+    window.fbGet = get;
+    window.fbSet = set;
+    window.fbUpdate = update;
+    window.fbRemove = remove;
+    window.fbOnValue = onValue;
+
+    // Se já estiver logado, redireciona para a calculadora
+    onAuthStateChanged(auth, (user) => {
+        if (user && window.location.pathname.includes('auth.html')) {
+            // Verifica se é admin ou usuário comum para direcionamento correto
+            // (Opcional: se o e-mail for o seu admin, pode abrir direto o painel)
+        }
+    });
+</script>
 </head>
 <body>
 
-<div class="card">
-    <h2>Acesso Restrito - Calculadora F-18</h2>
-    
+<header class="site-header">
+    <img src="logo.png" alt="Logo Rádio-Gestão" width="450" height="110">
+</header>
+
+<div class="tab-buttons">
+    <button type="button" id="tabBtnLogin" class="active" onclick="mudarAba('login')">Entrar / Cadastrar</button>
+    <button type="button" id="tabBtnAdmin" onclick="mudarAba('admin')">Painel Admin</button>
+</div>
+
+<!-- ============== ABA LOGIN / CADASTRO ============== -->
+<div id="secaoLogin" class="card">
+    <h2>Acesso ao Sistema - Calculadora F-18</h2>
+
     <label for="loginEmail">E-mail:</label>
     <input type="email" id="loginEmail" placeholder="seu@email.com">
 
@@ -91,71 +155,292 @@
 
     <button type="button" onclick="fazerLoginFirebase()">Entrar no Sistema</button>
     <div id="loginMsg" class="msg"></div>
-    
-    <div class="info">
-        Certifique-se de que o usuário e a senha foram previamente cadastrados no painel do Firebase Authentication.
+
+    <hr style="margin: 25px 0; border:0; border-top:1px solid #e2e8f0;">
+
+    <button type="button" class="btn-secondary" onclick="alternarFormularioCadastro()" id="btnToggleCadastro">Novo Cadastro (Clique para abrir)</button>
+
+    <div id="formCadastroContainer" class="hidden" style="margin-top:20px; border-top:1px dashed #cbd5e1; padding-top:15px;">
+        <h2>Solicitar Novo Cadastro</h2>
+
+        <label for="regCpfCnpj">CPF ou CNPJ:</label>
+        <input type="text" id="regCpfCnpj" placeholder="Digite CPF ou CNPJ válido" maxlength="18">
+
+        <label for="regRazaoSocial">Razão Social Completa:</label>
+        <input type="text" id="regRazaoSocial" placeholder="Ex: MedScan Servicos Medicos Ltda">
+
+        <label for="regNome">Nome do Cliente / Clínica:</label>
+        <input type="text" id="regNome" placeholder="Ex: Clínica MedScan">
+
+        <div class="grid-2">
+            <div>
+                <label for="regCidade">Cidade:</label>
+                <input type="text" id="regCidade" placeholder="Ex: São Paulo">
+            </div>
+            <div>
+                <label for="regUf">UF (Estado):</label>
+                <select id="regUf">
+                    <option value="">Selecione...</option>
+                    <option value="SP">SP</option><option value="RJ">RJ</option><option value="MG">MG</option>
+                    <option value="RS">RS</option><option value="PR">PR</option><option value="SC">SC</option>
+                    <option value="BA">BA</option><option value="GO">GO</option><option value="DF">DF</option>
+                    <option value="OUTROS">Outros</option>
+                </select>
+            </div>
+        </div>
+
+        <label for="regEmail">E-mail:</label>
+        <input type="email" id="regEmail" placeholder="clinica@email.com">
+
+        <label for="regTelefone">Telefone / WhatsApp com DDD:</label>
+        <input type="tel" id="regTelefone" placeholder="(00) 00000-0000">
+
+        <label for="regSenha">Senha (Mín. 6 caracteres):</label>
+        <input type="password" id="regSenha" placeholder="********" oninput="verificarForcaSenha(this.value, 'strengthProgress', 'strengthHint')">
+        <div class="password-strength-bar"><div id="strengthProgress" class="password-strength-progress"></div></div>
+        <div id="strengthHint" class="password-hint">Digite uma senha forte.</div>
+
+        <button type="button" class="btn-success" onclick="solicitarCadastroFirebase()">Enviar Solicitação</button>
+        <div id="regMsg" class="msg"></div>
     </div>
 </div>
 
-<!-- Importação e Lógica do Firebase Authentication -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+<!-- ============== ABA LOGIN ADMIN ============== -->
+<div id="secaoAdminLogin" class="card hidden">
+    <h2>Acesso Restrito - Administrador</h2>
+    <p style="font-size:13px; color:#64748b;">Faça login com sua conta de administrador para gerenciar o sistema.</p>
 
-    // Configuração oficial do projeto Calculadora-F18
-    const firebaseConfig = {
-        databaseURL: "https://calculadora-f18-default-rtdb.firebaseio.com"
-        // Caso seu console do Firebase tenha gerado apiKey ou projectId, você pode incluí-los aqui.
-    };
+    <label for="adminEmail">E-mail Admin:</label>
+    <input type="email" id="adminEmail" placeholder="admin@hospiline.com.br">
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    <label for="adminPass">Senha Admin:</label>
+    <input type="password" id="adminPass" placeholder="Sua senha de admin">
 
-    // Verifica se já existe uma sessão ativa ao abrir a página
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // Se já estiver logado, redireciona direto para a calculadora
-            window.location.href = 'calculadora.html';
+    <button type="button" onclick="fazerLoginAdminFirebase()">Acessar Painel</button>
+    <div id="adminLoginMsg" class="msg"></div>
+</div>
+
+<!-- ============== ABA PAINEL ADMIN ============== -->
+<div id="secaoAdminPainel" class="card hidden">
+    <h2>Painel Administrativo - Aprovador</h2>
+    <p style="font-size:13px; color:#64748b;">Gerencie acessos, aprove, edite ou exclua clínicas cadastradas na nuvem.</p>
+
+    <h3>Lista de Solicitações e Usuários</h3>
+    <div id="listaUsuariosAdmin">
+        <p style="font-style:italic; color:#64748b;">Carregando usuários do Firebase...</p>
+    </div>
+
+    <button type="button" class="btn-danger" onclick="logoutAdminFirebase()" style="margin-top:30px;">Sair do Painel</button>
+</div>
+
+<script>
+    function alternarFormularioCadastro() {
+        const f = document.getElementById('formCadastroContainer');
+        const b = document.getElementById('btnToggleCadastro');
+        const aberto = !f.classList.contains('hidden');
+        f.classList.toggle('hidden', aberto);
+        b.innerText = aberto ? 'Novo Cadastro (Clique para abrir)' : 'Ocultar Formulário';
+    }
+
+    function mudarAba(aba) {
+        const login = document.getElementById('secaoLogin');
+        const alogin = document.getElementById('secaoAdminLogin');
+        const apainel = document.getElementById('secaoAdminPainel');
+        const bL = document.getElementById('tabBtnLogin');
+        const bA = document.getElementById('tabBtnAdmin');
+
+        if (aba === 'login') {
+            login.classList.remove('hidden');
+            alogin.classList.add('hidden');
+            apainel.classList.add('hidden');
+            bL.classList.add('active');
+            bA.classList.remove('active');
+        } else {
+            login.classList.add('hidden');
+            bA.classList.add('active');
+            bL.classList.remove('active');
+
+            // Verifica se o admin já está logado na sessão
+            const adminLogado = sessionStorage.getItem('admin_logado');
+            if (adminLogado === 'true') {
+                alogin.classList.add('hidden');
+                apainel.classList.remove('hidden');
+                carregarUsuariosPainel();
+            } else {
+                alogin.classList.remove('hidden');
+                apainel.classList.add('hidden');
+            }
         }
-    });
+    }
 
-    // Função global de login chamada pelo botão
-    window.fazerLoginFirebase = async function() {
-        const email = document.getElementById('loginEmail').value.trim();
-        const senha = document.getElementById('loginSenha').value;
-        const msgEl = document.getElementById('loginMsg');
-        msgEl.className = "msg error";
+    function verificarForcaSenha(senha, barId, hintId) {
+        const bar = document.getElementById(barId);
+        const hint = document.getElementById(hintId);
+        if (!bar || !hint) return;
+        if (senha.length >= 6) {
+            bar.style.width = '100%';
+            bar.style.backgroundColor = '#10b981';
+            hint.innerText = 'Senha adequada.';
+        } else {
+            bar.style.width = '30%';
+            bar.style.backgroundColor = '#dc2626';
+            hint.innerText = 'Mínimo de 6 caracteres.';
+        }
+    }
 
-        if (!email || !senha) {
-            msgEl.innerText = "Por favor, preencha o e-mail e a senha.";
+    // --- SOLICITAR CADASTRO ---
+    async function solicitarCadastroFirebase() {
+        const email = document.getElementById('regEmail').value.trim();
+        const senha = document.getElementById('regSenha').value;
+        const nome = document.getElementById('regNome').value.trim();
+        const cpfCnpj = document.getElementById('regCpfCnpj').value.trim();
+        const razaoSocial = document.getElementById('regRazaoSocial').value.trim();
+        const cidade = document.getElementById('regCidade').value.trim();
+        const uf = document.getElementById('regUf').value;
+        const telefone = document.getElementById('regTelefone').value.trim();
+        const msgEl = document.getElementById('regMsg');
+
+        if (!email || !senha || !nome) {
+            msgEl.className = "msg error";
+            msgEl.innerText = "Preencha os campos obrigatórios!";
             return;
         }
 
         try {
-            msgEl.style.color = "#3b82f6";
-            msgEl.innerText = "Autenticando...";
+            // Cria usuário no Firebase Auth
+            const userCredential = await window.fbCreateUser(window.fbAuth, email, senha);
+            const uid = userCredential.user.uid;
 
-            await signInWithEmailAndPassword(auth, email, senha);
-            
+            // Salva os dados detalhados da clínica no Realtime Database com status "Pendente"
+            const userRef = window.fbRef(window.fbDb, 'usuarios/' + uid);
+            await window.fbSet(userRef, {
+                uid, email, nome, cpfCnpj, razaoSocial, cidade, uf, telefone,
+                status: 'Pendente',
+                dataCadastro: new Date().toLocaleDateString('pt-BR')
+            });
+
             msgEl.className = "msg success";
-            msgEl.innerText = "Login realizado com sucesso! Redirecionando...";
-
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 800);
-
+            msgEl.innerText = "Solicitação enviada com sucesso! Aguarde aprovação do administrador.";
         } catch (error) {
-            console.error("Erro no login:", error);
             msgEl.className = "msg error";
-            
-            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-email') {
-                msgEl.innerText = "E-mail ou senha incorretos.";
-            } else if (error.code === 'auth/too-many-requests') {
-                msgEl.innerText = "Muitas tentativas falhas. Tente novamente mais tarde.";
-            } else {
-                msgEl.innerText = "Erro ao fazer login: " + error.message;
-            }
+            msgEl.innerText = "Erro ao cadastrar: " + error.message;
         }
+    }
+
+    // --- LOGIN DE CLIENTES ---
+    async function fazerLoginFirebase() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const senha = document.getElementById('loginSenha').value;
+        const msgEl = document.getElementById('loginMsg');
+
+        try {
+            const userCredential = await window.fbSignIn(window.fbAuth, email, senha);
+            const uid = userCredential.user.uid;
+
+            // Verifica o status no banco de dados
+            const userRef = window.fbRef(window.fbDb, 'usuarios/' + uid);
+            const snapshot = await window.fbGet(userRef);
+
+            if (snapshot.exists()) {
+                const dados = snapshot.val();
+                if (dados.status !== 'Ativo') {
+                    msgEl.className = "msg error";
+                    msgEl.innerText = `Sua conta está com status: ${dados.status}. Aguarde aprovação.`;
+                    await window.fbSignOut(window.fbAuth);
+                    return;
+                }
+            }
+
+            // Sucesso -> Vai para a calculadora
+            window.location.href = 'calculadora.html';
+        } catch (error) {
+            msgEl.className = "msg error";
+            msgEl.innerText = "E-mail ou senha incorretos.";
+        }
+    }
+
+    // --- LOGIN ADMIN ---
+    async function fazerLoginAdminFirebase() {
+        const email = document.getElementById('adminEmail').value.trim();
+        const senha = document.getElementById('adminPass').value;
+        const msgEl = document.getElementById('adminLoginMsg');
+
+        // Defina aqui o e-mail do seu administrador principal ou valide por regra
+        if (email === "celso.leonel@hospiline.com.br" || email.includes("admin")) {
+            try {
+                await window.fbSignIn(window.fbAuth, email, senha);
+                sessionStorage.setItem('admin_logado', 'true');
+                document.getElementById('secaoAdminLogin').classList.add('hidden');
+                document.getElementById('secaoAdminPainel').classList.remove('hidden');
+                carregarUsuariosPainel();
+            } catch (error) {
+                msgEl.className = "msg error";
+                msgEl.innerText = "Senha ou e-mail de admin inválidos.";
+            }
+        } else {
+            msgEl.className = "msg error";
+            msgEl.innerText = "Este e-mail não possui privilégios administrativos.";
+        }
+    }
+
+    // --- PAINEL ADMIN: CARREGAR USUÁRIOS ---
+    function carregarUsuariosPainel() {
+        const cont = document.getElementById('listaUsuariosAdmin');
+        const usuariosRef = window.fbRef(window.fbDb, 'usuarios');
+
+        window.fbOnValue(usuariosRef, (snapshot) => {
+            if (!snapshot.exists()) {
+                cont.innerHTML = '<p style="font-style:italic; color:#64748b;">Nenhum usuário cadastrado.</p>';
+                return;
+            }
+
+            let html = "";
+            snapshot.forEach((childSnapshot) => {
+                const u = childSnapshot.val();
+                const uid = childSnapshot.key;
+                let corBadge = u.status === 'Ativo' ? '#10b981' : (u.status === 'Bloqueado' ? '#dc2626' : '#f59e0b');
+
+                html += `
+                    <div class="list-item">
+                        <div class="list-item-header">
+                            <div>
+                                <strong>${u.nome || 'Sem Nome'}</strong> (${u.email})<br>
+                                <span class="badge" style="background:${corBadge};">${u.status}</span>
+                                <small> | Tel: ${u.telefone || 'N/D'} | Cidade: ${u.cidade || 'N/D'}</small>
+                            </div>
+                            <div class="list-item-actions">
+                                <select onchange="alterarStatus('${uid}', this.value)" style="width:auto; padding:4px; font-size:12px;">
+                                    <option value="Pendente" ${u.status==='Pendente'?'selected':''}>Pendente</option>
+                                    <option value="Ativo" ${u.status==='Ativo'?'selected':''}>Ativo</option>
+                                    <option value="Bloqueado" ${u.status==='Bloqueado'?'selected':''}>Bloqueado</option>
+                                </select>
+                                <button type="button" class="btn-danger" onclick="excluirUsuario('${uid}')">Excluir</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            cont.innerHTML = html;
+        });
+    }
+
+    // --- PAINEL ADMIN: MUDAR STATUS (APROVAR/BLOQUEAR) ---
+    async function alterarStatus(uid, novoStatus) {
+        const userRef = window.fbRef(window.fbDb, 'usuarios/' + uid);
+        await window.fbUpdate(userRef, { status: novoStatus });
+    }
+
+    // --- PAINEL ADMIN: EXCLUIR ---
+    async function excluirUsuario(uid) {
+        if (!confirm("Deseja realmente excluir este usuário do sistema?")) return;
+        const userRef = window.fbRef(window.fbDb, 'usuarios/' + uid);
+        await window.fbRemove(userRef);
+    }
+
+    function logoutAdminFirebase() {
+        sessionStorage.removeItem('admin_logado');
+        window.fbSignOut(window.fbAuth);
+        mudarAba('admin');
     }
 </script>
 </body>
