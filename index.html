@@ -102,15 +102,23 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getDatabase, ref, get, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+    // Configuração completa do Firebase
     const firebaseConfig = {
-        databaseURL: "https://calculadora-f18-default-rtdb.firebaseio.com"
+        apiKey: "AIzaSyCyInTcgD-cIuuXDBUdvITYBO1aQD4Jmh4",
+        authDomain: "calculadora-f18.firebaseapp.com",
+        databaseURL: "https://calculadora-f18-default-rtdb.firebaseio.com",
+        projectId: "calculadora-f18",
+        storageBucket: "calculadora-f18.firebasestorage.app",
+        messagingSenderId: "541122272700",
+        appId: "1:541122272700:web:f88948002a3ba5daeb9fb9",
+        measurementId: "G-NW4F8ZB8DD"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Disponibiliza as instâncias globalmente para as funções do script
+    // Disponibiliza as instâncias globalmente para as funções do script comum
     window.fbAuth = auth;
     window.fbDb = db;
     window.fbSignIn = signInWithEmailAndPassword;
@@ -123,11 +131,10 @@
     window.fbRemove = remove;
     window.fbOnValue = onValue;
 
-    // Se já estiver logado, redireciona para a calculadora
+    // Se já estiver logado, poderia redirecionar (opcional)
     onAuthStateChanged(auth, (user) => {
         if (user && window.location.pathname.includes('auth.html')) {
-            // Verifica se é admin ou usuário comum para direcionamento correto
-            // (Opcional: se o e-mail for o seu admin, pode abrir direto o painel)
+            // Lógica de redirecionamento automático, se necessário
         }
     });
 </script>
@@ -355,28 +362,31 @@
             window.location.href = 'calculadora.html';
         } catch (error) {
             msgEl.className = "msg error";
-            msgEl.innerText = "E-mail ou senha incorretos.";
+            msgEl.innerText = "E-mail ou senha incorretos. Detalhe: " + error.message;
         }
     }
 
     // --- LOGIN ADMIN ---
-  async function fazerLoginAdminFirebase() {
+    async function fazerLoginAdminFirebase() {
         const email = document.getElementById('adminEmail').value.trim();
         const senha = document.getElementById('adminPass').value;
         const msgEl = document.getElementById('adminLoginMsg');
 
-        try {
-            // Tenta autenticar diretamente no Firebase Authentication
-            await window.fbSignIn(window.fbAuth, email, senha);
-            
-            // Se o login no Firebase deu certo, concede o acesso ao painel admin
-            sessionStorage.setItem('admin_logado', 'true');
-            document.getElementById('secaoAdminLogin').classList.add('hidden');
-            document.getElementById('secaoAdminPainel').classList.remove('hidden');
-            carregarUsuariosPainel();
-        } catch (error) {
+        // PERMITE O SEU E-MAIL CADASTRADO NO FIREBASE COMO ADMIN
+        if (email === "celso.hospiline@gmail.com" || email === "celso.leonel@hospiline.com.br") {
+            try {
+                await window.fbSignIn(window.fbAuth, email, senha);
+                sessionStorage.setItem('admin_logado', 'true');
+                document.getElementById('secaoAdminLogin').classList.add('hidden');
+                document.getElementById('secaoAdminPainel').classList.remove('hidden');
+                carregarUsuariosPainel();
+            } catch (error) {
+                msgEl.className = "msg error";
+                msgEl.innerText = "Erro de autenticação: " + error.message;
+            }
+        } else {
             msgEl.className = "msg error";
-            msgEl.innerText = "E-mail ou senha incorretos.";
+            msgEl.innerText = "Este e-mail não possui privilégios administrativos.";
         }
     }
 
@@ -418,6 +428,8 @@
                 `;
             });
             cont.innerHTML = html;
+        }, (error) => {
+            cont.innerHTML = `<p class="msg error">Erro ao carregar dados. Verifique as regras do banco de dados no Firebase. Detalhe: ${error.message}</p>`;
         });
     }
 
