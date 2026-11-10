@@ -29,26 +29,26 @@
         const db = getDatabase(app);
         try { getAnalytics(app); } catch(e) {}
 
-        // BLINDAGEM DE ACESSO E BUSCA DO NOME DA CLÍNICA
+        // Variável global para guardar o UID do usuário logado
+        window.uidLogado = null;
+
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                window.location.href = 'auth.html'; // ou index.html, dependendo de como você renomeou
+                window.location.href = 'index.html';
             } else {
-                // Injeta o nome da clínica acima da lista de pacientes
+                window.uidLogado = user.uid; // Armazena o ID do usuário logado
+
+                // Injeta o nome da clínica
                 const headerCard = document.querySelector('.card');
                 const topRow = document.querySelector('.header-top-row');
                 
                 if (headerCard && topRow && !document.getElementById('nomeClinicaExibicao')) {
                     const nomeClinicaDiv = document.createElement('div');
                     nomeClinicaDiv.id = 'nomeClinicaExibicao';
-                    // Estilo para ficar destacado na linha de cima
                     nomeClinicaDiv.style.cssText = "font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 5px; width: 100%; display: block;";
-                    
-                    // Insere antes da linha que tem os botões PT/ES/Sair
                     topRow.parentNode.insertBefore(nomeClinicaDiv, topRow);
                 }
 
-                // Busca o nome no banco de dados
                 try {
                     const userRef = ref(db, 'usuarios/' + user.uid);
                     const snapshot = await get(userRef);
@@ -57,21 +57,21 @@
                     if (snapshot.exists()) {
                         const dados = snapshot.val();
                         if (nomeDiv) {
-                            if (dados.nomeClinica) {
-                                nomeDiv.innerText = dados.nomeClinica;
-                            } else if (dados.nome) {
-                                nomeDiv.innerText = dados.nome; // Fallback
-                            }
+                            nomeDiv.innerText = dados.nomeClinica || dados.nome || "Clínica sem Nome";
                         }
                     }
                 } catch (e) {
                     console.error("Erro ao buscar dados da clínica:", e);
                 }
 
-                // Atualiza o título menor com o e-mail
                 const topRowTitle = document.querySelector('.header-top-row h2');
                 if (topRowTitle) {
                     topRowTitle.innerHTML = `Lista de Pacientes do Dia - <span style="color:#3b82f6; font-size: 15px;">${user.email}</span>`;
+                }
+
+                // Se a função de escuta já estiver definida, inicia ela (pois agora temos o UID)
+                if (typeof iniciarEscutaTempoReal === 'function') {
+                    iniciarEscutaTempoReal();
                 }
             }
         });
@@ -79,7 +79,7 @@
         window.fazerLogoutFirebase = async function() {
             await signOut(auth);
             sessionStorage.clear();
-            window.location.href = 'auth.html'; // ou index.html
+            window.location.href = 'index.html';
         };
 
         window.fbDb = db;
@@ -88,10 +88,6 @@
         window.fbSet = set;
         window.fbUpdate = update;
         window.fbOnValue = onValue;
-        
-        if (typeof iniciarEscutaTempoReal === 'function') {
-            iniciarEscutaTempoReal();
-        }
     </script>
 
     <style>
@@ -687,9 +683,11 @@
         }
     };
 
+    // FUNÇÃO MODIFICADA: Agora a referência é única por clínica (UID)
     function getBancoRef() {
-        if (!window.fbDb) return null;
-        return window.fbRef(window.fbDb, 'calculadoraDecaimento/banco');
+        if (!window.fbDb || !window.uidLogado) return null;
+        // Salva dentro de 'calculadoraDecaimento/banco_UID' para isolar as clínicas
+        return window.fbRef(window.fbDb, `calculadoraDecaimento/banco_${window.uidLogado}`);
     }
 
     function abrirDialogo({ titulo, mensagem, inputs = [] }) {
@@ -752,14 +750,15 @@
 
     function iniciarEscutaTempoReal() {
         const statusEl = document.getElementById('sync-status');
-        statusEl.innerText = "Carregando dados...";
-        statusEl.className = "loading";
-
-        if (!window.fbDb || !window.fbOnValue) {
-            statusEl.innerText = "(Erro de conexão Firebase)";
+        
+        if (!window.fbDb || !window.fbOnValue || !window.uidLogado) {
+            statusEl.innerText = "(Aguardando login...)";
             statusEl.className = "sync-status";
             return;
         }
+
+        statusEl.innerText = "Carregando dados...";
+        statusEl.className = "loading";
 
         window.fbOnValue(getBancoRef(), (snapshot) => {
             if (snapshot.exists()) {
@@ -831,7 +830,7 @@
     }
 
     async function salvarDadosNuvem() {
-        if (!window.fbDb) return;
+        if (!window.fbDb || !window.uidLogado) return;
         
         const dataSelecionada = document.getElementById('filtroData').value;
         if (!dataSelecionada) return;
@@ -878,6 +877,8 @@
     }
 
     async function salvarConfiguracoesPadrao() {
+        if (!window.uidLogado) return;
+        
         const valDose = document.getElementById('dosePadraoLote').value;
         const valRotina = document.getElementById('razaoRotina').value;
         const valRIA = document.getElementById('razaoRIA').value;
@@ -918,10 +919,11 @@
         }
     }
 
+    // FUNÇÃO MODIFICADA: Agora apaga APENAS os dados da clínica logada
     async function zerarBancoNuvem() {
         const res = await abrirDialogo({
             titulo: 'Zerar Histórico',
-            mensagem: 'ATENÇÃO: Esta ação irá apagar todo o histórico do banco de dados.\nPara confirmar, digite a palavra abaixo:',
+            mensagem: 'ATENÇÃO: Esta ação irá apagar todo o histórico de pacientes da SUA clínica no banco de dados.\nIsso NÃO afetará outras clínicas.\n\nPara confirmar, digite a palavra abaixo:',
             inputs: [{ placeholder: 'Digite ZERAR para confirmar' }]
         });
 
@@ -930,6 +932,11 @@
         const textoDigitado = (res.valores[0] || '').trim().toUpperCase();
         if (textoDigitado !== 'ZERAR') {
             alert("A palavra de confirmação está incorreta. A operação foi cancelada.");
+            return;
+        }
+
+        if (!window.uidLogado) {
+            alert("Erro: Usuário não identificado. Faça login novamente.");
             return;
         }
 
@@ -945,11 +952,12 @@
         estado.cache.overridesAuto = {};
 
         try {
+            // Salva o banco limpo SOBRE a referência específica da clínica
             await window.fbSet(getBancoRef(), estado.banco);
             document.getElementById('listaPacientes').value = "";
             processarSimulacaoCompleta();
             atualizarRelatorioConsolidado();
-            alert("Histórico limpo com sucesso!");
+            alert("Histórico da sua clínica limpo com sucesso!");
         } catch (error) {
             console.error("Erro ao zerar banco:", error);
             alert("Erro ao limpar dados no Firebase.");
@@ -1173,7 +1181,7 @@
         if (partes.length < 2) return null;
 
         const horaBruta = partes[0].trim();
-        const minutos = converterHoraParaMinutos(horaBruta);
+        const minutos = converterHoraParaMinuto(horaBruta);
         if (minutos === null) return null;
 
         const pesoVal = parseFloat(partes[1].trim());
