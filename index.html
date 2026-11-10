@@ -360,26 +360,23 @@
     }
 
     // --- LOGIN ADMIN ---
-   async function fazerLoginAdminFirebase() {
+  async function fazerLoginAdminFirebase() {
         const email = document.getElementById('adminEmail').value.trim();
         const senha = document.getElementById('adminPass').value;
         const msgEl = document.getElementById('adminLoginMsg');
 
-        // PERMITE O SEU E-MAIL CADASTRADO NO FIREBASE COMO ADMIN
-        if (email === "celso.hospiline@gmail.com" || email === "celso.leonel@hospiline.com.br") {
-            try {
-                await window.fbSignIn(window.fbAuth, email, senha);
-                sessionStorage.setItem('admin_logado', 'true');
-                document.getElementById('secaoAdminLogin').classList.add('hidden');
-                document.getElementById('secaoAdminPainel').classList.remove('hidden');
-                carregarUsuariosPainel();
-            } catch (error) {
-                msgEl.className = "msg error";
-                msgEl.innerText = "Senha ou e-mail de admin inválidos.";
-            }
-        } else {
+        try {
+            // Tenta autenticar diretamente no Firebase Authentication
+            await window.fbSignIn(window.fbAuth, email, senha);
+            
+            // Se o login no Firebase deu certo, concede o acesso ao painel admin
+            sessionStorage.setItem('admin_logado', 'true');
+            document.getElementById('secaoAdminLogin').classList.add('hidden');
+            document.getElementById('secaoAdminPainel').classList.remove('hidden');
+            carregarUsuariosPainel();
+        } catch (error) {
             msgEl.className = "msg error";
-            msgEl.innerText = "Este e-mail não possui privilégios administrativos.";
+            msgEl.innerText = "E-mail ou senha incorretos.";
         }
     }
 
