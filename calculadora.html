@@ -32,40 +32,46 @@
         // BLINDAGEM DE ACESSO E BUSCA DO NOME DA CLÍNICA
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                window.location.href = 'auth.html';
+                window.location.href = 'auth.html'; // ou index.html, dependendo de como você renomeou
             } else {
+                // Injeta o nome da clínica acima da lista de pacientes
+                const headerCard = document.querySelector('.card');
                 const topRow = document.querySelector('.header-top-row');
                 
-                // Cria a div onde o nome da clínica será exibido
-                let nomeClinicaDiv = document.getElementById('nomeClinicaExibicao');
-                if (!nomeClinicaDiv && topRow) {
-                    nomeClinicaDiv = document.createElement('div');
+                if (headerCard && topRow && !document.getElementById('nomeClinicaExibicao')) {
+                    const nomeClinicaDiv = document.createElement('div');
                     nomeClinicaDiv.id = 'nomeClinicaExibicao';
-                    // Estilo para ficar na linha de cima, onde estava o "em branco" em vermelho
-                    nomeClinicaDiv.style.cssText = "font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 5px; width: 100%;";
+                    // Estilo para ficar destacado na linha de cima
+                    nomeClinicaDiv.style.cssText = "font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 5px; width: 100%; display: block;";
+                    
+                    // Insere antes da linha que tem os botões PT/ES/Sair
                     topRow.parentNode.insertBefore(nomeClinicaDiv, topRow);
                 }
 
-                // Busca o nome da clínica no banco de dados
+                // Busca o nome no banco de dados
                 try {
                     const userRef = ref(db, 'usuarios/' + user.uid);
                     const snapshot = await get(userRef);
+                    const nomeDiv = document.getElementById('nomeClinicaExibicao');
+                    
                     if (snapshot.exists()) {
                         const dados = snapshot.val();
-                        if (dados.nomeClinica && nomeClinicaDiv) {
-                            nomeClinicaDiv.innerText = dados.nomeClinica;
-                        } else if (dados.nome && nomeClinicaDiv) {
-                            // Fallback: se não tiver nomeClinica, usa o nome comum (para usuários antigos)
-                            nomeClinicaDiv.innerText = dados.nome;
+                        if (nomeDiv) {
+                            if (dados.nomeClinica) {
+                                nomeDiv.innerText = dados.nomeClinica;
+                            } else if (dados.nome) {
+                                nomeDiv.innerText = dados.nome; // Fallback
+                            }
                         }
                     }
                 } catch (e) {
-                    console.error("Erro ao buscar nome da clínica:", e);
+                    console.error("Erro ao buscar dados da clínica:", e);
                 }
 
+                // Atualiza o título menor com o e-mail
                 const topRowTitle = document.querySelector('.header-top-row h2');
                 if (topRowTitle) {
-                    topRowTitle.innerHTML = `Lista de Pacientes do Dia - <span style="color:#3b82f6; font-size: 16px;">${user.email}</span>`;
+                    topRowTitle.innerHTML = `Lista de Pacientes do Dia - <span style="color:#3b82f6; font-size: 15px;">${user.email}</span>`;
                 }
             }
         });
@@ -73,7 +79,7 @@
         window.fazerLogoutFirebase = async function() {
             await signOut(auth);
             sessionStorage.clear();
-            window.location.href = 'auth.html';
+            window.location.href = 'auth.html'; // ou index.html
         };
 
         window.fbDb = db;
@@ -186,4 +192,1441 @@
         }
         .print-logo img { 
             max-width: 350px; 
-            height
+            height: auto; 
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        label { display: block; margin-top: 10px; font-weight: 600; color: #334155; font-size: 13px; }
+        input, select, textarea { width: 100%; padding: 9px; margin-top: 4px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background-color: #fcfcfc; }
+        
+        button { margin-top: 10px; width: 100%; padding: 9px; background: #475569; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; }
+        button:hover { background: #334155; }
+        
+        .btn-success { background: #10b981; }
+        .btn-success:hover { background: #059669; }
+        
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; }
+        
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+
+        .result { margin-top: 20px; padding: 12px; background: #f1f5f9; border-left: 4px solid #3b82f6; border-radius: 6px; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .stats { background: #f0fdf4; border-top: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .loading { font-size: 12px; color: #64748b; font-style: italic; }
+        .chart-container { position: relative; margin-top: 20px; width: 100%; height: 380px; }
+        
+        .historico-box { background: #fffbeb; padding: 18px; border-radius: 6px; border: 1px solid #fde68a; margin-bottom: 15px; }
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+            align-items: start;
+        }
+
+        .input-rapido-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 5px;
+            align-items: end;
+        }
+        @media (max-width: 768px) {
+            .config-grid { grid-template-columns: 1fr; }
+            .input-rapido-grid { grid-template-columns: 1fr; }
+        }
+
+        .footer-copyright {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: var(--secondary-color);
+            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+        }
+        
+        .info-status-fator {
+            font-size: 11px;
+            margin-top: 4px;
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .sync-status {
+            font-size: 11px;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        dialog#modalDialogo {
+            border: none;
+            border-radius: 10px;
+            padding: 0;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        dialog#modalDialogo::backdrop {
+            background: rgba(15, 23, 42, 0.55);
+        }
+        .dialog-content { padding: 22px; }
+        .dialog-title { font-size: 16px; font-weight: 700; margin: 0 0 10px 0; color: #1e293b; }
+        .dialog-msg { font-size: 13px; color: #475569; margin-bottom: 14px; white-space: pre-line; }
+        .dialog-input { margin-bottom: 12px; }
+        .dialog-buttons { display: flex; gap: 8px; justify-content: flex-end; }
+        .dialog-buttons button { width: auto; margin-top: 0; padding: 8px 16px; }
+
+        @media print {
+            body { background: white; padding: 0; color: #000; }
+            .card:not(.stats), button, .historico-box, .header, .chart-container, .footer-copyright { display: none !important; }
+            .print-logo { display: block !important; }
+            .stats { 
+                box-shadow: none !important; 
+                border: 1px solid #cbd5e1; 
+                width: 100%; 
+                margin: 0; 
+                background: #ffffff !important;
+                border-top: 4px solid #10b981 !important;
+                padding: 30px;
+            }
+            .stats h3 {
+                border-bottom: 2px solid #10b981;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+                color: #065f46;
+            }
+            #detalhes-diarios-print {
+                display: block !important;
+                margin-top: 20px;
+                border-top: 1px solid #e2e8f0;
+                padding-top: 15px;
+            }
+        }
+        #detalhes-diarios-print { display: none; }
+    </style>
+</head>
+<body>
+
+<dialog id="modalDialogo">
+    <div class="dialog-content">
+        <h3 class="dialog-title" id="dialogTitulo">Confirmação</h3>
+        <div class="dialog-msg" id="dialogMensagem"></div>
+        <div id="dialogInputs"></div>
+        <div class="dialog-buttons">
+            <button type="button" id="dialogBtnCancelar" style="background:#94a3b8;" data-i18n="btnCancel">Cancelar</button>
+            <button type="button" id="dialogBtnOk" class="btn-success" data-i18n="btnOk">OK</button>
+        </div>
+    </div>
+</dialog>
+
+<div class="print-logo">
+    <img src="logo.png" alt="Logo Hospiline">
+    <h2 style="color: #1e293b; margin-top: 10px;" data-i18n="printTitle">Relatório Consolidado de Gestão - Rádio-Gestão</h2>
+    <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 15px 0;">
+</div>
+
+<div class="card">
+    <div class="header">
+        <img src="logo.png" alt="Logo Hospiline">
+    </div>
+
+    <div class="header-top-row">
+        <h2 data-i18n="titlePatientsList">Lista de Pacientes do Dia</h2>
+        <div class="lang-selector-container">
+            <button type="button" id="btnLangPt" class="lang-btn active" onclick="mudarIdioma('pt')">PT</button>
+            <button type="button" id="btnLangEs" class="lang-btn" onclick="mudarIdioma('es')">ES</button>
+            <button type="button" class="lang-btn" style="background:#dc2626; color:#fff; border-color:#dc2626;" onclick="fazerLogoutFirebase()">Sair</button>
+        </div>
+    </div>
+
+    <div class="historico-box">
+        <div class="config-grid">
+            <div>
+                <label for="dataInsercao" data-i18n="lblDateInsertion">Data de Inserção / Atendimento:</label>
+                <input type="date" id="dataInsercao" onchange="aoMudarDataInsercao()">
+            </div>
+            <div>
+                <label for="filtroData" data-i18n="lblDateHistory">Consultar Histórico (Visualização):</label>
+                <input type="date" id="filtroData" onchange="carregarDadosPorData()">
+            </div>
+            <div>
+                <label for="radiofarmaco" data-i18n="lblRadiopharm">Radiofármaco (Isótopo):</label>
+                <select id="radiofarmaco" onchange="aoMudarRadiofarmaco()">
+                    <option value="109.8" selected data-i18n="optFDG">¹⁸F-FDG (Meia-vida: 109.8 min)</option>
+                    <option value="360" data-i18n="optTc">⁹⁹ᵐTc - Tecnécio (Meia-vida: 360 min)</option>
+                    <option value="408" data-i18n="optGa">⁶⁸Ga - Gálio (Meia-vida: 68 min)</option>
+                    <option value="11520" data-i18n="optI">¹³¹I - Iodo (Meia-vida: 8 dias)</option>
+                    <option value="9561.6" data-i18n="optLu">¹⁷⁷Lu - Lutécio (Meia-vida: 6.64 dias)</option>
+                    <option value="custom" data-i18n="optCustom">Outro (Meia-Vida personalizada)</option>
+                </select>
+            </div>
+            <div id="boxMeiaVidaCustom" style="display: none;">
+                <label for="meiaVidaCustom" data-i18n="lblHalfLifeCustom">Meia-Vida Custom (min):</label>
+                <input type="number" id="meiaVidaCustom" value="109.8" step="0.1" min="0.1" oninput="aoDigitarPacientes()">
+            </div>
+            <div>
+                <label for="razaoRotina" data-i18n="lblRazaoRotina">Clínica - Razão (Rrotina) [mCi/kg]:</label>
+                <input type="number" id="razaoRotina" value="0.12" step="0.01" min="0.01" max="1.0" oninput="recalcularFatorAutomatico(); aoDigitarPacientes();" placeholder="Ex: 0.12">
+            </div>
+            <div>
+                <label for="razaoRIA" id="labelCampoDinamico" data-i18n="lblRazaoRIA">IA - Razão (RIA Padrão) [mCi/kg]:</label>
+                <input type="number" id="razaoRIA" value="0.08" step="0.01" min="0.001" max="1.0" oninput="recalcularFatorAutomatico(); aoDigitarPacientes();" placeholder="Ex: 0.08">
+                <div id="infoFatorTexto" class="info-status-fator">Fator: 0.667 (Economia de 33,3%)</div>
+                <input type="hidden" id="fatorSubtle" value="0.667">
+            </div>
+            <div>
+                <label for="dosePadraoLote" data-i18n="lblBatchDose">Dose Inicial do Lote (mCi):</label>
+                <input type="number" id="dosePadraoLote" value="10" step="0.5" min="1" max="50" oninput="aoDigitarPacientes()">
+            </div>
+            <div style="grid-column: span 3;">
+                <button type="button" onclick="salvarConfiguracoesPadrao()" style="background: #3b82f6; margin-top: 10px; height: 41px;" data-i18n="btnSaveDefaults">Salvar Configuração Padrão</button>
+            </div>
+        </div>
+    </div>
+
+    <label data-i18n="lblQuickAdd">Adicionar Paciente Rápido (Máscara automática):</label>
+    
+    <div class="input-rapido-grid">
+        <div>
+            <label style="margin-top:0; font-size:12px;" data-i18n="lblTime">Horário:</label>
+            <input type="text" id="inputHoraRapida" placeholder="Ex: 0730" maxlength="5">
+        </div>
+        <div>
+            <label style="margin-top:0; font-size:12px;" data-i18n="lblWeight">Peso (kg):</label>
+            <input type="number" id="inputPesoRapido" placeholder="Ex: 80">
+        </div>
+        <div>
+            <label style="margin-top:0; font-size:12px;" data-i18n="lblExam">Exame (Opcional):</label>
+            <input type="text" id="inputExameRapido" placeholder="Ex: PET-CT F-18">
+        </div>
+        <div>
+            <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
+                <label style="display: flex; align-items: center; gap: 3px; margin: 0; font-size: 11px; cursor: pointer; white-space: nowrap;">
+                    <input type="checkbox" id="chkRiaCustom" onchange="document.getElementById('inputRiaRapida').style.display = this.checked ? 'block' : 'none';">Ria Por Paciente:
+                </label>
+                <input type="number" id="inputRiaRapida" placeholder="0.07" step="0.01" style="display: none; width: 100%; margin-top: 0; padding: 9px;" />
+            </div>
+        </div>
+        <div style="grid-column: span 4;">
+            <button type="button" class="btn-success" onclick="adicionarPacienteRapido()" style="margin-top: 5px; height: 41px; width: 100%;" data-i18n="btnAddQuick">+ Adicionar Paciente</button>
+        </div>
+    </div>
+
+    <span style="font-size: 11px; color: #64748b; display: block; margin-top: 8px;" data-i18n="hintQuickAdd">Dica: Digite apenas os números do horário (ex: 0800) que os dois-pontos entram sozinhos.</span>
+
+    <label for="listaPacientes" style="margin-top: 15px;" data-i18n="lblFullList">Lista Completa (Somente Leitura - Somente Editar e Excluir):</label>
+    <textarea id="listaPacientes" rows="5" oninput="aoDigitarPacientes()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); alert('Para inserir novos pacientes, utilize o botão Adicionar acima.'); }" style="background: #ffffff;" placeholder="Os pacientes inseridos aparecerão aqui..."></textarea>
+
+    <div class="result" id="resultado">
+        <span id="textoResultadoSimulacao" data-i18n="msgWaitingData">Aguardando inserção de dados dos pacientes...</span>
+        <span id="syncStatus" class="sync-status"></span>
+    </div>
+</div>
+
+<div class="card">
+    <h3 id="tituloGraficoTeto" data-i18n="titleChart">Curva do Decaimento e Reposições</h3>
+    <p style="font-size: 13px; color: #475569; margin-top: -5px; line-height: 1.4;" data-i18n="legendChart">
+        🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante).<br>
+        🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>
+        🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais.<br>
+        ✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.
+    </p>
+    <div class="chart-container">
+        <canvas id="graficoDecaimento"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <h3 data-i18n="titleOrderList">Lista para Pedido (Distribuidora - TXT)</h3>
+    <label for="modoHorarioPedido" data-i18n="lblOrderRule">Regra de Horário para Distribuidora:</label>
+    <select id="modoHorarioPedido" onchange="processarSimulacaoCompleta()">
+        <option value="exato" selected data-i18n="optExactTime">Horário Exato (Ex: 08:00, 09:00, 09:30)</option>
+        <option value="horaEmHora" data-i18n="optHourly">De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))</option>
+    </select>
+
+    <textarea id="listaPedido" rows="6" readonly style="background: #f8fafc; font-family: monospace; margin-top: 10px;" placeholder="A lista de horários aparecerá aqui..."></textarea>
+    <button class="btn-warning" onclick="baixarTxtPedido()" data-i18n="btnDownloadTxt">Baixar Lista em TXT</button>
+</div>
+
+<div class="card stats">
+    <h3><span data-i18n="titleConsolidated">Relatório Consolidado</span> <span id="sync-status" class="loading">Carregando dados...</span></h3>
+    <p><strong data-i18n="lblTotalPatients">Total de Pacientes Atendidos (7 dias):</strong> <span id="stat-total">0</span></p>
+    <p><strong data-i18n="lblSavedDoses">Doses Economizadas (Estimativa):</strong> <span id="stat-economia">0</span></p>
+    
+    <div id="detalhes-diarios-print">
+        <h4 style="color: #065f46; margin-bottom: 10px;" data-i18n="titleDailyDetails">Detalhamento Diário (Últimos 7 Dias):</h4>
+        <div id="lista-detalhes-print"></div>
+    </div>
+    
+    <button class="btn-success" onclick="window.print()" style="margin-top: 15px;" data-i18n="btnPrintPdf">Imprimir / Salvar Resumo (PDF)</button>
+    <button class="btn-danger" onclick="zerarBancoNuvem()" style="margin-top: 10px;" data-i18n="btnClearHistory">Zerar / Limpar Histórico Antigo</button>
+</div>
+
+<div class="footer-copyright" data-i18n="footerCopyright">
+    Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6
+</div>
+
+<script>
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    document.addEventListener('keydown', function(e) {
+        if (
+            e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+            (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's'))
+        ) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    });
+
+    const i18n = {
+        pt: {
+            pageTitle: "Calculadora de Decaimento e Reposição - Rádio-Gestão",
+            printTitle: "Relatório Consolidado de Gestão - Rádio-Gestão",
+            titlePatientsList: "Lista de Pacientes do Dia",
+            lblDateInsertion: "Data de Inserção / Atendimento:",
+            lblDateHistory: "Consultar Histórico (Visualização):",
+            lblRadiopharm: "Radiofármaco (Isótopo):",
+            optFDG: "¹⁸F-FDG (Meia-vida: 109.8 min)",
+            optTc: "⁹⁹ᵐTc - Tecnécio (Meia-vida: 360 min)",
+            optGa: "⁶⁸Ga - Gálio (Meia-vida: 68 min)",
+            optI: "¹³¹I - Iodo (Meia-vida: 8 dias)",
+            optLu: "¹⁷⁷Lu - Lutécio (Meia-vida: 6.64 dias)",
+            optCustom: "Outro (Meia-Vida personalizada)",
+            lblHalfLifeCustom: "Meia-Vida Custom (min):",
+            lblRazaoRotina: "Clínica - Razão (Rrotina) [mCi/kg]:",
+            lblRazaoRIA: "IA - Razão (RIA Padrão) [mCi/kg]:",
+            lblBatchDose: "Dose Inicial do Lote (mCi):",
+            btnSaveDefaults: "Salvar Configuração Padrão",
+            lblQuickAdd: "Adicionar Paciente Rápido (Máscara automática):",
+            phQuickTime: "Horário (Ex: 0730)",
+            phQuickWeight: "Peso em kg (Ex: 80)",
+            phQuickExam: "Exame (Opcional)",
+            btnAddQuick: "+ Adicionar Paciente",
+            hintQuickAdd: "Dica: Digite apenas os números do horário (ex: 0800) que os dois-pontos entram sozinhos.",
+            lblFullList: "Lista Completa (Somente Leitura - Somente Editar e Excluir):",
+            msgWaitingData: "Aguardando inserção de dados dos pacientes...",
+            titleChart: "Curva do Decaimento e Reposições",
+            legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante).<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais.<br>✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.",
+            titleOrderList: "Lista para Pedido (Distribuidora - TXT)",
+            lblOrderRule: "Regra de Horário para Distribuidora:",
+            optExactTime: "Horário Exato (Ex: 08:00, 09:00, 09:30)",
+            optHourly: "De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))",
+            btnDownloadTxt: "Baixar Lista em TXT",
+            titleConsolidated: "Relatório Consolidado",
+            lblTotalPatients: "Total de Pacientes Atendidos (7 dias):",
+            lblSavedDoses: "Doses Economizadas (Estimativa):",
+            titleDailyDetails: "Detalhamento Diário (Últimos 7 Dias):",
+            btnPrintPdf: "Imprimir / Salvar Resumo (PDF)",
+            btnClearHistory: "Zerar / Limpar Histórico Antigo",
+            footerCopyright: "Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6",
+            btnCancel: "Cancelar",
+            btnOk: "OK",
+            saving: "(Salvando...)",
+            saved: "(Salvo na nuvem)",
+            typing: "(Digitando...)",
+            synchronized: "(Sincronizado)",
+            loading: "Carregando dados...",
+            errSave: "(Erro ao salvar)",
+            errLoad: "(Erro ao carregar)",
+            savingsText: "Fator: {fator} (Economia de {val}% da dose)",
+            increaseText: "Fator: {fator} (Aumento de {val}% da dose)",
+            standardDoseText: "Factor: 1.00 (Dose Padrão)",
+            simCompleted: "Simulação concluída! (Razão Rotina: <strong>{rotina}</strong> | RIA: <strong>{ria}</strong> | Lote: <strong>{a0} mCi</strong>)<br><strong>Pedidos:</strong> {qtd} | <strong>Economia do dia:</strong> {econ}",
+            patientsAttended: "pacientes atendidos",
+            noRecords: "Nenhum registro nos últimos 7 dias.",
+            datasetRemaining: "Atividade Restante A(t) [mCi]",
+            datasetPatients: "Pacientes",
+            datasetStock: "Dose Estoque",
+            datasetExtra: "Doses Extras",
+            chartXTitle: "Horário Proporcional (🔴 Pacientes | 🔵 Dose Estoque | 🟠 Doses Extras)",
+            chartYTitle: "Atividade (mCi)"
+        },
+        es: {
+            pageTitle: "Calculadora de Decaimiento y Reposición - Radio-Gestión",
+            printTitle: "Informe Consolidado de Gestión - Radio-Gestión",
+            titlePatientsList: "Lista de Pacientes del Día",
+            lblDateInsertion: "Fecha de Inserción / Atención:",
+            lblDateHistory: "Consultar Historial (Vista):",
+            lblRadiopharm: "Radiofármaco (Isótopo):",
+            optFDG: "¹⁸F-FDG (Semivida: 109.8 min)",
+            optTc: "⁹⁹ᵐTc - Tecnecio (Semivida: 360 min)",
+            optGa: "⁶⁸Ga - Galio (Semivida: 68 min)",
+            optI: "¹³¹I - Yodo (Semivida: 8 días)",
+            optLu: "¹⁷⁷Lu - Lutecio (Semivida: 6.64 días)",
+            optCustom: "Otro (Semivida personalizada)",
+            lblHalfLifeCustom: "Semivida Personalizada (min):",
+            lblRazaoRotina: "Clínica - Relación actividad/masa (Rrotina) [mCi/kg]:",
+            lblRazaoRIA: "IA - Relación actividad/masa (RIA Estándar) [mCi/kg]:",
+            lblBatchDose: "Dosis Inicial del Lote (mCi):",
+            btnSaveDefaults: "Guardar Config en BD",
+            lblQuickAdd: "Agregar Paciente Rápido (Máscara auto):",
+            phQuickTime: "Hora (Ej: 0730)",
+            phQuickWeight: "Peso en kg (Ej: 80)",
+            phQuickExam: "Estudio (Opcional)",
+            btnAddQuick: "+ Agregar Paciente",
+            hintQuickAdd: "Consejo: Ingrese solo números de hora (ej: 0800) y dos puntos se añaden solos.",
+            lblFullList: "Lista Completa (Solo Lectura - Solo Edita y Elimina):",
+            msgWaitingData: "Esperando ingreso de datos de pacientes...",
+            titleChart: "Curva de Decaimiento y Reposiciones",
+            legendChart: "🔴 <b>Bolas Rojas:</b> Pacientes (Muestra peso, dosis aplicada y actividad restante).<br>🔵 <b>Bolas Azules (Arriba):</b> Dosis Stock (Soma Dosis Auto + Residuo Anterior).<br>🟠 <b>Bolas Naranjas (Arriba):</b> Dosis Extras Manuales.<br>✨ <b>Pase el cursor en el gráfico</b> para ver hora y stock exacto. Clic para añadir o gestionar eventos.",
+            titleOrderList: "Lista para Pedido (Distribuidora - TXT)",
+            lblOrderRule: "Regra de Horario para Distribuidora:",
+            optExactTime: "Horario Exacto (Ej: 08:00, 09:00, 09:30)",
+            optHourly: "Cada Hora (Anticipado / Consolidado - Ej: 09:00 (2 doses))",
+            btnDownloadTxt: "Descargar Lista en TXT",
+            titleConsolidated: "Informe Consolidado",
+            lblTotalPatients: "Total de Pacientes Atendidos (7 días):",
+            lblSavedDoses: "Dosis Ahorradas (Estimación):",
+            titleDailyDetails: "Detalle Diario (Últimos 7 Días):",
+            btnPrintPdf: "Imprimir / Guardar Resumen (PDF)",
+            btnClearHistory: "Borrar / Limpiar Historial Antiguo",
+            footerCopyright: "Copyright © 2026 Hospiline. Todos os derechos reservados - Versão 4.9.6",
+            btnCancel: "Cancelar",
+            btnOk: "Aceptar",
+            saving: "(Guardando...)",
+            saved: "(Guardado en la nube)",
+            typing: "(Escribiendo...)",
+            synchronized: "(Sincronizado)",
+            loading: "Cargando datos...",
+            errSave: "(Error al guardar)",
+            errLoad: "(Error al cargar)",
+            savingsText: "Factor: {fator} (Ahorro de {val}% de la dosis)",
+            increaseText: "Factor: {fator} (Aumento de {val}% de la dosis)",
+            standardDoseText: "Factor: 1.00 (Dosis Estándar)",
+            simCompleted: "¡Simulación completada! (Rotina: <strong>{rotina}</strong> | RIA: <strong>{ria}</strong> | Lote: <strong>{a0} mCi</strong>)<br><strong>Pedidos:</strong> {qtd} | <strong>Ahorro del día:</strong> {econ}",
+            patientsAttended: "pacientes atendidos",
+            noRecords: "Sin registros en los últimos 7 días.",
+            datasetRemaining: "Actividad Restante A(t) [mCi]",
+            datasetPatients: "Pacientes",
+            datasetStock: "Dosis Stock",
+            datasetExtra: "Dosis Extras",
+            chartXTitle: "Horario Proporcional (🔴 Pacientes | 🔵 Dosis Stock | 🟠 Dosis Extras)",
+            chartYTitle: "Actividad (mCi)"
+        }
+    };
+
+    let idiomaAtual = 'pt';
+
+    function mudarIdioma(lang) {
+        if (!i18n[lang]) return;
+        idiomaAtual = lang;
+
+        if (estado.banco) {
+            estado.banco.idiomaGlobal = lang;
+            salvarDadosNuvem();
+        }
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (i18n[lang][key]) {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.placeholder = i18n[lang][key];
+                } else {
+                    el.innerHTML = i18n[lang][key];
+                }
+            }
+        });
+
+        document.getElementById('inputHoraRapida').placeholder = i18n[lang].phQuickTime;
+        document.getElementById('inputPesoRapido').placeholder = i18n[lang].phQuickWeight;
+        document.getElementById('inputExameRapido').placeholder = i18n[lang].phQuickExam;
+        
+        document.getElementById('btnLangPt').classList.remove('active');
+        document.getElementById('btnLangEs').classList.remove('active');
+
+        if (lang === 'pt') document.getElementById('btnLangPt').classList.add('active');
+        if (lang === 'es') document.getElementById('btnLangEs').classList.add('active');
+
+        recalcularFatorAutomatico();
+        atualizarRelatorioConsolidado();
+        processarSimulacaoCompleta();
+    }
+
+    const DIAS_HISTORICO = 7;
+
+    const estado = {
+        banco: { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {} },
+        cache: {
+            reposicoesExtras: {},
+            overridesAuto: {}
+        },
+        pacientes: [],
+        salvando: false,
+        carregandoRemoto: false
+    };
+
+    let meuGrafico = null;
+    let temporizadorSalvamento = null;
+
+    const pluginLinhasTracejadasVertical = {
+        id: 'linhasTracejadasVertical',
+        afterDraw(chart) {
+            const { ctx, scales: { x, y } } = chart;
+            const datasets = chart.data.datasets;
+            
+            [2, 3].forEach(dsIndex => {
+                if (!datasets[dsIndex]) return;
+                const meta = chart.getDatasetMeta(dsIndex);
+                meta.data.forEach(point => {
+                    if (point.x !== undefined && point.y !== undefined && !point.skip) {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.setLineDash([5, 5]);
+                        ctx.lineWidth = 1.2;
+                        ctx.strokeStyle = dsIndex === 2 ? 'rgba(59, 130, 246, 0.7)' : 'rgba(245, 158, 11, 0.7)';
+                        ctx.moveTo(point.x, y.bottom);
+                        ctx.lineTo(point.x, point.y);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                });
+            });
+        }
+    };
+
+    function getBancoRef() {
+        if (!window.fbDb) return null;
+        return window.fbRef(window.fbDb, 'calculadoraDecaimento/banco');
+    }
+
+    function abrirDialogo({ titulo, mensagem, inputs = [] }) {
+        return new Promise((resolve) => {
+            const dlg = document.getElementById('modalDialogo');
+            document.getElementById('dialogTitulo').innerText = titulo || 'Confirmação';
+            document.getElementById('dialogMensagem').innerText = mensagem || '';
+            const container = document.getElementById('dialogInputs');
+            container.innerHTML = '';
+            inputs.forEach((inp, i) => {
+                const div = document.createElement('div');
+                div.className = 'dialog-input';
+                if (inp.label) {
+                    const lbl = document.createElement('label');
+                    lbl.innerText = inp.label;
+                    div.appendChild(lbl);
+                }
+                const el = document.createElement('input');
+                el.type = inp.type || 'text';
+                el.value = inp.value ?? '';
+                if (inp.placeholder) el.placeholder = inp.placeholder;
+                el.id = `dialogInput_${i}`;
+                div.appendChild(el);
+                container.appendChild(div);
+            });
+
+            const btnOk = document.getElementById('dialogBtnOk');
+            const btnCancel = document.getElementById('dialogBtnCancelar');
+
+            const cleanup = () => {
+                btnOk.onclick = null;
+                btnCancel.onclick = null;
+                dlg.onclose = null;
+            };
+
+            btnOk.onclick = () => {
+                const valores = inputs.map((_, i) => document.getElementById(`dialogInput_${i}`).value);
+                cleanup();
+                dlg.close();
+                resolve({ confirmado: true, valores });
+            };
+            btnCancel.onclick = () => {
+                cleanup();
+                dlg.close();
+                resolve({ confirmado: false, valores: [] });
+            };
+            dlg.onclose = () => {
+                cleanup();
+                resolve({ confirmado: false, valores: [] });
+            };
+
+            if (dlg.open) dlg.close();
+            dlg.showModal();
+            if (inputs.length > 0) {
+                const primeiro = document.getElementById('dialogInput_0');
+                if (primeiro) primeiro.focus();
+            }
+        });
+    }
+
+    function iniciarEscutaTempoReal() {
+        const statusEl = document.getElementById('sync-status');
+        statusEl.innerText = "Carregando dados...";
+        statusEl.className = "loading";
+
+        if (!window.fbDb || !window.fbOnValue) {
+            statusEl.innerText = "(Erro de conexão Firebase)";
+            statusEl.className = "sync-status";
+            return;
+        }
+
+        window.fbOnValue(getBancoRef(), (snapshot) => {
+            if (snapshot.exists()) {
+                estado.banco = snapshot.val() || { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {} };
+                limparHistoricoAntigoNoBanco();
+            } else {
+                estado.banco = { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {} };
+            }
+
+            if (estado.banco.idiomaGlobal && estado.banco.idiomaGlobal !== idiomaAtual) {
+                mudarIdioma(estado.banco.idiomaGlobal);
+            }
+
+            if (estado.banco.configuracoesGlobais) {
+                const cfg = estado.banco.configuracoesGlobais;
+                if (cfg.dosePadraoLote && document.activeElement !== document.getElementById('dosePadraoLote')) {
+                    document.getElementById('dosePadraoLote').value = cfg.dosePadraoLote;
+                }
+                if (cfg.razaoRotina && document.activeElement !== document.getElementById('razaoRotina')) {
+                    document.getElementById('razaoRotina').value = cfg.razaoRotina;
+                }
+                if (cfg.razaoRIA && document.activeElement !== document.getElementById('razaoRIA')) {
+                    document.getElementById('razaoRIA').value = cfg.razaoRIA;
+                }
+                if (cfg.radiofarmaco) {
+                    document.getElementById('radiofarmaco').value = cfg.radiofarmaco;
+                    aoMudarRadiofarmaco();
+                }
+                if (cfg.meiaVidaCustom && document.activeElement !== document.getElementById('meiaVidaCustom')) {
+                    document.getElementById('meiaVidaCustom').value = cfg.meiaVidaCustom;
+                }
+            }
+            
+            recalcularFatorAutomatico();
+            atualizarRelatorioConsolidado();
+            
+            const filtroDataEl = document.getElementById('filtroData');
+            if (filtroDataEl && filtroDataEl.value && document.activeElement !== document.getElementById('listaPacientes') && !estado.salvando) {
+                carregarDadosPorData();
+            }
+            
+            statusEl.innerText = "(Sincronizado)";
+            statusEl.className = "sync-status";
+        }, (error) => {
+            console.error("Erro ao sincronizar com o Firebase:", error);
+            statusEl.innerText = "(Erro ao carregar)";
+            statusEl.className = "sync-status";
+        });
+    }
+
+    function limparHistoricoAntigoNoBanco() {
+        if (!estado.banco || !estado.banco.historicoDias) return;
+        
+        const hoje = new Date();
+        let houveRemocao = false;
+
+        Object.keys(estado.banco.historicoDias).forEach(dataStr => {
+            const dataReg = new Date(dataStr + 'T00:00:00');
+            const diffTime = hoje - dataReg;
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+            if (diffDays > DIAS_HISTORICO) {
+                delete estado.banco.historicoDias[dataStr];
+                houveRemocao = true;
+            }
+        });
+
+        return houveRemocao;
+    }
+
+    async function salvarDadosNuvem() {
+        if (!window.fbDb) return;
+        
+        const dataSelecionada = document.getElementById('filtroData').value;
+        if (!dataSelecionada) return;
+
+        const textoPacientes = document.getElementById('listaPacientes').value;
+        const radiofarmaco = document.getElementById('radiofarmaco').value;
+        const razaoRotina = document.getElementById('razaoRotina').value;
+        const razaoRIA = document.getElementById('razaoRIA').value;
+        const fatorSubtle = document.getElementById('fatorSubtle').value;
+        const meiaVidaCustom = document.getElementById('meiaVidaCustom').value;
+        const dosePadraoLote = document.getElementById('dosePadraoLote').value;
+
+        if (!estado.banco.historicoDias) {
+            estado.banco.historicoDias = {};
+        }
+
+        const dadosParaAtualizar = {};
+        dadosParaAtualizar[`historicoDias/${dataSelecionada}`] = {
+            textoPacientes,
+            radiofarmaco,
+            razaoRotina,
+            razaoRIA,
+            fatorSubtle,
+            meiaVidaCustom,
+            dosePadraoLote,
+            reposicoesExtras: estado.cache.reposicoesExtras[dataSelecionada] || [],
+            overridesAuto: estado.cache.overridesAuto[dataSelecionada] || {}
+        };
+        dadosParaAtualizar['idiomaGlobal'] = idiomaAtual;
+
+        estado.salvando = true;
+        document.getElementById('syncStatus').innerText = "(Salvando...)";
+
+        try {
+            await window.fbUpdate(getBancoRef(), dadosParaAtualizar);
+            document.getElementById('syncStatus').innerText = "(Salvo na nuvem)";
+            atualizarRelatorioConsolidado();
+        } catch (error) {
+            console.error("Erro ao salvar no Firebase:", error);
+            document.getElementById('syncStatus').innerText = "(Erro ao salvar)";
+        } finally {
+            estado.salvando = false;
+        }
+    }
+
+    async function salvarConfiguracoesPadrao() {
+        const valDose = document.getElementById('dosePadraoLote').value;
+        const valRotina = document.getElementById('razaoRotina').value;
+        const valRIA = document.getElementById('razaoRIA').value;
+        const valRadio = document.getElementById('radiofarmaco').value;
+        const valMeiaCustom = document.getElementById('meiaVidaCustom').value;
+
+        if (!valDose || isNaN(valDose) || parseFloat(valDose) <= 0) {
+            alert("Insira um valor válido para a dose padrão.");
+            return;
+        }
+
+        if (!estado.banco.configuracoesGlobais) {
+            estado.banco.configuracoesGlobais = {};
+        }
+
+        estado.banco.configuracoesGlobais = {
+            dosePadraoLote: valDose,
+            razaoRotina: valRotina,
+            razaoRIA: valRIA,
+            radiofarmaco: valRadio,
+            meiaVidaCustom: valMeiaCustom
+        };
+
+        const dadosParaAtualizar = {
+            configuracoesGlobais: estado.banco.configuracoesGlobais
+        };
+
+        estado.salvando = true;
+        try {
+            await window.fbUpdate(getBancoRef(), dadosParaAtualizar);
+            alert("Configurações padrão salvas com sucesso no banco de dados!");
+            processarSimulacaoCompleta();
+        } catch (error) {
+            console.error("Erro ao salvar configurações:", error);
+            alert("Erro ao salvar configurações na nuvem.");
+        } finally {
+            estado.salvando = false;
+        }
+    }
+
+    async function zerarBancoNuvem() {
+        const res = await abrirDialogo({
+            titulo: 'Zerar Histórico',
+            mensagem: 'ATENÇÃO: Esta ação irá apagar todo o histórico do banco de dados.\nPara confirmar, digite a palavra abaixo:',
+            inputs: [{ placeholder: 'Digite ZERAR para confirmar' }]
+        });
+
+        if (!res.confirmado) return;
+
+        const textoDigitado = (res.valores[0] || '').trim().toUpperCase();
+        if (textoDigitado !== 'ZERAR') {
+            alert("A palavra de confirmação está incorreta. A operação foi cancelada.");
+            return;
+        }
+
+        let configGlobalTemp = estado.banco.configuracoesGlobais;
+        let idiomaGlobalTemp = estado.banco.idiomaGlobal;
+
+        estado.banco = { 
+            historicoDias: {}, 
+            idiomaGlobal: idiomaGlobalTemp || 'pt', 
+            configuracoesGlobais: configGlobalTemp || {} 
+        };
+        estado.cache.reposicoesExtras = {};
+        estado.cache.overridesAuto = {};
+
+        try {
+            await window.fbSet(getBancoRef(), estado.banco);
+            document.getElementById('listaPacientes').value = "";
+            processarSimulacaoCompleta();
+            atualizarRelatorioConsolidado();
+            alert("Histórico limpo com sucesso!");
+        } catch (error) {
+            console.error("Erro ao zerar banco:", error);
+            alert("Erro ao limpar dados no Firebase.");
+        }
+    }
+
+    function atualizarRelatorioConsolidado() {
+        let totalPacientes = 0;
+        let totalEconomia = 0;
+        let listaDetalhesHTML = "";
+
+        if (estado.banco && estado.banco.historicoDias) {
+            const hoje = new Date();
+            
+            Object.keys(estado.banco.historicoDias).forEach(dataStr => {
+                const dataReg = new Date(dataStr + 'T00:00:00');
+                const diffTime = hoje - dataReg;
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+                if (diffDays >= 0 && diffDays <= DIAS_HISTORICO) {
+                    let dia = estado.banco.historicoDias[dataStr];
+                    if (dia && dia.textoPacientes) {
+                        let linhas = dia.textoPacientes.split(/(?=\s\d{1,2}:\d{2})|\n/).map(l => l.trim()).filter(l => l !== '');
+                        let qtdDia = linhas.length;
+                        totalPacientes += qtdDia;
+                        
+                        let fator = parseFloat(dia.fatorSubtle) || 0.667;
+                        let dosePadraoDia = parseFloat(dia.dosePadraoLote) || 10;
+                        let economiaDia = qtdDia * (dosePadraoDia * (1 - fator)); 
+                        totalEconomia += Math.max(0, economiaDia);
+
+                        let pacientesDetalheHtml = "";
+                        linhas.forEach(l => {
+                            let parsed = parseLinhaPaciente(l);
+                            if (parsed) {
+                                let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : '';
+                                pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: #334155;">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`;
+                            }
+                        });
+
+                        listaDetalhesHTML += `<div style="margin-bottom: 8px;">• <b>${dataStr}</b> (${qtdDia} ${i18n[idiomaAtual].patientsAttended}):<br>${pacientesDetalheHtml}</div>`;
+                    }
+                }
+            });
+        }
+
+        document.getElementById('stat-total').innerText = totalPacientes;
+        document.getElementById('stat-economia').innerText = totalEconomia.toFixed(1) + " mCi";
+        document.getElementById('lista-detalhes-print').innerHTML = listaDetalhesHTML || i18n[idiomaAtual].noRecords;
+    }
+
+    window.onload = function() {
+        const hojeStr = obterDataAtualStr();
+        document.getElementById('dataInsercao').value = hojeStr;
+        document.getElementById('filtroData').value = hojeStr;
+
+        const inputHora = document.getElementById('inputHoraRapida');
+        inputHora.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length >= 3) {
+                v = v.substring(0, 2) + ':' + v.substring(2, 4);
+            }
+            e.target.value = v;
+        });
+
+        document.getElementById('inputPesoRapido').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { adicionarPacienteRapido(); }
+        });
+        document.getElementById('inputExameRapido').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { adicionarPacienteRapido(); }
+        });
+        document.getElementById('inputRiaRapida').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { adicionarPacienteRapido(); }
+        });
+        
+        recalcularFatorAutomatico();
+        carregarDadosPorData();
+    };
+
+    function adicionarPacienteRapido() {
+        let hora = document.getElementById('inputHoraRapida').value.trim();
+        let peso = document.getElementById('inputPesoRapido').value.trim();
+        let exame = document.getElementById('inputExameRapido').value.trim();
+        let chkRia = document.getElementById('chkRiaCustom').checked;
+        let riaCustom = document.getElementById('inputRiaRapida').value.trim();
+
+        if (!hora || !peso || isNaN(peso)) {
+            alert("Informe um horário válido e o peso do paciente.");
+            return;
+        }
+
+        if (hora.length === 4 && !hora.includes(':')) {
+            hora = hora.substring(0, 2) + ':' + hora.substring(2, 4);
+        }
+
+        let linhaNueva = `${hora} = ${peso}`;
+        if (exame) {
+            linhaNueva += ` | Exame: ${exame}`;
+        }
+        if (chkRia && riaCustom && !isNaN(riaCustom) && parseFloat(riaCustom) > 0) {
+            linhaNueva += ` @ ${riaCustom}`;
+        }
+
+        let textarea = document.getElementById('listaPacientes');
+        
+        if (textarea.value.trim() === "") {
+            textarea.value = linhaNueva;
+        } else {
+            textarea.value = textarea.value.trim() + '\n' + linhaNueva;
+        }
+
+        document.getElementById('inputHoraRapida').value = "";
+        document.getElementById('inputPesoRapido').value = "";
+        document.getElementById('inputExameRapido').value = "";
+        document.getElementById('inputRiaRapida').value = "";
+        document.getElementById('chkRiaCustom').checked = false;
+        document.getElementById('inputRiaRapida').style.display = 'none';
+        document.getElementById('inputHoraRapida').focus();
+
+        aoDigitarPacientes();
+    }
+
+    function aoMudarRadiofarmaco() {
+        const sel = document.getElementById('radiofarmaco').value;
+        const boxCustom = document.getElementById('boxMeiaVidaCustom');
+        boxCustom.style.display = (sel === 'custom') ? 'block' : 'none';
+        processarSimulacaoCompleta();
+    }
+
+    function recalcularFatorAutomatico() {
+        const rotina = parseFloat(document.getElementById('razaoRotina').value);
+        const ria = parseFloat(document.getElementById('razaoRIA').value);
+        const divInfo = document.getElementById('infoFatorTexto');
+        const inputFatorOculto = document.getElementById('fatorSubtle');
+
+        if (!rotina || rotina <= 0 || !ria || ria <= 0 || isNaN(rotina) || isNaN(ria)) {
+            divInfo.innerText = "Informe valores válidos para cálculo.";
+            return;
+        }
+
+        let fatorCalculado = ria / rotina;
+        inputFatorOculto.value = fatorCalculado;
+
+        let percentualExato = ((1 - fatorCalculado) * 100).toFixed(1);
+        let fatorStr = fatorCalculado.toFixed(3);
+
+        if (parseFloat(percentualExato) > 0) {
+            divInfo.style.color = "#059669";
+            divInfo.innerText = i18n[idiomaAtual].savingsText.replace('{fator}', fatorStr).replace('{val}', percentualExato.replace('.', ','));
+        } else if (parseFloat(percentualExato) < 0) {
+            let aumento = Math.abs(parseFloat(percentualExato)).toFixed(1);
+            divInfo.style.color = "#d97706";
+            divInfo.innerText = i18n[idiomaAtual].increaseText.replace('{fator}', fatorStr).replace('{val}', aumento.replace('.', ','));
+        } else {
+            divInfo.style.color = "#64748b";
+            divInfo.innerText = i18n[idiomaAtual].standardDoseText;
+        }
+    }
+
+    function obterDataAtualStr() {
+        const d = new Date();
+        return d.toISOString().split('T')[0];
+    }
+
+    function obterMeiaVidaMinutos() {
+        const sel = document.getElementById('radiofarmaco').value;
+        if (sel === 'custom') {
+            const v = parseFloat(document.getElementById('meiaVidaCustom').value);
+            if (!v || v <= 0 || isNaN(v)) return 109.8;
+            return v;
+        }
+        return parseFloat(sel);
+    }
+
+    function converterHoraParaMinutos(strHora) {
+        if (typeof strHora !== 'string') return null;
+        const limpo = strHora.trim();
+        if (!/^\d{1,2}:\d{2}$/.test(limpo)) return null;
+        const partes = limpo.split(':');
+        const h = parseInt(partes[0], 10);
+        const m = parseInt(partes[1], 10);
+        if (isNaN(h) || isNaN(m) || m < 0 || m > 59 || h < 0 || h > 47) return null;
+        return h * 60 + m;
+    }
+
+    function minutosParaHoraStr(minutosTotais) {
+        let h = Math.floor(minutosTotais / 60);
+        let m = minutosTotais % 60;
+        if (h >= 24) {
+            return `${String(h % 24).padStart(2, '0')}:${String(m).padStart(2, '0')} (+1d)`;
+        }
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    function parseLinhaPaciente(linha) {
+        const linhaLimpa = linha.trim();
+        if (!linhaLimpa) return null;
+
+        let riaEspecifica = null;
+        let exameEspecifico = null;
+        let partePac = linhaLimpa;
+
+        if (partePac.includes('@')) {
+            const partesRia = partePac.split('@');
+            partePac = partesRia[0].trim();
+            riaEspecifica = parseFloat(partesRia[1].trim());
+        }
+
+        if (partePac.includes('|')) {
+            const partesExame = partePac.split('|');
+            partePac = partesExame[0].trim();
+            let textoExameExtra = partesExame[1].trim();
+            if (textoExameExtra.toLowerCase().startsWith('exame:')) {
+                exameEspecifico = textoExameExtra.substring(6).trim();
+            } else {
+                exameEspecifico = textoExameExtra;
+            }
+        }
+
+        const partes = partePac.includes('=') ? partePac.split('=') : partePac.split(' ');
+        if (partes.length < 2) return null;
+
+        const horaBruta = partes[0].trim();
+        const minutos = converterHoraParaMinutos(horaBruta);
+        if (minutos === null) return null;
+
+        const pesoVal = parseFloat(partes[1].trim());
+        if (isNaN(pesoVal) || pesoVal <= 0) return null;
+
+        return { 
+            minutos, 
+            horaStr: minutosParaHoraStr(minutos), 
+            peso: pesoVal, 
+            exame: exameEspecifico,
+            riaCustom: (!isNaN(riaEspecifica) && riaEspecifica > 0) ? riaEspecifica : null 
+        };
+    }
+
+    async function aoMudarDataInsercao() {
+        if (temporizadorSalvamento) {
+            clearTimeout(temporizadorSalvamento);
+            temporizadorSalvamento = null;
+            await salvarDadosNuvem();
+        }
+        document.getElementById('filtroData').value = document.getElementById('dataInsercao').value;
+        carregarDadosPorData();
+    }
+
+    function aoDigitarPacientes() {
+        if (estado.carregandoRemoto) return;
+        processarSimulacaoCompleta();
+        clearTimeout(temporizadorSalvamento);
+        document.getElementById('syncStatus').innerText = "(Digitando...)";
+        temporizadorSalvamento = setTimeout(() => {
+            salvarDadosNuvem();
+        }, 800);
+    }
+
+    function carregarDadosPorData() {
+        estado.carregandoRemoto = true;
+        const dataSelecionada = document.getElementById('filtroData').value;
+        
+        if (estado.banco.historicoDias && estado.banco.historicoDias[dataSelecionada]) {
+            let dadosDia = estado.banco.historicoDias[dataSelecionada];
+            document.getElementById('listaPacientes').value = dadosDia.textoPacientes || "";
+            estado.cache.reposicoesExtras[dataSelecionada] = dadosDia.reposicoesExtras || [];
+            estado.cache.overridesAuto[dataSelecionada] = dadosDia.overridesAuto || {};
+            
+            if (dadosDia.radiofarmaco) {
+                document.getElementById('radiofarmaco').value = dadosDia.radiofarmaco;
+                aoMudarRadiofarmaco();
+            }
+            if (dadosDia.razaoRotina) { document.getElementById('razaoRotina').value = dadosDia.razaoRotina; }
+            if (dadosDia.razaoRIA) { document.getElementById('razaoRIA').value = dadosDia.razaoRIA; }
+            if (dadosDia.fatorSubtle) { document.getElementById('fatorSubtle').value = dadosDia.fatorSubtle; }
+            if (dadosDia.meiaVidaCustom) { document.getElementById('meiaVidaCustom').value = dadosDia.meiaVidaCustom; }
+            if (dadosDia.dosePadraoLote) { document.getElementById('dosePadraoLote').value = dadosDia.dosePadraoLote; }
+        } else {
+            document.getElementById('listaPacientes').value = "";
+            estado.cache.reposicoesExtras[dataSelecionada] = [];
+            estado.cache.overridesAuto[dataSelecionada] = {};
+        }
+        recalcularFatorAutomatico();
+        processarSimulacaoCompleta();
+        estado.carregandoRemoto = false;
+    }
+
+    function processarSimulacaoCompleta() {
+        try {
+            const textoPacientes = document.getElementById('listaPacientes').value.trim();
+            const dataAtual = document.getElementById('filtroData').value;
+            let reposicoesManuaisArr = estado.cache.reposicoesExtras[dataAtual] || [];
+            let overridesAuto = estado.cache.overridesAuto[dataAtual] || {};
+
+            const a0Inicial = parseFloat(document.getElementById('dosePadraoLote').value) || 10;
+            const tetoMaximo = a0Inicial * 2.5;
+            document.getElementById('tituloGraficoTeto').innerText = `${i18n[idiomaAtual].titleChart} (Lote Padrão: ${a0Inicial} mCi)`;
+
+            if (!textoPacientes) {
+                document.getElementById('textoResultadoSimulacao').innerHTML = i18n[idiomaAtual].msgWaitingData;
+                document.getElementById('listaPedido').value = "";
+                if (meuGrafico) meuGrafico.destroy();
+                return;
+            }
+
+            const razaoRotinaVal = parseFloat(document.getElementById('razaoRotina').value) || 0.12;
+            const razaoRIAVal = parseFloat(document.getElementById('razaoRIA').value) || 0.08;
+            
+            const fatorSubtleCalculado = razaoRIAVal / razaoRotinaVal;
+            document.getElementById('fatorSubtle').value = fatorSubtleCalculado;
+
+            const meiaVidaMin = obterMeiaVidaMinutos();
+            const lambda = 0.693 / meiaVidaMin;
+            let pacientes = [];
+            
+            const linhasProcessadas = textoPacientes
+                .split(/(?=\s\d{1,2}:\d{2})|\n/)
+                .map(l => l.trim())
+                .filter(l => l !== '');
+
+            linhasProcessadas.forEach(linha => {
+                const p = parseLinhaPaciente(linha);
+                if (p) {
+                    let riaUtilizada = p.riaCustom ? p.riaCustom : razaoRIAVal;
+                    let fatorPaciente = riaUtilizada / razaoRotinaVal;
+                    
+                    pacientes.push({
+                        ...p,
+                        doseNecessaria: p.peso * razaoRotinaVal * fatorPaciente
+                    });
+                }
+            });
+
+            if (pacientes.length === 0) return;
+            pacientes.sort((a, b) => a.minutos - b.minutos);
+            estado.pacientes = pacientes;
+
+            let minInicioLote = pacientes[0].minutos;
+            let fimSimulacao = pacientes[pacientes.length - 1].minutos + 60;
+            
+            let estoqueAtual = a0Inicial;
+            let ultimoMinutoAvaliado = minInicioLote;
+            
+            let reposicoesAutoSet = new Set();
+            reposicoesAutoSet.add(pacientes[0].horaStr);
+
+            let detalhesResiduosMap = {};
+            detalhesResiduosMap[pacientes[0].horaStr] = { doseAuto: a0Inicial, residuo: 0, totalEstoque: a0Inicial };
+
+            pacientes.forEach((pac, index) => {
+                let deltaT = pac.minutos - ultimoMinutoAvaliado;
+                if (deltaT > 0) {
+                    estoqueAtual = estoqueAtual * Math.exp(-lambda * deltaT);
+                }
+                ultimoMinutoAvaliado = pac.minutos;
+
+                if (reposicoesManuaisArr.includes(pac.horaStr)) {
+                    let residuoAtual = estoqueAtual;
+                    let doseComResiduo = a0Inicial + residuoAtual;
+                    detalhesResiduosMap[pac.horaStr] = { doseAuto: a0Inicial, residuo: residuoAtual, totalEstoque: doseComResiduo };
+                    estoqueAtual = doseComResiduo;
+                    if (estoqueAtual > tetoMaximo) estoqueAtual = tetoMaximo;
+                }
+
+                if (index === 0) {
+                    // Primeiro paciente consome do lote inicial
+                } else if (estoqueAtual < pac.doseNecessaria) {
+                    let horarioAlvo = overridesAuto[pac.horaStr] !== undefined ? overridesAuto[pac.horaStr] : pac.horaStr;
+                    reposicoesAutoSet.add(horarioAlvo);
+                    
+                    let residuoAtual = estoqueAtual;
+                    let doseComResiduo = a0Inicial + residuoAtual;
+                    detalhesResiduosMap[horarioAlvo] = { doseAuto: a0Inicial, residuo: residuoAtual, totalEstoque: doseComResiduo };
+
+                    estoqueAtual = doseComResiduo; 
+                    if (estoqueAtual > tetoMaximo) estoqueAtual = tetoMaximo;
+                }
+                estoqueAtual -= pac.doseNecessaria;
+                if (estoqueAtual < 0) estoqueAtual = 0;
+            });
+
+            let reposicoesAutoArr = Array.from(reposicoesAutoSet);
+            let todasReposicoes = [...reposicoesAutoArr, ...reposicoesManuaisArr];
+            let repositorioUnicoSet = new Set(todasReposicoes);
+            let pedidosReposicao = Array.from(repositorioUnicoSet);
+            pedidosReposicao.sort((a, b) => converterHoraParaMinutos(a) - converterHoraParaMinutos(b));
+
+            let minutosUnicos = new Set();
+            for (let m = minInicioLote; m <= fimSimulacao; m += 5) {
+                minutosUnicos.add(m);
+            }
+            pacientes.forEach(p => minutosUnicos.add(p.minutos));
+            pedidosReposicao.forEach(h => minutosUnicos.add(converterHoraParaMinutos(h)));
+            let minutosArray = Array.from(minutosUnicos).sort((a, b) => a - b);
+
+            let dadosCurva = [];
+            let dadosAtividadePre = [];
+            let dadosPacientesPuntos = [];
+            let dadosDosesAutoAcima = [];
+            let dadosDosesExtrasAcima = [];
+
+            let minutosPacientes = pacientes.map(p => p.minutos);
+            let minutosAuto = reposicoesAutoArr.map(h => converterHoraParaMinutos(h));
+            let minutosExtras = reposicoesManuaisArr.map(h => converterHoraParaMinutos(h));
+
+            let estoqueSim = a0Inicial;
+            let tempoCursor = minInicioLote;
+
+            minutosArray.forEach(m => {
+                let dt = m - tempoCursor;
+                if (dt > 0) {
+                    estoqueSim = estoqueSim * Math.exp(-lambda * dt);
+                    tempoCursor = m;
+                }
+
+                let horaStrM = minutosParaHoraStr(m);
+                let ehMomentoDeReposicao = repositorioUnicoSet.has(horaStrM) && m !== minInicioLote;
+
+                if (ehMomentoDeReposicao) {
+                    let infoR = detalhesResiduosMap[horaStrM];
+                    let doseAdicionada = infoR ? infoR.doseAuto : a0Inicial;
+                    estoqueSim += doseAdicionada;
+                    if (estoqueSim > tetoMaximo) estoqueSim = tetoMaximo;
+                }
+
+                let picoEstoqueNoMinuto = estoqueSim;
+
+                pacientes.forEach(pac => {
+                    if (pac.minutos === m) {
+                        estoqueSim -= pac.doseNecessaria;
+                        if (estoqueSim < 0) estoqueSim = 0;
+                    }
+                });
+
+                let valorAtivRestante = estoqueSim > 0 ? parseFloat(estoqueSim.toFixed(2)) : 0;
+                dadosCurva.push({ x: m, y: valorAtivRestante });
+
+                if (minutosPacientes.includes(m)) {
+                    let pacObj = pacientes.find(p => p.minutos === m);
+                    dadosPacientesPuntos.push({ x: m, y: valorAtivRestante });
+                    dadosAtividadePre.push({
+                        ativPre: parseFloat(picoEstoqueNoMinuto.toFixed(2)),
+                        dosePaciente: pacObj ? pacObj.doseNecessaria : 0,
+                        peso: pacObj ? pacObj.peso : 0,
+                        exame: pacObj ? pacObj.exame : null,
+                        riaCustom: pacObj ? pacObj.riaCustom : null
+                    });
+                } else {
+                    dadosPacientesPuntos.push({ x: m, y: null });
+                    dadosAtividadePre.push(null);
+                }
+
+                if (minutosAuto.includes(m)) {
+                    dadosDosesAutoAcima.push({ x: m, y: parseFloat(picoEstoqueNoMinuto.toFixed(2)) });
+                } else {
+                    dadosDosesAutoAcima.push({ x: m, y: null });
+                }
+
+                if (minutosExtras.includes(m)) {
+                    dadosDosesExtrasAcima.push({ x: m, y: parseFloat(picoEstoqueNoMinuto.toFixed(2)) });
+                } else {
+                    dadosDosesExtrasAcima.push({ x: m, y: null });
+                }
+            });
+
+            if (meuGrafico) meuGrafico.destroy();
+
+            const ctx = document.getElementById('graficoDecaimento').getContext('2d');
+            meuGrafico = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: i18n[idiomaAtual].datasetRemaining,
+                            data: dadosCurva,
+                            infoPacientePre: dadosAtividadePre,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        },
+                        {
+                            label: i18n[idiomaAtual].datasetPatients,
+                            data: dadosPacientesPuntos,
+                            borderColor: 'transparent',
+                            backgroundColor: '#ef4444',
+                            pointBackgroundColor: '#ef4444',
+                            pointBorderColor: '#ef4444',
+                            pointRadius: 7,
+                            pointHoverRadius: 9,
+                            showLine: false
+                        },
+                        {
+                            label: i18n[idiomaAtual].datasetStock,
+                            data: dadosDosesAutoAcima,
+                            borderColor: 'transparent',
+                            backgroundColor: '#3b82f6',
+                            pointBackgroundColor: '#3b82f6',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 1.5,
+                            pointRadius: 7,
+                            pointHoverRadius: 9,
+                            showLine: false
+                        },
+                        {
+                            label: i18n[idiomaAtual].datasetExtra,
+                            data: dadosDosesExtrasAcima,
+                            borderColor: 'transparent',
+                            backgroundColor: '#f59e0b',
+                            pointBackgroundColor: '#f59e0b',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 1.5,
+                            pointRadius: 7,
+                            pointHoverRadius: 9,
+                            showLine: false
+                        }
+                    ]
+                },
+                plugins: [pluginLinhasTracejadasVertical],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    let minutosTotais = context[0].parsed.x;
+                                    return minutosParaHoraStr(minutosTotais);
+                                },
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    let minutosTotais = context.parsed.x;
+                                    let horarioStr = minutosParaHoraStr(minutosTotais);
+
+                                    if (label === i18n[idiomaAtual].datasetStock || label === i18n[idiomaAtual].datasetExtra) {
+                                        let infoRes = detalhesResiduosMap[horarioStr];
+                                        if (infoRes) {
+                                            return [
+                                                `${i18n[idiomaAtual].datasetStock}: ${infoRes.totalEstoque.toFixed(2).replace('.', ',')} mCi`,
+                                                `• Auto: ${infoRes.doseAuto.toFixed(2).replace('.', ',')} mCi`,
+                                                `• Resíduo: ${infoRes.residuo.toFixed(2).replace('.', ',')} mCi`
+                                            ];
+                                        }
+                                        let valY = context.parsed.y;
+                                        return `${i18n[idiomaAtual].datasetStock}: ${valY.toFixed(2).replace('.', ',')} mCi`;
+                                    }
+
+                                    if (label === i18n[idiomaAtual].datasetPatients) {
+                                        const index = context.dataIndex;
+                                        const dataset0 = context.chart.data.datasets[0];
+                                        const infoP = dataset0.infoPacientePre ? dataset0.infoPacientePre[index] : null;
+                                        
+                                        let ativRestante = context.parsed.y < 0 ? 0 : context.parsed.y;
+                                        let linhasTooltip = [`Atividade Restante: ${ativRestante.toFixed(2).replace('.', ',')} mCi`];
+                                        
+                                        if (infoP) {
+                                            if (infoP.exame) {
+                                                linhasTooltip.push(`Exame: ${infoP.exame}`);
+                                            }
+                                            let strRia = infoP.riaCustom ? ` (RIA Custom: ${infoP.riaCustom})` : '';
+                                            linhasTooltip.push(`Dose Aplicada: ${infoP.dosePaciente.toFixed(2).replace('.', ',')} mCi (Peso: ${infoP.peso} kg${strRia})`);
+                                            let h = Math.floor(minutosTotais / 60);
+                                            let m = minutosTotais % 60;
+                                            let minAnt = m - 1 < 0 ? 59 : m - 1;
+                                            let hAnt = m - 1 < 0 ? (h - 1 + 24) % 24 : h;
+                                            let hFormat = `${String(hAnt).padStart(2, '0')}:${String(minAnt).padStart(2, '0')}`;
+                                            linhasTooltip.push(`Pré-Aplicação (${hFormat}): ${infoP.ativPre.toFixed(2).replace('.', ',')} mCi`);
+                                        }
+                                        return linhasTooltip;
+                                    }
+
+                                    if (label === i18n[idiomaAtual].datasetRemaining) {
+                                        if (context.parsed.y !== null) {
+                                            let val = context.parsed.y;
+                                            if (val < 0) val = 0;
+                                            return `Estoque Atual: ${val.toFixed(2).replace('.', ',')} mCi`;
+                                        }
+                                    }
+
+                                    return null;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            max: tetoMaximo * 1.15, 
+                            title: { display: true, text: i18n[idiomaAtual].chartYTitle } 
+                        },
+                        x: { 
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: i18n[idiomaAtual].chartXTitle },
+                            ticks: {
+                                callback: function(value) { return minutosParaHoraStr(value); },
+                                stepSize: 30
+                            }
+                        }
+                    }
+                }
+            });
+
+            let totalQtdPedidos = pedidosReposicao.length;
+            let totalPacientesAtual = pacientes.length;
+            let economiaDia = totalPacientesAtual - totalQtdPedidos;
+            if (economiaDia < 0) economiaDia = 0;
+
+            let textoSimul = i18n[idiomaAtual].simCompleted
+                .replace('{rotina}', razaoRotinaVal)
+                .replace('{ria}', razaoRIAVal)
+                .replace('{a0}', a0Inicial)
+                .replace('{qtd}', totalQtdPedidos)
+                .replace('{econ}', economiaDia);
+
+            document.getElementById('textoResultadoSimulacao').innerHTML = textoSimul;
+
+            gerarListaPedido(pacientes, pedidosReposicao);
+
+        } catch (e) {
+            console.error("Erro na simulação:", e);
+        }
+    }
+
+    function gerarListaPedido(pacientes, pedidosReposicao) {
+        const modo = document.getElementById('modoHorarioPedido').value;
+        let textoTxt = "";
+
+        if (modo === "horaEmHora") {
+            let agrupadoPorHora = {};
+            pedidosReposicao.forEach(horarioStr => {
+                let partes = horarioStr.split(':');
+                let horaCheia = `${partes[0]}:00`;
+                if (!agrupadoPorHora[horaCheia]) {
+                    agrupadoPorHora[horaCheia] = 0;
+                }
+                agrupadoPorHora[horaCheia]++;
+            });
+
+            let linhasFormatadas = [];
+            Object.keys(agrupadoPorHora).sort().forEach(h => {
+                let qtd = agrupadoPorHora[h];
+                if (qtd > 1) {
+                    linhasFormatadas.push(`${h} (${qtd} doses)`);
+                } else {
+                    linhasFormatadas.push(h);
+                }
+            });
+            textoTxt = linhasFormatadas.join('\n');
+        } else {
+            textoTxt = pedidosReposicao.join('\n');
+        }
+
+        document.getElementById('listaPedido').value = textoTxt;
+    }
+
+    function baixarTxtPedido() {
+        const conteudo = document.getElementById('listaPedido').value;
+        if (!conteudo) {
+            alert("Nenhum pedido para baixar.");
+            return;
+        }
+        let blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = `Pedido_Radiofarmacos_${document.getElementById('filtroData').value}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+</script>
+</body>
+</html>
