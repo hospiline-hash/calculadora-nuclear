@@ -1693,7 +1693,6 @@
                             tension: 0.2,
                             pointRadius: 0,
                             pointHoverRadius: 4,
-                            hitRadius: 15 // <--- ADICIONE ESTA LINHA AQUI
                         },
                         {
                             label: i18n[idiomaAtual].datasetPatients,
@@ -1752,8 +1751,7 @@
                     // AQUI ESTÁ O SEGREDO: O MODO 'nearest' garante que ele pegue a bolinha mais próxima do mouse
                     interaction: {
                         mode: 'nearest',
-                        axis: 'x',
-                        intersect: false,
+                        intersect: true,
                     },
                     plugins: {
                         tooltip: {
