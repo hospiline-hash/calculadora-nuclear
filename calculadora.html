@@ -1092,70 +1092,80 @@
     }
 
     function atualizarRelatorioConsolidado() {
-        let totalPacientes = 0;
-        let totalEconomia = 0;
-        let listaDetalhesHTML = "";
+    let totalPacientes = 0;
+    let totalEconomia = 0;
+    let listaDetalhesHTML = "";
 
-        const filtroDataEl = document.getElementById('filtroData');
-        const dataConsulta = filtroDataEl ? filtroDataEl.value : '';
+    const filtroDataEl = document.getElementById('filtroData');
+    const dataConsulta = filtroDataEl ? filtroDataEl.value : '';
 
-        const dataRef = dataConsulta ? new Date(dataConsulta + 'T00:00:00') : new Date();
-        dataRef.setHours(0, 0, 0, 0);
+    const dataRef = dataConsulta ? new Date(dataConsulta + 'T00:00:00') : new Date();
+    dataRef.setHours(0, 0, 0, 0);
 
-        if (estado.banco && estado.banco.historicoDias) {
-            const datasValidas = [];
-            Object.keys(estado.banco.historicoDias).forEach(dataStr => {
-                const dataReg = new Date(dataStr + 'T00:00:00');
-                dataReg.setHours(0, 0, 0, 0);
-                const diffDays = (dataRef - dataReg) / (1000 * 60 * 60 * 24);
-                if (diffDays >= 0 && diffDays <= DIAS_HISTORICO) {
-                    datasValidas.push(dataStr);
-                }
-            });
-
-            datasValidas.sort((a, b) => a.localeCompare(b));
-
-            datasValidas.forEach(dataStr => {
-                let dia = estado.banco.historicoDias[dataStr];
-                if (dia && dia.textoPacientes) {
-                    let linhas = dia.textoPacientes.split(/(?=\s\d{1,2}:\d{2})|\n/).map(l => l.trim()).filter(l => l !== '');
-                    let qtdDia = linhas.length;
-                    totalPacientes += qtdDia;
-
-                    let fator = parseFloat(dia.fatorSubtle) || 0.667;
-                    let dosePadraoDia = parseFloat(dia.dosePadraoLote) || 10;
-                    let economiaDia = qtdDia * (dosePadraoDia * (1 - fator));
-                    totalEconomia += Math.max(0, economiaDia);
-
-                    let pacientesDetalheHtml = "";
-                    linhas.forEach(l => {
-                        let parsed = parseLinhaPaciente(l);
-                        if (parsed) {
-                            let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : '';
-                            pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`;
-                        }
-                    });
-
-                    let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px; color:#065f46;"' : '';
-                    listaDetalhesHTML += `<div${destaque} style="margin-bottom: 8px;">• <b>${dataStr}</b> (${qtdDia} ${i18n[idiomaAtual].patientsAttended}):<br>${pacientesDetalheHtml}</div>`;
-                }
-            });
-        }
-
-        document.getElementById('stat-total').innerText = totalPacientes;
-        document.getElementById('stat-economia').innerText = totalEconomia.toFixed(1) + " mCi";
-        document.getElementById('lista-detalhes-print').innerHTML = listaDetalhesHTML || i18n[idiomaAtual].noRecords;
-
-        const dataConsultaPrint = document.getElementById('dataConsultaPrint');
-        if (dataConsultaPrint) {
-            if (dataConsulta) {
-                dataConsultaPrint.innerText = `Data consultada: ${dataConsulta.split('-').reverse().join('/')}`;
-                dataConsultaPrint.style.display = 'block';
-            } else {
-                dataConsultaPrint.style.display = 'none';
+    if (estado.banco && estado.banco.historicoDias) {
+        const datasValidas = [];
+        Object.keys(estado.banco.historicoDias).forEach(dataStr => {
+            const dataReg = new Date(dataStr + 'T00:00:00');
+            dataReg.setHours(0, 0, 0, 0);
+            const diffDays = (dataRef - dataReg) / (1000 * 60 * 60 * 24);
+            if (diffDays >= 0 && diffDays <= DIAS_HISTORICO) {
+                datasValidas.push(dataStr);
             }
+        });
+
+        datasValidas.sort((a, b) => a.localeCompare(b));
+
+        datasValidas.forEach(dataStr => {
+            let dia = estado.banco.historicoDias[dataStr];
+            if (dia && dia.textoPacientes) {
+                let linhas = dia.textoPacientes.split(/(?=\s\d{1,2}:\d{2})|\n/).map(l => l.trim()).filter(l => l !== '');
+                let qtdDia = linhas.length;
+                totalPacientes += qtdDia;
+
+                // Cálculos do dia
+                let fator = parseFloat(dia.fatorSubtle) || 0.667;
+                let dosePadraoDia = parseFloat(dia.dosePadraoLote) || 10;
+                let economiaDia = Math.max(0, qtdDia * (dosePadraoDia * (1 - fator)));
+                totalEconomia += economiaDia;
+
+                // Conta as reposições (automáticas + extras) do dia
+                let reposicoesExtrasDia = (dia.reposicoesExtras || []).length;
+                let overridesAutoDia = Object.keys(dia.overridesAuto || {}).length;
+                let reposicoesAutoDia = 1 + overridesAutoDia;
+                let pedidosDia = reposicoesAutoDia + reposicoesExtrasDia;
+
+                let pacientesDetalheHtml = "";
+                linhas.forEach(l => {
+                    let parsed = parseLinhaPaciente(l);
+                    if (parsed) {
+                        let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : '';
+                        pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`;
+                    }
+                });
+
+                // Monta o título do dia com as infos de pedidos e economia
+                let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px; color:#065f46;"' : '';
+                let infoDia = `<span style="font-weight: normal; font-size: 13px; color: #475569; margin-left: 8px;">(${pedidosDia} doses pedidas | Economia: ${economiaDia.toFixed(1).replace('.', ',')} mCi)</span>`;
+                
+                listaDetalhesHTML += `<div${destaque} style="margin-bottom: 12px;">• <b>${dataStr}</b> - ${qtdDia} ${i18n[idiomaAtual].patientsAttended} ${infoDia}:<br>${pacientesDetalheHtml}</div>`;
+            }
+        });
+    }
+
+    document.getElementById('stat-total').innerText = totalPacientes;
+    document.getElementById('stat-economia').innerText = totalEconomia.toFixed(1) + " mCi";
+    document.getElementById('lista-detalhes-print').innerHTML = listaDetalhesHTML || i18n[idiomaAtual].noRecords;
+
+    const dataConsultaPrint = document.getElementById('dataConsultaPrint');
+    if (dataConsultaPrint) {
+        if (dataConsulta) {
+            dataConsultaPrint.innerText = `Data consultada: ${dataConsulta.split('-').reverse().join('/')}`;
+            dataConsultaPrint.style.display = 'block';
+        } else {
+            dataConsultaPrint.style.display = 'none';
         }
     }
+}
 
     window.onload = function() {
         const hojeStr = obterDataAtualStr();
