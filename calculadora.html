@@ -1748,9 +1748,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    // AQUI ESTÁ O SEGREDO: O MODO 'nearest' garante que ele pegue a bolinha mais próxima do mouse
                     interaction: {
-                        mode: 'index',
-                        intersect: false,
+                        mode: 'nearest',
+                        intersect: true,
                     },
                     plugins: {
                         tooltip: {
@@ -1841,13 +1842,14 @@
                         if (!estado.cache.overridesAuto[dataAtual]) estado.cache.overridesAuto[dataAtual] = {};
 
                         if (elements && elements.length > 0) {
+                            // Como mudamos para 'nearest', ele vai pegar a bolinha exata que você clicou
                             const hit = elements[0];
                             const datasetIndex = hit.datasetIndex;
                             const index = hit.index;
                             const minutosClicados = meuGrafico.data.datasets[datasetIndex].data[index].x;
                             let horarioClicado = minutosParaHoraStr(minutosClicados);
 
-                            if (datasetIndex === 2) {
+                            if (datasetIndex === 2) { // Bola Azul (Estoque)
                                 const res = await abrirDialogo({
                                     titulo: i18n[idiomaAtual].datasetStock,
                                     mensagem: `Dose Automática às ${horarioClicado}.\nDigite o NOVO HORÁRIO (HH:MM):`,
@@ -1864,7 +1866,7 @@
                                 return;
                             }
 
-                            if (datasetIndex === 3) {
+                            if (datasetIndex === 3) { // Bola Laranja (Dose Extra)
                                 const res = await abrirDialogo({
                                     titulo: i18n[idiomaAtual].datasetExtra,
                                     mensagem: `Dose Extra às ${horarioClicado}.\nO que deseja fazer?`,
@@ -1883,6 +1885,7 @@
                                             aoDigitarPacientes();
                                         }
                                     } else if (res.valores[0] === '2') {
+                                        // REMOVE A DOSE EXTRA
                                         estado.cache.reposicoesExtras[dataAtual] = estado.cache.reposicoesExtras[dataAtual].filter(h => h !== horarioClicado);
                                         aoDigitarPacientes();
                                     }
@@ -1934,6 +1937,7 @@
                             }
                         }
 
+                        // Se clicou em área vazia, abre o menu de adicionar
                         const canvasPosition = Chart.helpers.getRelativePosition(e, meuGrafico);
                         const dataX = meuGrafico.scales.x.getValueForPixel(canvasPosition.x);
                         if (dataX !== undefined) {
