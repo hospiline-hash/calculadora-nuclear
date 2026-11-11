@@ -1122,17 +1122,46 @@
                 let qtdDia = linhas.length;
                 totalPacientes += qtdDia;
 
-                // Cálculos do dia
+                // Mantém o cálculo original da economia (mCi) para o TOTAL do topo
                 let fator = parseFloat(dia.fatorSubtle) || 0.667;
                 let dosePadraoDia = parseFloat(dia.dosePadraoLote) || 10;
-                let economiaDia = Math.max(0, qtdDia * (dosePadraoDia * (1 - fator)));
-                totalEconomia += economiaDia;
+                let economiaDiaMci = qtdDia * (dosePadraoDia * (1 - fator));
+                totalEconomia += Math.max(0, economiaDiaMci);
 
-                // Conta as reposições (automáticas + extras) do dia
-                let reposicoesExtrasDia = (dia.reposicoesExtras || []).length;
-                let overridesAutoDia = Object.keys(dia.overridesAuto || {}).length;
-                let reposicoesAutoDia = 1 + overridesAutoDia;
-                let pedidosDia = reposicoesAutoDia + reposicoesExtrasDia;
+                // ---- INÍCIO DO CÁLCULO EXATO PARA O DIA ----
+                let pedidosDiaExato = 0;
+                let economiaDiaExato = 0;
+                
+                // Só calcula se tivermos a lógica de simulação disponível
+                if (typeof processarSimulacaoCompleta === 'function') {
+                    const backupPacientes = document.getElementById('listaPacientes').value;
+                    const backupRepo = document.getElementById('listaPedido').value;
+                    
+                    // Simula o dia temporariamente nos bastidores para pegar o resultado exato
+                    document.getElementById('listaPacientes').value = dia.textoPacientes || '';
+                    
+                    const backupData = document.getElementById('filtroData').value;
+                    document.getElementById('filtroData').value = dataStr;
+                    estado.carregandoRemoto = true; // Evita disparar salvamentos
+                    
+                    // Chama a função original do sistema
+                    processarSimulacaoCompleta();
+                    
+                    // Extrai os números do HTML que a função gerou
+                    const textoSimul = document.getElementById('textoResultadoSimulacao').innerHTML;
+                    const matchPedidos = textoSimul.match(/Pedidos:<\/strong>\s*(\d+)/);
+                    const matchEconomia = textoSimul.match(/Economia do dia:<\/strong>\s*(\d+)/);
+                    
+                    if (matchPedidos) pedidosDiaExato = parseInt(matchPedidos[1], 10);
+                    if (matchEconomia) economiaDiaExato = parseInt(matchEconomia[1], 10);
+                    
+                    // Restaura tudo como estava
+                    document.getElementById('listaPacientes').value = backupPacientes;
+                    document.getElementById('filtroData').value = backupData;
+                    document.getElementById('listaPedido').value = backupRepo;
+                    estado.carregandoRemoto = false;
+                }
+                // ---- FIM DO CÁLCULO EXATO ----
 
                 let pacientesDetalheHtml = "";
                 linhas.forEach(l => {
@@ -1143,9 +1172,10 @@
                     }
                 });
 
-                // Monta o título do dia com as infos de pedidos e economia
                 let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px; color:#065f46;"' : '';
-                let infoDia = `<span style="font-weight: normal; font-size: 13px; color: #475569; margin-left: 8px;">(${pedidosDia} doses pedidas | Economia: ${economiaDia.toFixed(1).replace('.', ',')} mCi)</span>`;
+                
+                // Monta a informação vermelha com os dados exatos
+                let infoDia = `<span style="font-weight: normal; font-size: 13px; color: #475569; margin-left: 8px;">(${pedidosDiaExato} doses pedidas | Economia: ${economiaDiaExato} doses)</span>`;
                 
                 listaDetalhesHTML += `<div${destaque} style="margin-bottom: 12px;">• <b>${dataStr}</b> - ${qtdDia} ${i18n[idiomaAtual].patientsAttended} ${infoDia}:<br>${pacientesDetalheHtml}</div>`;
             }
