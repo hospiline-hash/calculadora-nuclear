@@ -469,7 +469,7 @@
     <h3 id="tituloGraficoTeto" data-i18n="titleChart">Curva do Decaimento e Reposições</h3>
     <p style="font-size: 13px; color: var(--secondary-color); margin-top: -5px; line-height: 1.4;" data-i18n="legendChart">
         🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>
-        🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br> <!-- BOLINHA VERDE ADICIONADA AQUI -->
+        🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>
         🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>
         🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>
         ✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.
@@ -1754,6 +1754,9 @@
                     },
                     plugins: {
                         tooltip: {
+                            titleFont: { size: 12 },
+                            bodyFont: { size: 11 },
+                            padding: 8,
                             callbacks: {
                                 title: function(context) {
                                     let minutosTotais = context[0].parsed.x;
@@ -1764,11 +1767,36 @@
                                     let minutosTotais = context.parsed.x;
                                     let horarioStr = minutosParaHoraStr(minutosTotais);
 
-                                    // Mostra o valor no tooltip para a bolinha verde
-                                    if (label === 'Dose Aplicada (Verde)') {
-                                        return `Dose Aplicada: ${context.parsed.y.toFixed(2).replace('.', ',')} mCi`;
+                                    // 1. ESCONDE A "ATIVIDADE RESTANTE" SE HOUVER UM PACIENTE NO MESMO HORÁRIO
+                                    if (label === i18n[idiomaAtual].datasetRemaining) {
+                                        const pacientesNoHorario = context.chart.data.datasets[1].data;
+                                        const temPaciente = pacientesNoHorario.some(p => p.x === minutosTotais && p.y !== null);
+                                        
+                                        if (temPaciente) {
+                                            return null;
+                                        }
+                                        
+                                        if (context.parsed.y !== null) {
+                                            let val = context.parsed.y < 0 ? 0 : context.parsed.y;
+                                            return `Estoque Atual: ${val.toFixed(2).replace('.', ',')} mCi`;
+                                        }
+                                        return null;
                                     }
 
+                                    // 2. A BOLINHA VERDE AGORA MOSTRA A DOSE + O PESO
+                                    if (label === 'Dose Aplicada (Verde)') {
+                                        const index = context.dataIndex;
+                                        const dataset0 = context.chart.data.datasets[0];
+                                        const infoP = dataset0.infoPacientePre ? dataset0.infoPacientePre[index] : null;
+                                        
+                                        let strRia = (infoP && infoP.riaCustom) ? ` | RIA Custom: ${infoP.riaCustom}` : '';
+                                        let pesoStr = infoP ? ` (Peso: ${infoP.peso} kg${strRia})` : '';
+                                        let exameStr = (infoP && infoP.exame) ? `\nExame: ${infoP.exame}` : '';
+
+                                        return `Dose Aplicada: ${context.parsed.y.toFixed(2).replace('.', ',')} mCi${pesoStr}${exameStr}`;
+                                    }
+
+                                    // 3. MOSTRA AS DOSES DE ESTOQUE (AZUL) E EXTRAS (LARANJA)
                                     if (label === i18n[idiomaAtual].datasetStock || label === i18n[idiomaAtual].datasetExtra) {
                                         let infoRes = detalhesResiduosMap[horarioStr];
                                         if (infoRes) {
@@ -1782,20 +1810,16 @@
                                         return `${i18n[idiomaAtual].datasetStock}: ${valY.toFixed(2).replace('.', ',')} mCi`;
                                     }
 
+                                    // 4. MOSTRA OS DADOS DO PACIENTE (BOLINHA VERMELHA) SEM A DOSE APLICADA REPETIDA
                                     if (label === i18n[idiomaAtual].datasetPatients) {
                                         const index = context.dataIndex;
                                         const dataset0 = context.chart.data.datasets[0];
                                         const infoP = dataset0.infoPacientePre ? dataset0.infoPacientePre[index] : null;
                                         
                                         let ativRestante = context.parsed.y < 0 ? 0 : context.parsed.y;
-                                        let linhasTooltip = [`Atividade Restante: ${ativRestante.toFixed(2).replace('.', ',')} mCi`];
+                                        let linhasTooltip = [`Estoque Restante: ${ativRestante.toFixed(2).replace('.', ',')} mCi`];
                                         
                                         if (infoP) {
-                                            if (infoP.exame) {
-                                                linhasTooltip.push(`Exame: ${infoP.exame}`);
-                                            }
-                                            let strRia = infoP.riaCustom ? ` (RIA Custom: ${infoP.riaCustom})` : '';
-                                            linhasTooltip.push(`Dose Aplicada: ${infoP.dosePaciente.toFixed(2).replace('.', ',')} mCi (Peso: ${infoP.peso} kg${strRia})`);
                                             let h = Math.floor(minutosTotais / 60);
                                             let m = minutosTotais % 60;
                                             let minAnt = m - 1 < 0 ? 59 : m - 1;
@@ -1804,14 +1828,6 @@
                                             linhasTooltip.push(`Pré-Aplicação (${hFormat}): ${infoP.ativPre.toFixed(2).replace('.', ',')} mCi`);
                                         }
                                         return linhasTooltip;
-                                    }
-
-                                    if (label === i18n[idiomaAtual].datasetRemaining) {
-                                        if (context.parsed.y !== null) {
-                                            let val = context.parsed.y;
-                                            if (val < 0) val = 0;
-                                            return `Estoque Atual: ${val.toFixed(2).replace('.', ',')} mCi`;
-                                        }
                                     }
 
                                     return null;
