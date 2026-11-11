@@ -36,6 +36,7 @@
                 window.location.href = 'index.html';
             } else {
                 window.uidLogado = user.uid;
+                document.body.style.display = 'block';
 
                 const headerCard = document.querySelector('.card');
                 const topRow = document.querySelector('.header-top-row');
@@ -43,7 +44,7 @@
                 if (headerCard && topRow && !document.getElementById('nomeClinicaExibicao')) {
                     const nomeClinicaDiv = document.createElement('div');
                     nomeClinicaDiv.id = 'nomeClinicaExibicao';
-                    nomeClinicaDiv.style.cssText = "font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 5px; width: 100%; display: block;";
+                    nomeClinicaDiv.style.cssText = "font-size: 18px; font-weight: 700; color: var(--text-color); margin-bottom: 5px; width: 100%; display: block;";
                     topRow.parentNode.insertBefore(nomeClinicaDiv, topRow);
                 }
 
@@ -94,6 +95,32 @@
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-color: #1e293b;
+            --border-color: #cbd5e1;
+            --input-bg: #fcfcfc;
+            --historico-bg: #fffbeb;
+            --historico-border: #fde68a;
+            --result-bg: #f1f5f9;
+            --stats-bg: #f0fdf4;
+            --footer-border: #e2e8f0;
+            --dialog-bg: #ffffff;
+            --chart-grid: #e2e8f0;
+        }
+
+        body.dark-mode {
+            --primary-color: #60a5fa;
+            --secondary-color: #94a3b8;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #e2e8f0;
+            --border-color: #475569;
+            --input-bg: #0f172a;
+            --historico-bg: #1e293b;
+            --historico-border: #b45309;
+            --result-bg: #1e293b;
+            --stats-bg: #064e3b;
+            --footer-border: #334155;
+            --dialog-bg: #1e293b;
+            --chart-grid: #334155;
         }
 
         body { 
@@ -107,6 +134,7 @@
             -moz-user-select: none; 
             -ms-user-select: none; 
             user-select: none; 
+            transition: background-color 0.3s, color 0.3s;
         }
 
         input, select, textarea {
@@ -114,9 +142,12 @@
             -moz-user-select: text;
             -ms-user-select: text;
             user-select: text;
+            color: var(--text-color);
+            background-color: var(--input-bg);
+            border-color: var(--border-color);
         }
 
-        .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; border-top: 4px solid var(--primary-color); }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; border-top: 4px solid var(--primary-color); transition: background-color 0.3s; }
         .card.success { border-top-color: #10b981; }
         
         .header { text-align: center; margin-bottom: 20px; }
@@ -142,22 +173,23 @@
         .header-top-row h2 {
             margin: 0;
             font-size: 20px;
-            color: #1e293b;
+            color: var(--text-color);
         }
 
         .lang-selector-container {
             display: flex;
             gap: 6px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .lang-btn {
-            background: #ffffff;
-            border: 2px solid #cbd5e1;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 13px;
             font-weight: 700;
-            color: #475569;
+            color: var(--text-color);
             padding: 5px 10px;
             cursor: pointer;
             transition: all 0.2s;
@@ -168,7 +200,7 @@
 
         .lang-btn:hover {
             border-color: #94a3b8;
-            background: #f1f5f9;
+            background: var(--result-bg);
         }
 
         .lang-btn.active {
@@ -176,6 +208,11 @@
             background: #eff6ff;
             color: #1d4ed8;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        body.dark-mode .lang-btn.active {
+            background: #1e3a5f;
+            color: #93c5fd;
         }
 
         .print-logo {
@@ -189,8 +226,8 @@
             image-rendering: -webkit-optimize-contrast;
         }
 
-        label { display: block; margin-top: 10px; font-weight: 600; color: #334155; font-size: 13px; }
-        input, select, textarea { width: 100%; padding: 9px; margin-top: 4px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background-color: #fcfcfc; }
+        label { display: block; margin-top: 10px; font-weight: 600; color: var(--text-color); font-size: 13px; }
+        input, select, textarea { width: 100%; padding: 9px; margin-top: 4px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
         
         button { margin-top: 10px; width: 100%; padding: 9px; background: #475569; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; }
         button:hover { background: #334155; }
@@ -204,12 +241,12 @@
         .btn-danger { background: #dc2626; color: white; }
         .btn-danger:hover { background: #b91c1c; }
 
-        .result { margin-top: 20px; padding: 12px; background: #f1f5f9; border-left: 4px solid #3b82f6; border-radius: 6px; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .stats { background: #f0fdf4; border-top: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-top: 20px; }
-        .loading { font-size: 12px; color: #64748b; font-style: italic; }
+        .result { margin-top: 20px; padding: 12px; background: var(--result-bg); border-left: 4px solid #3b82f6; border-radius: 6px; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .stats { background: var(--stats-bg); border-top: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .loading { font-size: 12px; color: var(--secondary-color); font-style: italic; }
         .chart-container { position: relative; margin-top: 20px; width: 100%; height: 380px; }
         
-        .historico-box { background: #fffbeb; padding: 18px; border-radius: 6px; border: 1px solid #fde68a; margin-bottom: 15px; }
+        .historico-box { background: var(--historico-bg); padding: 18px; border-radius: 6px; border: 1px solid var(--historico-border); margin-bottom: 15px; }
         .config-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -235,7 +272,7 @@
             margin-bottom: 20px;
             font-size: 13px;
             color: var(--secondary-color);
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid var(--footer-border);
             padding-top: 15px;
         }
         
@@ -246,9 +283,13 @@
             color: #059669;
         }
 
+        body.dark-mode .info-status-fator {
+            color: #34d399;
+        }
+
         .sync-status {
             font-size: 11px;
-            color: #64748b;
+            color: var(--secondary-color);
             font-style: italic;
         }
 
@@ -259,19 +300,21 @@
             max-width: 420px;
             width: 90%;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            background: var(--dialog-bg);
+            color: var(--text-color);
         }
         dialog#modalDialogo::backdrop {
             background: rgba(15, 23, 42, 0.55);
         }
         .dialog-content { padding: 22px; }
-        .dialog-title { font-size: 16px; font-weight: 700; margin: 0 0 10px 0; color: #1e293b; }
-        .dialog-msg { font-size: 13px; color: #475569; margin-bottom: 14px; white-space: pre-line; }
+        .dialog-title { font-size: 16px; font-weight: 700; margin: 0 0 10px 0; color: var(--text-color); }
+        .dialog-msg { font-size: 13px; color: var(--secondary-color); margin-bottom: 14px; white-space: pre-line; }
         .dialog-input { margin-bottom: 12px; }
         .dialog-buttons { display: flex; gap: 8px; justify-content: flex-end; }
         .dialog-buttons button { width: auto; margin-top: 0; padding: 8px 16px; }
 
         @media print {
-            body { background: white; padding: 0; color: #000; }
+            body { background: white !important; padding: 0; color: #000 !important; }
             .card:not(.stats), button, .historico-box, .header, .chart-container, .footer-copyright { display: none !important; }
             .print-logo { display: block !important; }
             .stats { 
@@ -282,12 +325,13 @@
                 background: #ffffff !important;
                 border-top: 4px solid #10b981 !important;
                 padding: 30px;
+                color: #000 !important;
             }
             .stats h3 {
                 border-bottom: 2px solid #10b981;
                 padding-bottom: 10px;
                 margin-bottom: 20px;
-                color: #065f46;
+                color: #065f46 !important;
             }
             #detalhes-diarios-print {
                 display: block !important;
@@ -302,7 +346,7 @@
         #detalhes-diarios-print { display: none; }
     </style>
 </head>
-<body>
+<body style="display:none;">
 
 <dialog id="modalDialogo">
     <div class="dialog-content">
@@ -332,6 +376,7 @@
         <div class="lang-selector-container">
             <button type="button" id="btnLangPt" class="lang-btn active" onclick="mudarIdioma('pt')">PT</button>
             <button type="button" id="btnLangEs" class="lang-btn" onclick="mudarIdioma('es')">ES</button>
+            <button type="button" id="btnTema" class="lang-btn" onclick="alternarTema()" title="Alternar tema">🌙 Escuro</button>
             <button type="button" class="lang-btn" style="background:#dc2626; color:#fff; border-color:#dc2626;" onclick="fazerLogoutFirebase()">Sair</button>
         </div>
     </div>
@@ -398,7 +443,7 @@
         </div>
         <div>
             <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
-                <label style="display: flex; align-items: center; gap: 3px; margin: 0; font-size: 11px; cursor: pointer; white-space: nowrap;">
+                <label style="display: flex; align-items: center; gap: 3px; margin: 0; font-size: 11px; cursor: pointer; white-space: nowrap; color: var(--text-color);">
                     <input type="checkbox" id="chkRiaCustom" onchange="document.getElementById('inputRiaRapida').style.display = this.checked ? 'block' : 'none';">Ria Por Paciente:
                 </label>
                 <input type="number" id="inputRiaRapida" placeholder="0.07" step="0.01" style="display: none; width: 100%; margin-top: 0; padding: 9px;" />
@@ -409,10 +454,10 @@
         </div>
     </div>
 
-    <span style="font-size: 11px; color: #64748b; display: block; margin-top: 8px;" data-i18n="hintQuickAdd">Dica: Digite apenas os números do horário (ex: 0800) que os dois-pontos entram sozinhos.</span>
+    <span style="font-size: 11px; color: var(--secondary-color); display: block; margin-top: 8px;" data-i18n="hintQuickAdd">Dica: Digite apenas os números do horário (ex: 0800) que os dois-pontos entram sozinhos.</span>
 
     <label for="listaPacientes" style="margin-top: 15px;" data-i18n="lblFullList">Lista Completa (Somente Leitura - Somente Editar e Excluir):</label>
-    <textarea id="listaPacientes" rows="5" oninput="aoDigitarPacientes()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); alert('Para inserir novos pacientes, utilize o botão Adicionar acima.'); }" style="background: #ffffff;" placeholder="Os pacientes inseridos aparecerão aqui..."></textarea>
+    <textarea id="listaPacientes" rows="5" oninput="aoDigitarPacientes()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); alert('Para inserir novos pacientes, utilize o botão Adicionar acima.'); }" style="background: var(--card-bg);" placeholder="Os pacientes inseridos aparecerão aqui..."></textarea>
 
     <div class="result" id="resultado">
         <span id="textoResultadoSimulacao" data-i18n="msgWaitingData">Aguardando inserção de dados dos pacientes...</span>
@@ -422,7 +467,7 @@
 
 <div class="card">
     <h3 id="tituloGraficoTeto" data-i18n="titleChart">Curva do Decaimento e Reposições</h3>
-    <p style="font-size: 13px; color: #475569; margin-top: -5px; line-height: 1.4;" data-i18n="legendChart">
+    <p style="font-size: 13px; color: var(--secondary-color); margin-top: -5px; line-height: 1.4;" data-i18n="legendChart">
         🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>
         🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>
         🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>
@@ -441,7 +486,7 @@
         <option value="horaEmHora" data-i18n="optHourly">De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))</option>
     </select>
 
-    <textarea id="listaPedido" rows="6" readonly style="background: #f8fafc; font-family: monospace; margin-top: 10px;" placeholder="A lista de horários aparecerá aqui..."></textarea>
+    <textarea id="listaPedido" rows="6" readonly style="background: var(--input-bg); font-family: monospace; margin-top: 10px;" placeholder="A lista de horários aparecerá aqui..."></textarea>
     <button class="btn-warning" onclick="baixarTxtPedido()" data-i18n="btnDownloadTxt">Baixar Lista em TXT</button>
     <button class="btn-warning" onclick="imprimirPedido()" style="background:#0ea5e9; margin-top: 10px;" data-i18n="btnPrintOrder">Imprimir Apenas o Pedido</button>
 </div>
@@ -469,9 +514,8 @@
 <script>
     document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
-    // Bloqueio de devtools + Atalhos de teclado (Ctrl+S salvar, Ctrl+P imprimir, Esc fecha diálogo)
+    // Bloqueio de devtools + Atalhos de teclado
     document.addEventListener('keydown', function(e) {
-        // Bloqueio de devtools (mantido)
         if (
             e.key === 'F12' || 
             (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
@@ -482,7 +526,6 @@
             return false;
         }
 
-        // Ctrl+S → Salvar manualmente
         if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
             e.preventDefault();
             if (typeof salvarDadosNuvem === 'function') {
@@ -492,14 +535,12 @@
             return false;
         }
 
-        // Ctrl+P → Imprimir relatório consolidado
         if (e.ctrlKey && (e.key === 'P' || e.key === 'p')) {
             e.preventDefault();
             window.print();
             return false;
         }
 
-        // Esc → Fecha diálogo se estiver aberto
         if (e.key === 'Escape') {
             const dlg = document.getElementById('modalDialogo');
             if (dlg && dlg.open) {
@@ -553,6 +594,8 @@
             footerCopyright: "Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6",
             btnCancel: "Cancelar",
             btnOk: "OK",
+            btnDarkMode: "🌙 Escuro",
+            btnLightMode: "☀️ Claro",
             saving: "(Salvando...)",
             saved: "(Salvo na nuvem)",
             typing: "(Digitando...)",
@@ -616,6 +659,8 @@
             footerCopyright: "Copyright © 2026 Hospiline. Todos los derechos reservados - Versão 4.9.6",
             btnCancel: "Cancelar",
             btnOk: "Aceptar",
+            btnDarkMode: "🌙 Oscuro",
+            btnLightMode: "☀️ Claro",
             saving: "(Guardando...)",
             saved: "(Guardado en la nube)",
             typing: "(Escribiendo...)",
@@ -639,6 +684,46 @@
     };
 
     let idiomaAtual = 'pt';
+    let temaEscuro = false;
+
+    function alternarTema() {
+        temaEscuro = !temaEscuro;
+        aplicarTema(temaEscuro);
+
+        if (estado.banco) {
+            estado.banco.temaEscuro = temaEscuro;
+            salvarDadosNuvem();
+        }
+    }
+
+    function aplicarTema(escuro) {
+        if (escuro) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+        const btn = document.getElementById('btnTema');
+        if (btn) {
+            const label = escuro ? i18n[idiomaAtual].btnLightMode : i18n[idiomaAtual].btnDarkMode;
+            btn.innerText = label;
+        }
+        // Atualiza cores do gráfico se existir
+        if (meuGrafico) {
+            const gridColor = escuro ? '#334155' : '#e2e8f0';
+            const textColor = escuro ? '#e2e8f0' : '#1e293b';
+            if (meuGrafico.options.scales) {
+                meuGrafico.options.scales.x.ticks.color = textColor;
+                meuGrafico.options.scales.y.ticks.color = textColor;
+                meuGrafico.options.scales.x.title.color = textColor;
+                meuGrafico.options.scales.y.title.color = textColor;
+                meuGrafico.options.scales.x.grid = meuGrafico.options.scales.x.grid || {};
+                meuGrafico.options.scales.y.grid = meuGrafico.options.scales.y.grid || {};
+                meuGrafico.options.scales.x.grid.color = gridColor;
+                meuGrafico.options.scales.y.grid.color = gridColor;
+            }
+            meuGrafico.update();
+        }
+    }
 
     function mudarIdioma(lang) {
         if (!i18n[lang]) return;
@@ -670,6 +755,9 @@
         if (lang === 'pt') document.getElementById('btnLangPt').classList.add('active');
         if (lang === 'es') document.getElementById('btnLangEs').classList.add('active');
 
+        // Atualiza o label do botão tema
+        aplicarTema(temaEscuro);
+
         recalcularFatorAutomatico();
         atualizarRelatorioConsolidado();
         processarSimulacaoCompleta();
@@ -678,7 +766,7 @@
     const DIAS_HISTORICO = 7;
 
     const estado = {
-        banco: { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {} },
+        banco: { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {}, temaEscuro: false },
         cache: {
             reposicoesExtras: {},
             overridesAuto: {}
@@ -794,14 +882,20 @@
 
         window.fbOnValue(getBancoRef(), (snapshot) => {
             if (snapshot.exists()) {
-                estado.banco = snapshot.val() || { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {} };
+                estado.banco = snapshot.val() || { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {}, temaEscuro: false };
                 limparHistoricoAntigoNoBanco();
             } else {
-                estado.banco = { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {} };
+                estado.banco = { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {}, temaEscuro: false };
             }
 
             if (estado.banco.idiomaGlobal && estado.banco.idiomaGlobal !== idiomaAtual) {
                 mudarIdioma(estado.banco.idiomaGlobal);
+            }
+
+            // Aplica tema salvo
+            if (estado.banco.temaEscuro !== undefined) {
+                temaEscuro = !!estado.banco.temaEscuro;
+                aplicarTema(temaEscuro);
             }
 
             if (estado.banco.configuracoesGlobais) {
@@ -892,6 +986,7 @@
             overridesAuto: estado.cache.overridesAuto[dataSelecionada] || {}
         };
         dadosParaAtualizar['idiomaGlobal'] = idiomaAtual;
+        dadosParaAtualizar['temaEscuro'] = temaEscuro;
 
         estado.salvando = true;
         document.getElementById('syncStatus').innerText = "(Salvando...)";
@@ -973,11 +1068,13 @@
 
         let configGlobalTemp = estado.banco.configuracoesGlobais;
         let idiomaGlobalTemp = estado.banco.idiomaGlobal;
+        let temaTemp = temaEscuro;
 
         estado.banco = { 
             historicoDias: {}, 
             idiomaGlobal: idiomaGlobalTemp || 'pt', 
-            configuracoesGlobais: configGlobalTemp || {} 
+            configuracoesGlobais: configGlobalTemp || {},
+            temaEscuro: temaTemp
         };
         estado.cache.reposicoesExtras = {};
         estado.cache.overridesAuto = {};
@@ -1035,11 +1132,11 @@
                         let parsed = parseLinhaPaciente(l);
                         if (parsed) {
                             let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : '';
-                            pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: #334155;">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`;
+                            pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`;
                         }
                     });
 
-                    let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px;"' : '';
+                    let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px; color:#065f46;"' : '';
                     listaDetalhesHTML += `<div${destaque} style="margin-bottom: 8px;">• <b>${dataStr}</b> (${qtdDia} ${i18n[idiomaAtual].patientsAttended}):<br>${pacientesDetalheHtml}</div>`;
                 }
             });
@@ -1064,6 +1161,16 @@
         const hojeStr = obterDataAtualStr();
         document.getElementById('dataInsercao').value = hojeStr;
         document.getElementById('filtroData').value = hojeStr;
+
+        // Detecta preferência do sistema na primeira visita
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // Só aplica se ainda não houver preferência salva no banco
+            // (o banco sobrescreve quando carregar)
+            if (estado.banco.temaEscuro === undefined) {
+                temaEscuro = true;
+                aplicarTema(true);
+            }
+        }
 
         const inputHora = document.getElementById('inputHoraRapida');
         inputHora.addEventListener('input', function(e) {
@@ -1095,26 +1202,22 @@
         let chkRia = document.getElementById('chkRiaCustom').checked;
         let riaCustom = document.getElementById('inputRiaRapida').value.trim();
 
-        // Ajusta máscara do horário
         if (hora.length === 4 && !hora.includes(':')) {
             hora = hora.substring(0, 2) + ':' + hora.substring(2, 4);
         }
 
-        // Validação rigorosa do horário: 00:00 até 23:59
         const regexHora = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
         if (!regexHora.test(hora)) {
             alert("Horário inválido! Use o formato HH:MM (00:00 até 23:59).");
             return;
         }
 
-        // Validação do peso: 1 kg a 300 kg
         const pesoNum = parseFloat(peso);
         if (isNaN(pesoNum) || pesoNum < 1 || pesoNum > 300) {
             alert("Peso inválido! Informe um valor entre 1 e 300 kg.");
             return;
         }
 
-        // Validação da RIA custom: 0.001 a 1.0
         if (chkRia && riaCustom) {
             const riaNum = parseFloat(riaCustom);
             if (isNaN(riaNum) || riaNum < 0.001 || riaNum > 1.0) {
@@ -1175,14 +1278,14 @@
         let fatorStr = fatorCalculado.toFixed(3);
 
         if (parseFloat(percentualExato) > 0) {
-            divInfo.style.color = "#059669";
+            divInfo.style.color = temaEscuro ? "#34d399" : "#059669";
             divInfo.innerText = i18n[idiomaAtual].savingsText.replace('{fator}', fatorStr).replace('{val}', percentualExato.replace('.', ','));
         } else if (parseFloat(percentualExato) < 0) {
             let aumento = Math.abs(parseFloat(percentualExato)).toFixed(1);
             divInfo.style.color = "#d97706";
             divInfo.innerText = i18n[idiomaAtual].increaseText.replace('{fator}', fatorStr).replace('{val}', aumento.replace('.', ','));
         } else {
-            divInfo.style.color = "#64748b";
+            divInfo.style.color = "var(--secondary-color)";
             divInfo.innerText = i18n[idiomaAtual].standardDoseText;
         }
     }
@@ -1252,7 +1355,6 @@
 
         const horaBruta = partes[0].trim();
 
-        // Validação rigorosa do horário: 00:00 até 23:59
         const regexHora = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
         if (!regexHora.test(horaBruta)) {
             console.warn(`Horário inválido ignorado: "${horaBruta}"`);
@@ -1263,13 +1365,11 @@
         if (minutos === null) return null;
 
         const pesoVal = parseFloat(partes[1].trim());
-        // Validação do peso: 1 kg a 300 kg
         if (isNaN(pesoVal) || pesoVal < 1 || pesoVal > 300) {
             console.warn(`Peso inválido ignorado: "${partes[1].trim()}" (deve ser entre 1 e 300 kg)`);
             return null;
         }
 
-        // Validação da RIA customizada: 0.001 a 1.0
         let riaFinal = null;
         if (!isNaN(riaEspecifica)) {
             if (riaEspecifica >= 0.001 && riaEspecifica <= 1.0) {
@@ -1526,6 +1626,9 @@
             });
 
             if (meuGrafico) meuGrafico.destroy();
+
+            const gridColor = temaEscuro ? '#334155' : '#e2e8f0';
+            const textColor = temaEscuro ? '#e2e8f0' : '#1e293b';
 
             const ctx = document.getElementById('graficoDecaimento').getContext('2d');
             meuGrafico = new Chart(ctx, {
@@ -1798,16 +1901,20 @@
                         y: { 
                             beginAtZero: true, 
                             max: tetoMaximo * 1.15, 
-                            title: { display: true, text: i18n[idiomaAtual].chartYTitle } 
+                            title: { display: true, text: i18n[idiomaAtual].chartYTitle, color: textColor },
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
                         },
                         x: { 
                             type: 'linear',
                             position: 'bottom',
-                            title: { display: true, text: i18n[idiomaAtual].chartXTitle },
+                            title: { display: true, text: i18n[idiomaAtual].chartXTitle, color: textColor },
                             ticks: {
                                 callback: function(value) { return minutosParaHoraStr(value); },
-                                stepSize: 30
-                            }
+                                stepSize: 30,
+                                color: textColor
+                            },
+                            grid: { color: gridColor }
                         }
                     }
                 }
@@ -1881,7 +1988,6 @@
         URL.revokeObjectURL(url);
     }
 
-    // Item 2 — Imprimir apenas o pedido
     function imprimirPedido() {
         const conteudo = document.getElementById('listaPedido').value;
         if (!conteudo) {
