@@ -469,6 +469,7 @@
     <h3 id="tituloGraficoTeto" data-i18n="titleChart">Curva do Decaimento e Reposições</h3>
     <p style="font-size: 13px; color: var(--secondary-color); margin-top: -5px; line-height: 1.4;" data-i18n="legendChart">
         🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>
+        🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br> <!-- BOLINHA VERDE ADICIONADA AQUI -->
         🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>
         🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>
         ✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.
@@ -578,7 +579,7 @@
             lblFullList: "Lista Completa (Somente Leitura - Somente Editar e Excluir):",
             msgWaitingData: "Aguardando inserção de dados dos pacientes...",
             titleChart: "Curva do Decaimento e Reposições",
-            legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.",
+            legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.",
             titleOrderList: "Lista para Pedido (Distribuidora - TXT)",
             lblOrderRule: "Regra de Horário para Distribuidora:",
             optExactTime: "Horário Exato (Ex: 08:00, 09:00, 09:30)",
@@ -643,7 +644,7 @@
             lblFullList: "Lista Completa (Solo Lectura - Solo Edita y Elimina):",
             msgWaitingData: "Esperando ingreso de datos de pacientes...",
             titleChart: "Curva de Decaimiento y Reposiciones",
-            legendChart: "🔴 <b>Bolas Rojas:</b> Pacientes (Muestra peso, dosis aplicada y actividad restante).<br>🔵 <b>Bolas Azules (Arriba):</b> Dosis Stock (Soma Dosis Auto + Residuo Anterior).<br>🟠 <b>Bolas Naranjas (Arriba):</b> Dosis Extras Manuales.<br>✨ <b>Pase el cursor en el gráfico</b> para ver hora y stock exacto. Clic para añadir o gestionar eventos.",
+            legendChart: "🔴 <b>Bolas Rojas:</b> Pacientes (Muestra peso, dosis aplicada y actividad restante).<br>🟢 <b>Bolas Verdes:</b> Dosis Aplicada en el Paciente (mCi).<br>🔵 <b>Bolas Azules (Arriba):</b> Dosis Stock (Soma Dosis Auto + Residuo Anterior).<br>🟠 <b>Bolas Naranjas (Arriba):</b> Dosis Extras Manuales.<br>✨ <b>Pase el cursor en el gráfico</b> para ver hora y stock exacto. Clic para añadir o gestionar eventos.",
             titleOrderList: "Lista para Pedido (Distribuidora - TXT)",
             lblOrderRule: "Regra de Horario para Distribuidora:",
             optExactTime: "Horario Exacto (Ej: 08:00, 09:00, 09:30)",
@@ -785,16 +786,27 @@
             const { ctx, scales: { x, y } } = chart;
             const datasets = chart.data.datasets;
             
-            [2, 3].forEach(dsIndex => {
+            // 2=Azul (Estoque), 3=Laranja (Extras), 4=Verde (Dose Aplicada)
+            [2, 3, 4].forEach(dsIndex => {
                 if (!datasets[dsIndex]) return;
                 const meta = chart.getDatasetMeta(dsIndex);
                 meta.data.forEach(point => {
                     if (point.x !== undefined && point.y !== undefined && !point.skip) {
                         ctx.save();
                         ctx.beginPath();
-                        ctx.setLineDash([5, 5]);
+                        
+                        if (dsIndex === 2) {
+                            ctx.setLineDash([5, 5]);
+                            ctx.strokeStyle = 'rgba(59, 130, 246, 0.7)'; // Azul
+                        } else if (dsIndex === 3) {
+                            ctx.setLineDash([5, 5]);
+                            ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)'; // Laranja
+                        } else if (dsIndex === 4) {
+                            ctx.setLineDash([3, 3]); // Pontilhado mais fino para a verde
+                            ctx.strokeStyle = 'rgba(16, 185, 129, 0.5)'; // Verde mais suave/transparente
+                        }
+                        
                         ctx.lineWidth = 1.2;
-                        ctx.strokeStyle = dsIndex === 2 ? 'rgba(59, 130, 246, 0.7)' : 'rgba(245, 158, 11, 0.7)';
                         ctx.moveTo(point.x, y.bottom);
                         ctx.lineTo(point.x, point.y);
                         ctx.stroke();
@@ -1092,120 +1104,111 @@
     }
 
     function atualizarRelatorioConsolidado() {
-    let totalPacientes = 0;
-    let totalEconomia = 0;
-    let listaDetalhesHTML = "";
+        let totalPacientes = 0;
+        let totalEconomia = 0;
+        let listaDetalhesHTML = "";
 
-    const filtroDataEl = document.getElementById('filtroData');
-    const dataConsulta = filtroDataEl ? filtroDataEl.value : '';
+        const filtroDataEl = document.getElementById('filtroData');
+        const dataConsulta = filtroDataEl ? filtroDataEl.value : '';
 
-    const dataRef = dataConsulta ? new Date(dataConsulta + 'T00:00:00') : new Date();
-    dataRef.setHours(0, 0, 0, 0);
+        const dataRef = dataConsulta ? new Date(dataConsulta + 'T00:00:00') : new Date();
+        dataRef.setHours(0, 0, 0, 0);
 
-    if (estado.banco && estado.banco.historicoDias) {
-        const datasValidas = [];
-        Object.keys(estado.banco.historicoDias).forEach(dataStr => {
-            const dataReg = new Date(dataStr + 'T00:00:00');
-            dataReg.setHours(0, 0, 0, 0);
-            const diffDays = (dataRef - dataReg) / (1000 * 60 * 60 * 24);
-            if (diffDays >= 0 && diffDays <= DIAS_HISTORICO) {
-                datasValidas.push(dataStr);
-            }
-        });
-
-        datasValidas.sort((a, b) => a.localeCompare(b));
-
-        datasValidas.forEach(dataStr => {
-            let dia = estado.banco.historicoDias[dataStr];
-            if (dia && dia.textoPacientes) {
-                let linhas = dia.textoPacientes.split(/(?=\s\d{1,2}:\d{2})|\n/).map(l => l.trim()).filter(l => l !== '');
-                let qtdDia = linhas.length;
-                totalPacientes += qtdDia;
-
-                // Mantém o cálculo original da economia (mCi) para o TOTAL do topo
-                let fator = parseFloat(dia.fatorSubtle) || 0.667;
-                let dosePadraoDia = parseFloat(dia.dosePadraoLote) || 10;
-                let economiaDiaMci = qtdDia * (dosePadraoDia * (1 - fator));
-                totalEconomia += Math.max(0, economiaDiaMci);
-
-                // ---- INÍCIO DO CÁLCULO EXATO PARA O DIA ----
-                let pedidosDiaExato = 0;
-                let economiaDiaExato = 0;
-                
-                // Só calcula se tivermos a lógica de simulação disponível
-                if (typeof processarSimulacaoCompleta === 'function') {
-                    const backupPacientes = document.getElementById('listaPacientes').value;
-                    const backupRepo = document.getElementById('listaPedido').value;
-                    
-                    // Simula o dia temporariamente nos bastidores para pegar o resultado exato
-                    document.getElementById('listaPacientes').value = dia.textoPacientes || '';
-                    
-                    const backupData = document.getElementById('filtroData').value;
-                    document.getElementById('filtroData').value = dataStr;
-                    estado.carregandoRemoto = true; // Evita disparar salvamentos
-                    
-                    // Chama a função original do sistema
-                    processarSimulacaoCompleta();
-                    
-                    // Extrai os números do HTML que a função gerou
-                    const textoSimul = document.getElementById('textoResultadoSimulacao').innerHTML;
-                    const matchPedidos = textoSimul.match(/Pedidos:<\/strong>\s*(\d+)/);
-                    const matchEconomia = textoSimul.match(/Economia do dia:<\/strong>\s*(\d+)/);
-                    
-                    if (matchPedidos) pedidosDiaExato = parseInt(matchPedidos[1], 10);
-                    if (matchEconomia) economiaDiaExato = parseInt(matchEconomia[1], 10);
-                    
-                    // Restaura tudo como estava
-                    document.getElementById('listaPacientes').value = backupPacientes;
-                    document.getElementById('filtroData').value = backupData;
-                    document.getElementById('listaPedido').value = backupRepo;
-                    estado.carregandoRemoto = false;
+        if (estado.banco && estado.banco.historicoDias) {
+            const datasValidas = [];
+            Object.keys(estado.banco.historicoDias).forEach(dataStr => {
+                const dataReg = new Date(dataStr + 'T00:00:00');
+                dataReg.setHours(0, 0, 0, 0);
+                const diffDays = (dataRef - dataReg) / (1000 * 60 * 60 * 24);
+                if (diffDays >= 0 && diffDays <= DIAS_HISTORICO) {
+                    datasValidas.push(dataStr);
                 }
-                // ---- FIM DO CÁLCULO EXATO ----
+            });
 
-                let pacientesDetalheHtml = "";
-                linhas.forEach(l => {
-                    let parsed = parseLinhaPaciente(l);
-                    if (parsed) {
-                        let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : '';
-                        pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`;
+            datasValidas.sort((a, b) => a.localeCompare(b));
+
+            datasValidas.forEach(dataStr => {
+                let dia = estado.banco.historicoDias[dataStr];
+                if (dia && dia.textoPacientes) {
+                    let linhas = dia.textoPacientes.split(/(?=\s\d{1,2}:\d{2})|\n/).map(l => l.trim()).filter(l => l !== '');
+                    let qtdDia = linhas.length;
+                    totalPacientes += qtdDia;
+
+                    // Mantém o cálculo original da economia (mCi) para o TOTAL do topo
+                    let fator = parseFloat(dia.fatorSubtle) || 0.667;
+                    let dosePadraoDia = parseFloat(dia.dosePadraoLote) || 10;
+                    let economiaDiaMci = qtdDia * (dosePadraoDia * (1 - fator));
+                    totalEconomia += Math.max(0, economiaDiaMci);
+
+                    // ---- INÍCIO DO CÁLCULO EXATO PARA O DIA ----
+                    let pedidosDiaExato = 0;
+                    let economiaDiaExato = 0;
+                    
+                    if (typeof processarSimulacaoCompleta === 'function') {
+                        const backupPacientes = document.getElementById('listaPacientes').value;
+                        const backupRepo = document.getElementById('listaPedido').value;
+                        
+                        document.getElementById('listaPacientes').value = dia.textoPacientes || '';
+                        
+                        const backupData = document.getElementById('filtroData').value;
+                        document.getElementById('filtroData').value = dataStr;
+                        estado.carregandoRemoto = true; 
+                        
+                        processarSimulacaoCompleta();
+                        
+                        const textoSimul = document.getElementById('textoResultadoSimulacao').innerHTML;
+                        const matchPedidos = textoSimul.match(/Pedidos:<\/strong>\s*(\d+)/);
+                        const matchEconomia = textoSimul.match(/Economia do dia:<\/strong>\s*(\d+)/);
+                        
+                        if (matchPedidos) pedidosDiaExato = parseInt(matchPedidos[1], 10);
+                        if (matchEconomia) economiaDiaExato = parseInt(matchEconomia[1], 10);
+                        
+                        document.getElementById('listaPacientes').value = backupPacientes;
+                        document.getElementById('filtroData').value = backupData;
+                        document.getElementById('listaPedido').value = backupRepo;
+                        estado.carregandoRemoto = false;
                     }
-                });
+                    // ---- FIM DO CÁLCULO EXATO ----
 
-                let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px; color:#065f46;"' : '';
-                
-                // Monta a informação vermelha com os dados exatos
-                let infoDia = `<span style="font-weight: normal; font-size: 13px; color: #475569; margin-left: 8px;">(${pedidosDiaExato} doses pedidas | Economia: ${economiaDiaExato} doses)</span>`;
-                
-                listaDetalhesHTML += `<div${destaque} style="margin-bottom: 12px;">• <b>${dataStr}</b> - ${qtdDia} ${i18n[idiomaAtual].patientsAttended} ${infoDia}:<br>${pacientesDetalheHtml}</div>`;
+                    let pacientesDetalheHtml = "";
+                    linhas.forEach(l => {
+                        let parsed = parseLinhaPaciente(l);
+                        if (parsed) {
+                            let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : '';
+                            pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`;
+                        }
+                    });
+
+                    let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px; color:#065f46;"' : '';
+                    
+                    let infoDia = `<span style="font-weight: normal; font-size: 13px; color: #475569; margin-left: 8px;">(${pedidosDiaExato} doses pedidas | Economia: ${economiaDiaExato} doses)</span>`;
+                    
+                    listaDetalhesHTML += `<div${destaque} style="margin-bottom: 12px;">• <b>${dataStr}</b> - ${qtdDia} ${i18n[idiomaAtual].patientsAttended} ${infoDia}:<br>${pacientesDetalheHtml}</div>`;
+                }
+            });
+        }
+
+        document.getElementById('stat-total').innerText = totalPacientes;
+        document.getElementById('stat-economia').innerText = totalEconomia.toFixed(1) + " mCi";
+        document.getElementById('lista-detalhes-print').innerHTML = listaDetalhesHTML || i18n[idiomaAtual].noRecords;
+
+        const dataConsultaPrint = document.getElementById('dataConsultaPrint');
+        if (dataConsultaPrint) {
+            if (dataConsulta) {
+                dataConsultaPrint.innerText = `Data consultada: ${dataConsulta.split('-').reverse().join('/')}`;
+                dataConsultaPrint.style.display = 'block';
+            } else {
+                dataConsultaPrint.style.display = 'none';
             }
-        });
-    }
-
-    document.getElementById('stat-total').innerText = totalPacientes;
-    document.getElementById('stat-economia').innerText = totalEconomia.toFixed(1) + " mCi";
-    document.getElementById('lista-detalhes-print').innerHTML = listaDetalhesHTML || i18n[idiomaAtual].noRecords;
-
-    const dataConsultaPrint = document.getElementById('dataConsultaPrint');
-    if (dataConsultaPrint) {
-        if (dataConsulta) {
-            dataConsultaPrint.innerText = `Data consultada: ${dataConsulta.split('-').reverse().join('/')}`;
-            dataConsultaPrint.style.display = 'block';
-        } else {
-            dataConsultaPrint.style.display = 'none';
         }
     }
-}
 
     window.onload = function() {
         const hojeStr = obterDataAtualStr();
         document.getElementById('dataInsercao').value = hojeStr;
         document.getElementById('filtroData').value = hojeStr;
 
-        // Detecta preferência do sistema na primeira visita
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            // Só aplica se ainda não houver preferência salva no banco
-            // (o banco sobrescreve quando carregar)
             if (estado.banco.temaEscuro === undefined) {
                 temaEscuro = true;
                 aplicarTema(true);
@@ -1600,6 +1603,7 @@
             let dadosPacientesPuntos = [];
             let dadosDosesAutoAcima = [];
             let dadosDosesExtrasAcima = [];
+            let dadosDosesAplicadasPuntos = []; // DADOS DA BOLINHA VERDE
 
             let minutosPacientes = pacientes.map(p => p.minutos);
             let minutosAuto = reposicoesAutoArr.map(h => converterHoraParaMinutos(h));
@@ -1647,9 +1651,12 @@
                         exame: pacObj ? pacObj.exame : null,
                         riaCustom: pacObj ? pacObj.riaCustom : null
                     });
+                    // Preenche a bolinha verde com a dose aplicada
+                    dadosDosesAplicadasPuntos.push({ x: m, y: pacObj ? parseFloat(pacObj.doseNecessaria.toFixed(2)) : 0 });
                 } else {
                     dadosPacientesPuntos.push({ x: m, y: null });
                     dadosAtividadePre.push(null);
+                    dadosDosesAplicadasPuntos.push({ x: m, y: null });
                 }
 
                 if (minutosAuto.includes(m)) {
@@ -1721,6 +1728,19 @@
                             pointRadius: 7,
                             pointHoverRadius: 9,
                             showLine: false
+                        },
+                        // NOVO DATASET DA BOLINHA VERDE
+                        {
+                            label: 'Dose Aplicada (Verde)',
+                            data: dadosDosesAplicadasPuntos,
+                            borderColor: 'transparent',
+                            backgroundColor: '#10b981', 
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 1.5,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            showLine: false
                         }
                     ]
                 },
@@ -1743,6 +1763,11 @@
                                     let label = context.dataset.label || '';
                                     let minutosTotais = context.parsed.x;
                                     let horarioStr = minutosParaHoraStr(minutosTotais);
+
+                                    // Mostra o valor no tooltip para a bolinha verde
+                                    if (label === 'Dose Aplicada (Verde)') {
+                                        return `Dose Aplicada: ${context.parsed.y.toFixed(2).replace('.', ',')} mCi`;
+                                    }
 
                                     if (label === i18n[idiomaAtual].datasetStock || label === i18n[idiomaAtual].datasetExtra) {
                                         let infoRes = detalhesResiduosMap[horarioStr];
