@@ -933,9 +933,10 @@
             recalcularFatorAutomatico();
             atualizarRelatorioConsolidado();
             
+            // CORREÇÃO: Força o recarregamento da data selecionada se o banco atualizar
             const filtroDataEl = document.getElementById('filtroData');
-            if (filtroDataEl && filtroDataEl.value && document.activeElement !== document.getElementById('listaPacientes') && !estado.salvando) {
-                carregarDadosPorData();
+            if (filtroDataEl && filtroDataEl.value) {
+                carregarDadosPorData(); 
             }
             
             statusEl.innerText = "(Sincronizado)";
@@ -1444,10 +1445,16 @@
         if (temporizadorSalvamento) {
             clearTimeout(temporizadorSalvamento);
             temporizadorSalvamento = null;
+        }
+
+        const novaData = document.getElementById('dataInsercao').value;
+        document.getElementById('filtroData').value = novaData;
+        carregarDadosPorData();
+        
+        const textoAtual = document.getElementById('listaPacientes').value.trim();
+        if (textoAtual !== "") {
             await salvarDadosNuvem();
         }
-        document.getElementById('filtroData').value = document.getElementById('dataInsercao').value;
-        carregarDadosPorData();
     }
 
     function aoDigitarPacientes() {
@@ -1501,7 +1508,7 @@
             const tetoMaximo = a0Inicial * 2.5;
             document.getElementById('tituloGraficoTeto').innerText = `${i18n[idiomaAtual].titleChart} (Lote Padrão: ${a0Inicial} mCi)`;
 
-                if (!textoPacientes) {
+            if (!textoPacientes) {
                 estado.pacientes = [];
                 document.getElementById('textoResultadoSimulacao').innerHTML = i18n[idiomaAtual].msgWaitingData;
                 document.getElementById('listaPedido').value = "";
