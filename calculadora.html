@@ -6,7 +6,6 @@
     <title id="pageTitle">Calculadora de Decaimento e Reposição - Rádio-Gestão</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Inicialização do Firebase Auth e Realtime Database -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -137,6 +136,10 @@
         .dialog-input { margin-bottom: 12px; }
         .dialog-buttons { display: flex; gap: 8px; justify-content: flex-end; }
         .dialog-buttons button { width: auto; margin-top: 0; padding: 8px 16px; }
+
+        .grafico-oculto {
+            display: none !important;
+        }
         
         @media print {
             @page { margin: 2cm 1cm 1.5cm 1cm; }
@@ -636,7 +639,6 @@
     }
 
     function carregarDadosPorData() {
-        // 1. Força a limpeza imediata do gráfico antigo (A "BORRACHA")
         if (meuGrafico) { meuGrafico.destroy(); meuGrafico = null; }
         const canvas = document.getElementById('graficoDecaimento');
         if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
@@ -667,15 +669,23 @@
     }
 
     function processarSimulacaoCompleta() {
-        // Trava de segurança: se a caixa estiver vazia, limpa a tela e não desenha
         const textoPac = document.getElementById('listaPacientes').value.trim();
+        const canvasGrafico = document.getElementById('graficoDecaimento');
+
         if (!textoPac) {
             if (meuGrafico) { meuGrafico.destroy(); meuGrafico = null; }
-            const canvas = document.getElementById('graficoDecaimento');
-            if (canvas) { canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); }
+            if (canvasGrafico) {
+                canvasGrafico.classList.add('grafico-oculto');
+                const ctx = canvasGrafico.getContext('2d');
+                if (ctx) ctx.clearRect(0, 0, canvasGrafico.width, canvasGrafico.height);
+            }
             document.getElementById('textoResultadoSimulacao').innerHTML = i18n[idiomaAtual].msgWaitingData;
             document.getElementById('listaPedido').value = "";
             return;
+        }
+
+        if (canvasGrafico) {
+            canvasGrafico.classList.remove('grafico-oculto');
         }
 
         try {
