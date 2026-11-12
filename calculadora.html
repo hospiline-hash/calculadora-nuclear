@@ -636,7 +636,7 @@
     }
 
     function carregarDadosPorData() {
-        // Força a limpeza imediata do gráfico antigo
+        // 1. Força a limpeza imediata do gráfico antigo (A "BORRACHA")
         if (meuGrafico) { meuGrafico.destroy(); meuGrafico = null; }
         const canvas = document.getElementById('graficoDecaimento');
         if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
@@ -667,7 +667,7 @@
     }
 
     function processarSimulacaoCompleta() {
-        // Trava de segurança: se a caixa estiver vazia, não desenha nada e limpa a tela
+        // Trava de segurança: se a caixa estiver vazia, limpa a tela e não desenha
         const textoPac = document.getElementById('listaPacientes').value.trim();
         if (!textoPac) {
             if (meuGrafico) { meuGrafico.destroy(); meuGrafico = null; }
