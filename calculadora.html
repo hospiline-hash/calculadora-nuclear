@@ -1691,7 +1691,7 @@
                             borderWidth: 2,
                             fill: true,
                             tension: 0.2,
-                            pointRadius: 15,
+                            pointRadius: 1,
                             pointHoverRadius: 4
                         },
                         {
@@ -1870,7 +1870,7 @@
                                 const res = await abrirDialogo({
                                     titulo: i18n[idiomaAtual].datasetExtra,
                                     mensagem: `Dose Extra às ${horarioClicado}.\nO que deseja fazer?`,
-                                    inputs: [{ value: '', placeholder: '1-Alterar / 2-Remover' }]
+                                    inputs: [{ value: '1 - 2', placeholder: '1-Alterar / 2-Remover' }]
                                 });
                                 if (res.confirmado) {
                                     if (res.valores[0] === '1') {
