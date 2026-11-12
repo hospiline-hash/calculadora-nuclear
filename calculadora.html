@@ -6,7 +6,6 @@
     <title id="pageTitle">Calculadora de Decaimento e Reposição - Rádio-Gestão</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Inicialização do Firebase Auth e Realtime Database -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -90,258 +89,61 @@
 
     <style>
         :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #64748b;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --border-color: #cbd5e1;
-            --input-bg: #fcfcfc;
-            --historico-bg: #fffbeb;
-            --historico-border: #fde68a;
-            --result-bg: #f1f5f9;
-            --stats-bg: #f0fdf4;
-            --footer-border: #e2e8f0;
-            --dialog-bg: #ffffff;
-            --chart-grid: #e2e8f0;
+            --primary-color: #3b82f6; --secondary-color: #64748b; --bg-color: #f8fafc; --card-bg: #ffffff; --text-color: #1e293b; --border-color: #cbd5e1; --input-bg: #fcfcfc; --historico-bg: #fffbeb; --historico-border: #fde68a; --result-bg: #f1f5f9; --stats-bg: #f0fdf4; --footer-border: #e2e8f0; --dialog-bg: #ffffff; --chart-grid: #e2e8f0;
         }
-
         body.dark-mode {
-            --primary-color: #60a5fa;
-            --secondary-color: #94a3b8;
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #e2e8f0;
-            --border-color: #475569;
-            --input-bg: #0f172a;
-            --historico-bg: #1e293b;
-            --historico-border: #b45309;
-            --result-bg: #1e293b;
-            --stats-bg: #064e3b;
-            --footer-border: #334155;
-            --dialog-bg: #1e293b;
-            --chart-grid: #334155;
+            --primary-color: #60a5fa; --secondary-color: #94a3b8; --bg-color: #0f172a; --card-bg: #1e293b; --text-color: #e2e8f0; --border-color: #475569; --input-bg: #0f172a; --historico-bg: #1e293b; --historico-border: #b45309; --result-bg: #1e293b; --stats-bg: #064e3b; --footer-border: #334155; --dialog-bg: #1e293b; --chart-grid: #334155;
         }
-
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            padding: 20px; 
-            max-width: 900px; 
-            margin: 0 auto; 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            -webkit-user-select: none; 
-            -moz-user-select: none; 
-            -ms-user-select: none; 
-            user-select: none; 
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        input, select, textarea {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-            color: var(--text-color);
-            background-color: var(--input-bg);
-            border-color: var(--border-color);
-        }
-
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; background-color: var(--bg-color); color: var(--text-color); -webkit-user-select: none; user-select: none; transition: background-color 0.3s, color 0.3s; }
+        input, select, textarea { -webkit-user-select: text; user-select: text; color: var(--text-color); background-color: var(--input-bg); border-color: var(--border-color); }
         .card { background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; border-top: 4px solid var(--primary-color); transition: background-color 0.3s; }
         .card.success { border-top-color: #10b981; }
-        
         .header { text-align: center; margin-bottom: 20px; }
-        .header img {
-            width: 100%;
-            max-width: 550px;
-            height: auto;
-            display: block;
-            margin: 0 auto 15px auto;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-        }
-
-        .header-top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .header-top-row h2 {
-            margin: 0;
-            font-size: 20px;
-            color: var(--text-color);
-        }
-
-        .lang-selector-container {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .lang-btn {
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-color);
-            padding: 5px 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: auto;
-            margin-top: 0;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        .lang-btn:hover {
-            border-color: #94a3b8;
-            background: var(--result-bg);
-        }
-
-        .lang-btn.active {
-            border-color: #3b82f6;
-            background: #eff6ff;
-            color: #1d4ed8;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-        }
-
-        body.dark-mode .lang-btn.active {
-            background: #1e3a5f;
-            color: #93c5fd;
-        }
-
-        .print-logo {
-            display: none;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .print-logo img { 
-            max-width: 350px; 
-            height: auto; 
-            image-rendering: -webkit-optimize-contrast;
-        }
-
+        .header img { width: 100%; max-width: 550px; height: auto; display: block; margin: 0 auto 15px auto; image-rendering: -webkit-optimize-contrast; }
+        .header-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .header-top-row h2 { margin: 0; font-size: 20px; color: var(--text-color); }
+        .lang-selector-container { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .lang-btn { background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 6px; font-size: 13px; font-weight: 700; color: var(--text-color); padding: 5px 10px; cursor: pointer; transition: all 0.2s; width: auto; margin-top: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .lang-btn:hover { border-color: #94a3b8; background: var(--result-bg); }
+        .lang-btn.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        body.dark-mode .lang-btn.active { background: #1e3a5f; color: #93c5fd; }
+        .print-logo { display: none; text-align: center; margin-bottom: 20px; }
+        .print-logo img { max-width: 350px; height: auto; }
         label { display: block; margin-top: 10px; font-weight: 600; color: var(--text-color); font-size: 13px; }
         input, select, textarea { width: 100%; padding: 9px; margin-top: 4px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
-        
         button { margin-top: 10px; width: 100%; padding: 9px; background: #475569; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s; }
         button:hover { background: #334155; }
-        
-        .btn-success { background: #10b981; }
-        .btn-success:hover { background: #059669; }
-        
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-warning:hover { background: #d97706; }
-        
-        .btn-danger { background: #dc2626; color: white; }
-        .btn-danger:hover { background: #b91c1c; }
-
+        .btn-success { background: #10b981; } .btn-success:hover { background: #059669; }
+        .btn-warning { background: #f59e0b; color: white; } .btn-warning:hover { background: #d97706; }
+        .btn-danger { background: #dc2626; color: white; } .btn-danger:hover { background: #b91c1c; }
         .result { margin-top: 20px; padding: 12px; background: var(--result-bg); border-left: 4px solid #3b82f6; border-radius: 6px; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .stats { background: var(--stats-bg); border-top: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-top: 20px; }
         .loading { font-size: 12px; color: var(--secondary-color); font-style: italic; }
         .chart-container { position: relative; margin-top: 20px; width: 100%; height: 380px; }
-        
         .historico-box { background: var(--historico-bg); padding: 18px; border-radius: 6px; border: 1px solid var(--historico-border); margin-bottom: 15px; }
-        .config-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 15px;
-            align-items: start;
-        }
-
-        .input-rapido-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 10px;
-            margin-top: 5px;
-            align-items: end;
-        }
-        @media (max-width: 768px) {
-            .config-grid { grid-template-columns: 1fr; }
-            .input-rapido-grid { grid-template-columns: 1fr; }
-        }
-
-        .footer-copyright {
-            text-align: center;
-            margin-top: 30px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: var(--secondary-color);
-            border-top: 1px solid var(--footer-border);
-            padding-top: 15px;
-        }
-        
-        .info-status-fator {
-            font-size: 11px;
-            margin-top: 4px;
-            font-weight: 600;
-            color: #059669;
-        }
-
-        body.dark-mode .info-status-fator {
-            color: #34d399;
-        }
-
-        .sync-status {
-            font-size: 11px;
-            color: var(--secondary-color);
-            font-style: italic;
-        }
-
-        dialog#modalDialogo {
-            border: none;
-            border-radius: 10px;
-            padding: 0;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            background: var(--dialog-bg);
-            color: var(--text-color);
-        }
-        dialog#modalDialogo::backdrop {
-            background: rgba(15, 23, 42, 0.55);
-        }
+        .config-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; align-items: start; }
+        .input-rapido-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 5px; align-items: end; }
+        @media (max-width: 768px) { .config-grid { grid-template-columns: 1fr; } .input-rapido-grid { grid-template-columns: 1fr; } }
+        .footer-copyright { text-align: center; margin-top: 30px; margin-bottom: 20px; font-size: 13px; color: var(--secondary-color); border-top: 1px solid var(--footer-border); padding-top: 15px; }
+        .info-status-fator { font-size: 11px; margin-top: 4px; font-weight: 600; color: #059669; }
+        body.dark-mode .info-status-fator { color: #34d399; }
+        .sync-status { font-size: 11px; color: var(--secondary-color); font-style: italic; }
+        dialog#modalDialogo { border: none; border-radius: 10px; padding: 0; max-width: 420px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2); background: var(--dialog-bg); color: var(--text-color); }
+        dialog#modalDialogo::backdrop { background: rgba(15, 23, 42, 0.55); }
         .dialog-content { padding: 22px; }
         .dialog-title { font-size: 16px; font-weight: 700; margin: 0 0 10px 0; color: var(--text-color); }
         .dialog-msg { font-size: 13px; color: var(--secondary-color); margin-bottom: 14px; white-space: pre-line; }
         .dialog-input { margin-bottom: 12px; }
         .dialog-buttons { display: flex; gap: 8px; justify-content: flex-end; }
         .dialog-buttons button { width: auto; margin-top: 0; padding: 8px 16px; }
-
         @media print {
             body { background: white !important; padding: 0; color: #000 !important; }
             .card:not(.stats), button, .historico-box, .header, .chart-container, .footer-copyright { display: none !important; }
             .print-logo { display: block !important; }
-            .stats { 
-                box-shadow: none !important; 
-                border: 1px solid #cbd5e1; 
-                width: 100%; 
-                margin: 0; 
-                background: #ffffff !important;
-                border-top: 4px solid #10b981 !important;
-                padding: 30px;
-                color: #000 !important;
-            }
-            .stats h3 {
-                border-bottom: 2px solid #10b981;
-                padding-bottom: 10px;
-                margin-bottom: 20px;
-                color: #065f46 !important;
-            }
-            #detalhes-diarios-print {
-                display: block !important;
-                margin-top: 20px;
-                border-top: 1px solid #e2e8f0;
-                padding-top: 15px;
-            }
-            #dataConsultaPrint {
-                display: block !important;
-            }
+            .stats { box-shadow: none !important; border: 1px solid #cbd5e1; width: 100%; margin: 0; background: #ffffff !important; border-top: 4px solid #10b981 !important; padding: 30px; color: #000 !important; }
+            .stats h3 { border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 20px; color: #065f46 !important; }
+            #detalhes-diarios-print { display: block !important; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+            #dataConsultaPrint { display: block !important; }
         }
         #detalhes-diarios-print { display: none; }
     </style>
@@ -367,10 +169,7 @@
 </div>
 
 <div class="card">
-    <div class="header">
-        <img src="logo.png" alt="Logo Hospiline">
-    </div>
-
+    <div class="header"><img src="logo.png" alt="Logo Hospiline"></div>
     <div class="header-top-row">
         <h2 data-i18n="titlePatientsList">Lista de Pacientes do Dia</h2>
         <div class="lang-selector-container">
@@ -408,11 +207,11 @@
             </div>
             <div>
                 <label for="razaoRotina" data-i18n="lblRazaoRotina">Clínica - Razão (Rrotina) [mCi/kg]:</label>
-                <input type="number" id="razaoRotina" value="0.12" step="0.01" min="0.01" max="1.0" oninput="recalcularFatorAutomatico(); aoDigitarPacientes();" placeholder="Ex: 0.12">
+                <input type="number" id="razaoRotina" value="0.12" step="0.01" min="0.01" max="1.0" oninput="recalcularFatorAutomatico(); aoDigitarPacientes();">
             </div>
             <div>
                 <label for="razaoRIA" id="labelCampoDinamico" data-i18n="lblRazaoRIA">IA - Razão (RIA Padrão) [mCi/kg]:</label>
-                <input type="number" id="razaoRIA" value="0.08" step="0.01" min="0.001" max="1.0" oninput="recalcularFatorAutomatico(); aoDigitarPacientes();" placeholder="Ex: 0.08">
+                <input type="number" id="razaoRIA" value="0.08" step="0.01" min="0.001" max="1.0" oninput="recalcularFatorAutomatico(); aoDigitarPacientes();">
                 <div id="infoFatorTexto" class="info-status-fator">Fator: 0.667 (Economia de 33,3%)</div>
                 <input type="hidden" id="fatorSubtle" value="0.667">
             </div>
@@ -427,7 +226,6 @@
     </div>
 
     <label data-i18n="lblQuickAdd">Adicionar Paciente Rápido (Máscara automática):</label>
-    
     <div class="input-rapido-grid">
         <div>
             <label style="margin-top:0; font-size:12px;" data-i18n="lblTime">Horário:</label>
@@ -474,9 +272,7 @@
         🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>
         ✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.
     </p>
-    <div class="chart-container">
-        <canvas id="graficoDecaimento"></canvas>
-    </div>
+    <div class="chart-container"><canvas id="graficoDecaimento"></canvas></div>
 </div>
 
 <div class="card">
@@ -486,7 +282,6 @@
         <option value="exato" selected data-i18n="optExactTime">Horário Exato (Ex: 08:00, 09:00, 09:30)</option>
         <option value="horaEmHora" data-i18n="optHourly">De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))</option>
     </select>
-
     <textarea id="listaPedido" rows="6" readonly style="background: var(--input-bg); font-family: monospace; margin-top: 10px;" placeholder="A lista de horários aparecerá aqui..."></textarea>
     <button class="btn-warning" onclick="baixarTxtPedido()" data-i18n="btnDownloadTxt">Baixar Lista em TXT</button>
     <button class="btn-warning" onclick="imprimirPedido()" style="background:#0ea5e9; margin-top: 10px;" data-i18n="btnPrintOrder">Imprimir Apenas o Pedido</button>
@@ -496,231 +291,94 @@
     <h3><span data-i18n="titleConsolidated">Relatório Consolidado</span> <span id="sync-status" class="loading">Carregando dados...</span></h3>
     <p><strong data-i18n="lblTotalPatients">Total de Pacientes Atendidos (7 dias):</strong> <span id="stat-total">0</span></p>
     <p><strong data-i18n="lblSavedDoses">Doses Economizadas (Estimativa):</strong> <span id="stat-economia">0</span></p>
-    
     <p id="dataConsultaPrint" style="display: none; font-weight: 600; color: #065f46; margin-top: 10px;"></p>
-
     <div id="detalhes-diarios-print">
         <h4 style="color: #065f46; margin-bottom: 10px;" data-i18n="titleDailyDetails">Detalhamento Diário (Últimos 7 Dias):</h4>
         <div id="lista-detalhes-print"></div>
     </div>
-    
     <button class="btn-success" onclick="window.print()" style="margin-top: 15px;" data-i18n="btnPrintPdf">Imprimir / Salvar Resumo (PDF)</button>
     <button class="btn-danger" onclick="zerarBancoNuvem()" style="margin-top: 10px;" data-i18n="btnClearHistory">Zerar / Limpar Histórico Antigo</button>
 </div>
 
-<div class="footer-copyright" data-i18n="footerCopyright">
-    Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6
-</div>
+<div class="footer-copyright" data-i18n="footerCopyright">Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6</div>
 
 <script>
     document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-
-    // Bloqueio de devtools + Atalhos de teclado
     document.addEventListener('keydown', function(e) {
-        if (
-            e.key === 'F12' || 
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
-            (e.ctrlKey && (e.key === 'U' || e.key === 'u'))
-        ) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) || (e.ctrlKey && (e.key === 'U' || e.key === 'u'))) {
+            e.preventDefault(); e.stopPropagation(); return false;
         }
-
         if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
             e.preventDefault();
-            if (typeof salvarDadosNuvem === 'function') {
-                document.getElementById('syncStatus').innerText = "(Salvando manualmente...)";
-                salvarDadosNuvem();
-            }
+            if (typeof salvarDadosNuvem === 'function') { document.getElementById('syncStatus').innerText = "(Salvando...)"; salvarDadosNuvem(); }
             return false;
         }
-
-        if (e.ctrlKey && (e.key === 'P' || e.key === 'p')) {
-            e.preventDefault();
-            window.print();
-            return false;
-        }
-
-        if (e.key === 'Escape') {
-            const dlg = document.getElementById('modalDialogo');
-            if (dlg && dlg.open) {
-                dlg.close();
-            }
-            return false;
-        }
+        if (e.ctrlKey && (e.key === 'P' || e.key === 'p')) { e.preventDefault(); window.print(); return false; }
+        if (e.key === 'Escape') { const dlg = document.getElementById('modalDialogo'); if (dlg && dlg.open) { dlg.close(); } return false; }
     });
 
     const i18n = {
         pt: {
-            pageTitle: "Calculadora de Decaimento e Reposição - Rádio-Gestão",
-            printTitle: "Relatório Consolidado de Gestão - Rádio-Gestão",
-            titlePatientsList: "Lista de Pacientes do Dia",
-            lblDateInsertion: "Data de Inserção / Atendimento:",
-            lblDateHistory: "Consultar Histórico (Visualização):",
-            lblRadiopharm: "Radiofármaco (Isótopo):",
-            optFDG: "¹⁸F-FDG (Meia-vida: 109.8 min)",
-            optTc: "⁹⁹ᵐTc - Tecnécio (Meia-vida: 360 min)",
-            optGa: "⁶⁸Ga - Gálio (Meia-vida: 68 min)",
-            optI: "¹³¹I - Iodo (Meia-vida: 8 dias)",
-            optLu: "¹⁷⁷Lu - Lutécio (Meia-vida: 6.64 dias)",
-            optCustom: "Outro (Meia-Vida personalizada)",
-            lblHalfLifeCustom: "Meia-Vida Custom (min):",
-            lblRazaoRotina: "Clínica - Razão (Rrotina) [mCi/kg]:",
-            lblRazaoRIA: "IA - Razão (RIA Padrão) [mCi/kg]:",
-            lblBatchDose: "Dose Inicial do Lote (mCi):",
-            btnSaveDefaults: "Salvar Configuração Padrão",
-            lblQuickAdd: "Adicionar Paciente Rápido (Máscara automática):",
-            phQuickTime: "Horário (Ex: 0730)",
-            phQuickWeight: "Peso em kg (Ex: 80)",
-            phQuickExam: "Exame (Opcional)",
-            btnAddQuick: "+ Adicionar Paciente",
-            hintQuickAdd: "Dica: Digite apenas os números do horário (ex: 0800) que os dois-pontos entram sozinhos.",
-            lblFullList: "Lista Completa (Somente Leitura - Somente Editar e Excluir):",
-            msgWaitingData: "Aguardando inserção de dados dos pacientes...",
-            titleChart: "Curva do Decaimento e Reposições",
-            legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.",
-            titleOrderList: "Lista para Pedido (Distribuidora - TXT)",
-            lblOrderRule: "Regra de Horário para Distribuidora:",
-            optExactTime: "Horário Exato (Ex: 08:00, 09:00, 09:30)",
-            optHourly: "De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))",
-            btnDownloadTxt: "Baixar Lista em TXT",
-            btnPrintOrder: "Imprimir Apenas o Pedido",
-            titleConsolidated: "Relatório Consolidado",
-            lblTotalPatients: "Total de Pacientes Atendidos (7 dias):",
-            lblSavedDoses: "Doses Economizadas (Estimativa):",
-            titleDailyDetails: "Detalhamento Diário (Últimos 7 Dias):",
-            btnPrintPdf: "Imprimir / Salvar Resumo (PDF)",
-            btnClearHistory: "Zerar / Limpar Histórico Antigo",
-            footerCopyright: "Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6",
-            btnCancel: "Cancelar",
-            btnOk: "OK",
-            btnDarkMode: "🌙 Escuro",
-            btnLightMode: "☀️ Claro",
-            saving: "(Salvando...)",
-            saved: "(Salvo na nuvem)",
-            typing: "(Digitando...)",
-            synchronized: "(Sincronizado)",
-            loading: "Carregando dados...",
-            errSave: "(Erro ao salvar)",
-            errLoad: "(Erro ao carregar)",
-            savingsText: "Fator: {fator} (Economia de {val}% da dose)",
-            increaseText: "Fator: {fator} (Aumento de {val}% da dose)",
-            standardDoseText: "Factor: 1.00 (Dose Padrão)",
+            pageTitle: "Calculadora de Decaimento e Reposição - Rádio-Gestão", printTitle: "Relatório Consolidado de Gestão - Rádio-Gestão",
+            titlePatientsList: "Lista de Pacientes do Dia", lblDateInsertion: "Data de Inserção / Atendimento:", lblDateHistory: "Consultar Histórico (Visualização):",
+            lblRadiopharm: "Radiofármaco (Isótopo):", optFDG: "¹⁸F-FDG (Meia-vida: 109.8 min)", optTc: "⁹⁹ᵐTc - Tecnécio (Meia-vida: 360 min)", optGa: "⁶⁸Ga - Gálio (Meia-vida: 68 min)", optI: "¹³¹I - Iodo (Meia-vida: 8 dias)", optLu: "¹⁷⁷Lu - Lutécio (Meia-vida: 6.64 dias)", optCustom: "Outro (Meia-Vida personalizada)",
+            lblHalfLifeCustom: "Meia-Vida Custom (min):", lblRazaoRotina: "Clínica - Razão (Rrotina) [mCi/kg]:", lblRazaoRIA: "IA - Razão (RIA Padrão) [mCi/kg]:", lblBatchDose: "Dose Inicial do Lote (mCi):", btnSaveDefaults: "Salvar Configuração Padrão",
+            lblQuickAdd: "Adicionar Paciente Rápido (Máscara automática):", phQuickTime: "Horário (Ex: 0730)", phQuickWeight: "Peso em kg (Ex: 80)", phQuickExam: "Exame (Opcional)", btnAddQuick: "+ Adicionar Paciente", hintQuickAdd: "Dica: Digite apenas os números do horário (ex: 0800) que os dois-pontos entram sozinhos.",
+            lblFullList: "Lista Completa (Somente Leitura - Somente Editar e Excluir):", msgWaitingData: "Aguardando inserção de dados dos pacientes...",
+            titleChart: "Curva do Decaimento e Reposições", legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.",
+            titleOrderList: "Lista para Pedido (Distribuidora - TXT)", lblOrderRule: "Regra de Horário para Distribuidora:", optExactTime: "Horário Exato (Ex: 08:00, 09:00, 09:30)", optHourly: "De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))", btnDownloadTxt: "Baixar Lista em TXT", btnPrintOrder: "Imprimir Apenas o Pedido",
+            titleConsolidated: "Relatório Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 dias):", lblSavedDoses: "Doses Economizadas (Estimativa):", titleDailyDetails: "Detalhamento Diário (Últimos 7 Dias):", btnPrintPdf: "Imprimir / Salvar Resumo (PDF)", btnClearHistory: "Zerar / Limpar Histórico Antigo",
+            footerCopyright: "Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6", btnCancel: "Cancelar", btnOk: "OK", btnDarkMode: "🌙 Escuro", btnLightMode: "☀️ Claro",
+            saving: "(Salvando...)", saved: "(Salvo na nuvem)", typing: "(Digitando...)", synchronized: "(Sincronizado)", loading: "Carregando dados...", errSave: "(Erro ao salvar)", errLoad: "(Erro ao carregar)",
+            savingsText: "Fator: {fator} (Economia de {val}% da dose)", increaseText: "Fator: {fator} (Aumento de {val}% da dose)", standardDoseText: "Factor: 1.00 (Dose Padrão)",
             simCompleted: "Simulação concluída! (Razão Rotina: <strong>{rotina}</strong> | RIA: <strong>{ria}</strong> | Lote: <strong>{a0} mCi</strong>)<br><strong>Pedidos:</strong> {qtd} | <strong>Economia do dia:</strong> {econ}",
-            patientsAttended: "pacientes atendidos",
-            noRecords: "Nenhum registro nos últimos 7 dias.",
-            datasetRemaining: "Atividade Restante A(t) [mCi]",
-            datasetPatients: "Pacientes",
-            datasetStock: "Dose Estoque",
-            datasetExtra: "Doses Extras",
-            chartXTitle: "Horário Proporcional (🔴 Pacientes | 🟢 Dose Aplicada | 🔵 Dose Estoque | 🟠 Doses Extras)",
-            chartYTitle: "Atividade (mCi)"
+            patientsAttended: "pacientes atendidos", noRecords: "Nenhum registro nos últimos 7 dias.", datasetRemaining: "Atividade Restante A(t) [mCi]", datasetPatients: "Pacientes", datasetStock: "Dose Estoque", datasetExtra: "Doses Extras",
+            chartXTitle: "Horário Proporcional (🔴 Pacientes | 🟢 Dose Aplicada | 🔵 Dose Estoque | 🟠 Doses Extras)", chartYTitle: "Atividade (mCi)"
         },
         es: {
-            pageTitle: "Calculadora de Decaimiento y Reposición - Radio-Gestión",
-            printTitle: "Informe Consolidado de Gestión - Radio-Gestión",
-            titlePatientsList: "Lista de Pacientes del Día",
-            lblDateInsertion: "Fecha de Inserción / Atención:",
-            lblDateHistory: "Consultar Historial (Vista):",
-            lblRadiopharm: "Radiofármaco (Isótopo):",
-            optFDG: "¹⁸F-FDG (Semivida: 109.8 min)",
-            optTc: "⁹⁹ᵐTc - Tecnecio (Semivida: 360 min)",
-            optGa: "⁶⁸Ga - Galio (Semivida: 68 min)",
-            optI: "¹³¹I - Yodo (Semivida: 8 días)",
-            optLu: "¹⁷⁷Lu - Lutecio (Semivida: 6.64 días)",
-            optCustom: "Otro (Semivida personalizada)",
-            lblHalfLifeCustom: "Semivida Personalizada (min):",
-            lblRazaoRotina: "Clínica - Relación actividad/masa (Rrotina) [mCi/kg]:",
-            lblRazaoRIA: "IA - Relación actividad/masa (RIA Estándar) [mCi/kg]:",
-            lblBatchDose: "Dosis Inicial del Lote (mCi):",
-            btnSaveDefaults: "Guardar Config en BD",
-            lblQuickAdd: "Agregar Paciente Rápido (Máscara auto):",
-            phQuickTime: "Hora (Ej: 0730)",
-            phQuickWeight: "Peso en kg (Ej: 80)",
-            phQuickExam: "Estudio (Opcional)",
-            btnAddQuick: "+ Agregar Paciente",
-            hintQuickAdd: "Consejo: Ingrese solo números de hora (ej: 0800) y dos puntos se añaden solos.",
-            lblFullList: "Lista Completa (Solo Lectura - Solo Edita y Elimina):",
-            msgWaitingData: "Esperando ingreso de datos de pacientes...",
-            titleChart: "Curva de Decaimiento y Reposiciones",
-            legendChart: "🔴 <b>Bolas Rojas:</b> Pacientes (Muestra peso, dosis aplicada y actividad restante).<br>🟢 <b>Bolas Verdes:</b> Dosis Aplicada en el Paciente (mCi).<br>🔵 <b>Bolas Azules (Arriba):</b> Dosis Stock (Soma Dosis Auto + Residuo Anterior).<br>🟠 <b>Bolas Naranjas (Arriba):</b> Dosis Extras Manuales.<br>✨ <b>Pase el cursor en el gráfico</b> para ver hora y stock exacto. Clic para añadir o gestionar eventos.",
-            titleOrderList: "Lista para Pedido (Distribuidora - TXT)",
-            lblOrderRule: "Regra de Horario para Distribuidora:",
-            optExactTime: "Horario Exacto (Ej: 08:00, 09:00, 09:30)",
-            optHourly: "Cada Hora (Anticipado / Consolidado - Ej: 09:00 (2 doses))",
-            btnDownloadTxt: "Descargar Lista en TXT",
-            btnPrintOrder: "Imprimir Solo Pedido",
-            titleConsolidated: "Informe Consolidado",
-            lblTotalPatients: "Total de Pacientes Atendidos (7 días):",
-            lblSavedDoses: "Dosis Ahorradas (Estimación):",
-            titleDailyDetails: "Detalle Diario (Últimos 7 Días):",
-            btnPrintPdf: "Imprimir / Guardar Resumen (PDF)",
-            btnClearHistory: "Borrar / Limpiar Historial Antiguo",
-            footerCopyright: "Copyright © 2026 Hospiline. Todos los derechos reservados - Versão 4.9.6",
-            btnCancel: "Cancelar",
-            btnOk: "Aceptar",
-            btnDarkMode: "🌙 Oscuro",
-            btnLightMode: "☀️ Claro",
-            saving: "(Guardando...)",
-            saved: "(Guardado en la nube)",
-            typing: "(Escribiendo...)",
-            synchronized: "(Sincronizado)",
-            loading: "Cargando datos...",
-            errSave: "(Error al guardar)",
-            errLoad: "(Error al cargar)",
-            savingsText: "Factor: {fator} (Ahorro de {val}% de la dosis)",
-            increaseText: "Factor: {fator} (Aumento de {val}% de la dosis)",
-            standardDoseText: "Factor: 1.00 (Dosis Estándar)",
+            pageTitle: "Calculadora de Decaimiento y Reposición - Radio-Gestión", printTitle: "Informe Consolidado de Gestión - Radio-Gestión",
+            titlePatientsList: "Lista de Pacientes del Día", lblDateInsertion: "Fecha de Inserción / Atención:", lblDateHistory: "Consultar Historial (Vista):",
+            lblRadiopharm: "Radiofármaco (Isótopo):", optFDG: "¹⁸F-FDG (Semivida: 109.8 min)", optTc: "⁹⁹ᵐTc - Tecnecio (Semivida: 360 min)", optGa: "⁶⁸Ga - Galio (Semivida: 68 min)", optI: "¹³¹I - Yodo (Semivida: 8 días)", optLu: "¹⁷⁷Lu - Lutecio (Semivida: 6.64 días)", optCustom: "Otro (Semivida personalizada)",
+            lblHalfLifeCustom: "Semivida Personalizada (min):", lblRazaoRotina: "Clínica - Relación actividad/masa (Rrotina) [mCi/kg]:", lblRazaoRIA: "IA - Relación actividad/masa (RIA Estándar) [mCi/kg]:", lblBatchDose: "Dosis Inicial del Lote (mCi):", btnSaveDefaults: "Guardar Config en BD",
+            lblQuickAdd: "Agregar Paciente Rápido (Máscara auto):", phQuickTime: "Hora (Ej: 0730)", phQuickWeight: "Peso en kg (Ej: 80)", phQuickExam: "Estudio (Opcional)", btnAddQuick: "+ Agregar Paciente", hintQuickAdd: "Consejo: Ingrese solo números de hora (ej: 0800) y dos puntos se añaden solos.",
+            lblFullList: "Lista Completa (Solo Lectura - Solo Edita y Elimina):", msgWaitingData: "Esperando ingreso de datos de pacientes...",
+            titleChart: "Curva de Decaimiento y Reposiciones", legendChart: "🔴 <b>Bolas Rojas:</b> Pacientes.<br>🟢 <b>Bolas Verdes:</b> Dosis Aplicada en el Paciente (mCi).<br>🔵 <b>Bolas Azules (Arriba):</b> Dosis Stock.<br>🟠 <b>Bolas Naranjas (Arriba):</b> Dosis Extras Manuales.<br>✨ <b>Pase el cursor en el gráfico</b> para ver hora y stock exacto.",
+            titleOrderList: "Lista para Pedido (Distribuidora - TXT)", lblOrderRule: "Regra de Horario para Distribuidora:", optExactTime: "Horario Exacto", optHourly: "Cada Hora (Consolidado)", btnDownloadTxt: "Descargar Lista en TXT", btnPrintOrder: "Imprimir Solo Pedido",
+            titleConsolidated: "Informe Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 días):", lblSavedDoses: "Dosis Ahorradas (Estimación):", titleDailyDetails: "Detalle Diario (Últimos 7 Días):", btnPrintPdf: "Imprimir / Guardar Resumen (PDF)", btnClearHistory: "Borrar / Limpiar Historial Antiguo",
+            footerCopyright: "Copyright © 2026 Hospiline. Todos los derechos reservados - Versão 4.9.6", btnCancel: "Cancelar", btnOk: "Aceptar", btnDarkMode: "🌙 Oscuro", btnLightMode: "☀️ Claro",
+            saving: "(Guardando...)", saved: "(Guardado en la nube)", typing: "(Escribiendo...)", synchronized: "(Sincronizado)", loading: "Cargando datos...", errSave: "(Error al guardar)", errLoad: "(Error al cargar)",
+            savingsText: "Factor: {fator} (Ahorro de {val}% de la dosis)", increaseText: "Factor: {fator} (Aumento de {val}% de la dosis)", standardDoseText: "Factor: 1.00 (Dosis Estándar)",
             simCompleted: "¡Simulación completada! (Rotina: <strong>{rotina}</strong> | RIA: <strong>{ria}</strong> | Lote: <strong>{a0} mCi</strong>)<br><strong>Pedidos:</strong> {qtd} | <strong>Ahorro del día:</strong> {econ}",
-            patientsAttended: "pacientes atendidos",
-            noRecords: "Sin registros en los últimos 7 días.",
-            datasetRemaining: "Actividad Restante A(t) [mCi]",
-            datasetPatients: "Pacientes",
-            datasetStock: "Dosis Stock",
-            datasetExtra: "Dosis Extras",
-            chartXTitle: "Horario Proporcional (🔴 Pacientes | 🟢 Dosis Aplicada | 🔵 Dosis Stock | 🟠 Dosis Extras)",
-            chartYTitle: "Actividad (mCi)"
+            patientsAttended: "pacientes atendidos", noRecords: "Sin registros en los últimos 7 días.", datasetRemaining: "Actividad Restante A(t) [mCi]", datasetPatients: "Pacientes", datasetStock: "Dosis Stock", datasetExtra: "Dosis Extras",
+            chartXTitle: "Horario Proporcional (🔴 Pacientes | 🟢 Dosis Aplicada | 🔵 Dosis Stock | 🟠 Dosis Extras)", chartYTitle: "Actividad (mCi)"
         }
     };
 
     let idiomaAtual = 'pt';
     let temaEscuro = false;
+    const DIAS_HISTORICO = 7;
+    const estado = { banco: { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {}, temaEscuro: false }, cache: { reposicoesExtras: {}, overridesAuto: {} }, pacientes: [], salvando: false, carregandoRemoto: false };
+    let meuGrafico = null;
+    let temporizadorSalvamento = null;
 
     function alternarTema() {
         temaEscuro = !temaEscuro;
         aplicarTema(temaEscuro);
-
-        if (estado.banco) {
-            estado.banco.temaEscuro = temaEscuro;
-            salvarDadosNuvem();
-        }
+        if (estado.banco) { estado.banco.temaEscuro = temaEscuro; salvarDadosNuvem(); }
     }
 
     function aplicarTema(escuro) {
-        if (escuro) {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
+        if (escuro) { document.body.classList.add('dark-mode'); } else { document.body.classList.remove('dark-mode'); }
         const btn = document.getElementById('btnTema');
-        if (btn) {
-            const label = escuro ? i18n[idiomaAtual].btnLightMode : i18n[idiomaAtual].btnDarkMode;
-            btn.innerText = label;
-        }
-        // Atualiza cores do gráfico se existir
+        if (btn) { btn.innerText = escuro ? i18n[idiomaAtual].btnLightMode : i18n[idiomaAtual].btnDarkMode; }
         if (meuGrafico) {
             const gridColor = escuro ? '#334155' : '#e2e8f0';
             const textColor = escuro ? '#e2e8f0' : '#1e293b';
             if (meuGrafico.options.scales) {
-                meuGrafico.options.scales.x.ticks.color = textColor;
-                meuGrafico.options.scales.y.ticks.color = textColor;
-                meuGrafico.options.scales.x.title.color = textColor;
-                meuGrafico.options.scales.y.title.color = textColor;
-                meuGrafico.options.scales.x.grid = meuGrafico.options.scales.x.grid || {};
-                meuGrafico.options.scales.y.grid = meuGrafico.options.scales.y.grid || {};
-                meuGrafico.options.scales.x.grid.color = gridColor;
-                meuGrafico.options.scales.y.grid.color = gridColor;
+                meuGrafico.options.scales.x.ticks.color = textColor; meuGrafico.options.scales.y.ticks.color = textColor;
+                meuGrafico.options.scales.x.title.color = textColor; meuGrafico.options.scales.y.title.color = textColor;
+                meuGrafico.options.scales.x.grid = meuGrafico.options.scales.x.grid || {}; meuGrafico.options.scales.y.grid = meuGrafico.options.scales.y.grid || {};
+                meuGrafico.options.scales.x.grid.color = gridColor; meuGrafico.options.scales.y.grid.color = gridColor;
             }
             meuGrafico.update();
         }
@@ -729,251 +387,105 @@
     function mudarIdioma(lang) {
         if (!i18n[lang]) return;
         idiomaAtual = lang;
-
-        if (estado.banco) {
-            estado.banco.idiomaGlobal = lang;
-            salvarDadosNuvem();
-        }
-
+        if (estado.banco) { estado.banco.idiomaGlobal = lang; salvarDadosNuvem(); }
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            if (i18n[lang][key]) {
-                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                    el.placeholder = i18n[lang][key];
-                } else {
-                    el.innerHTML = i18n[lang][key];
-                }
-            }
+            if (i18n[lang][key]) { if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') { el.placeholder = i18n[lang][key]; } else { el.innerHTML = i18n[lang][key]; } }
         });
-
         document.getElementById('inputHoraRapida').placeholder = i18n[lang].phQuickTime;
         document.getElementById('inputPesoRapido').placeholder = i18n[lang].phQuickWeight;
         document.getElementById('inputExameRapido').placeholder = i18n[lang].phQuickExam;
-        
-        document.getElementById('btnLangPt').classList.remove('active');
-        document.getElementById('btnLangEs').classList.remove('active');
-
+        document.getElementById('btnLangPt').classList.remove('active'); document.getElementById('btnLangEs').classList.remove('active');
         if (lang === 'pt') document.getElementById('btnLangPt').classList.add('active');
         if (lang === 'es') document.getElementById('btnLangEs').classList.add('active');
-
-        // Atualiza o label do botão tema
         aplicarTema(temaEscuro);
-
         recalcularFatorAutomatico();
         atualizarRelatorioConsolidado();
         processarSimulacaoCompleta();
     }
 
-    const DIAS_HISTORICO = 7;
-
-    const estado = {
-        banco: { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {}, temaEscuro: false },
-        cache: {
-            reposicoesExtras: {},
-            overridesAuto: {}
-        },
-        pacientes: [],
-        salvando: false,
-        carregandoRemoto: false
-    };
-
-    let meuGrafico = null;
-    let temporizadorSalvamento = null;
-
     const pluginLinhasTracejadasVertical = {
         id: 'linhasTracejadasVertical',
         afterDraw(chart) {
-            const { ctx, scales: { x, y } } = chart;
-            const datasets = chart.data.datasets;
-            
-            // 2=Azul (Estoque), 3=Laranja (Extras), 4=Verde (Dose Aplicada)
+            const { ctx, scales: { x, y } } = chart; const datasets = chart.data.datasets;
             [2, 3, 4].forEach(dsIndex => {
                 if (!datasets[dsIndex]) return;
                 const meta = chart.getDatasetMeta(dsIndex);
                 meta.data.forEach(point => {
                     if (point.x !== undefined && point.y !== undefined && !point.skip) {
-                        ctx.save();
-                        ctx.beginPath();
-                        
-                        if (dsIndex === 2) {
-                            ctx.setLineDash([5, 5]);
-                            ctx.strokeStyle = 'rgba(59, 130, 246, 0.7)'; // Azul
-                        } else if (dsIndex === 3) {
-                            ctx.setLineDash([5, 5]);
-                            ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)'; // Laranja
-                        } else if (dsIndex === 4) {
-                            ctx.setLineDash([3, 3]); // Pontilhado mais fino para a verde
-                            ctx.strokeStyle = 'rgba(16, 185, 129, 0.5)'; // Verde mais suave/transparente
-                        }
-                        
-                        ctx.lineWidth = 1.2;
-                        ctx.moveTo(point.x, y.bottom);
-                        ctx.lineTo(point.x, point.y);
-                        ctx.stroke();
-                        ctx.restore();
+                        ctx.save(); ctx.beginPath();
+                        if (dsIndex === 2) { ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(59, 130, 246, 0.7)'; }
+                        else if (dsIndex === 3) { ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)'; }
+                        else if (dsIndex === 4) { ctx.setLineDash([3, 3]); ctx.strokeStyle = 'rgba(16, 185, 129, 0.5)'; }
+                        ctx.lineWidth = 1.2; ctx.moveTo(point.x, y.bottom); ctx.lineTo(point.x, point.y); ctx.stroke(); ctx.restore();
                     }
                 });
             });
         }
     };
 
-    function getBancoRef() {
-        if (!window.fbDb || !window.uidLogado) return null;
-        return window.fbRef(window.fbDb, `calculadoraDecaimento/banco_${window.uidLogado}`);
-    }
+    function getBancoRef() { if (!window.fbDb || !window.uidLogado) return null; return window.fbRef(window.fbDb, `calculadoraDecaimento/banco_${window.uidLogado}`); }
 
     function abrirDialogo({ titulo, mensagem, inputs = [] }) {
         return new Promise((resolve) => {
             const dlg = document.getElementById('modalDialogo');
             document.getElementById('dialogTitulo').innerText = titulo || 'Confirmação';
             document.getElementById('dialogMensagem').innerText = mensagem || '';
-            const container = document.getElementById('dialogInputs');
-            container.innerHTML = '';
+            const container = document.getElementById('dialogInputs'); container.innerHTML = '';
             inputs.forEach((inp, i) => {
-                const div = document.createElement('div');
-                div.className = 'dialog-input';
-                if (inp.label) {
-                    const lbl = document.createElement('label');
-                    lbl.innerText = inp.label;
-                    div.appendChild(lbl);
-                }
-                const el = document.createElement('input');
-                el.type = inp.type || 'text';
-                el.value = inp.value ?? '';
+                const div = document.createElement('div'); div.className = 'dialog-input';
+                if (inp.label) { const lbl = document.createElement('label'); lbl.innerText = inp.label; div.appendChild(lbl); }
+                const el = document.createElement('input'); el.type = inp.type || 'text'; el.value = inp.value ?? '';
                 if (inp.placeholder) el.placeholder = inp.placeholder;
-                el.id = `dialogInput_${i}`;
-                div.appendChild(el);
-                container.appendChild(div);
+                el.id = `dialogInput_${i}`; div.appendChild(el); container.appendChild(div);
             });
-
-            const btnOk = document.getElementById('dialogBtnOk');
-            const btnCancel = document.getElementById('dialogBtnCancelar');
-
-            const cleanup = () => {
-                btnOk.onclick = null;
-                btnCancel.onclick = null;
-                dlg.onclose = null;
-            };
-
-            btnOk.onclick = () => {
-                const valores = inputs.map((_, i) => document.getElementById(`dialogInput_${i}`).value);
-                cleanup();
-                dlg.close();
-                resolve({ confirmado: true, valores });
-            };
-            btnCancel.onclick = () => {
-                cleanup();
-                dlg.close();
-                resolve({ confirmado: false, valores: [] });
-            };
-            dlg.onclose = () => {
-                cleanup();
-                resolve({ confirmado: false, valores: [] });
-            };
-
-            if (dlg.open) dlg.close();
-            dlg.showModal();
-            if (inputs.length > 0) {
-                const primeiro = document.getElementById('dialogInput_0');
-                if (primeiro) primeiro.focus();
-            }
+            const btnOk = document.getElementById('dialogBtnOk'); const btnCancel = document.getElementById('dialogBtnCancelar');
+            const cleanup = () => { btnOk.onclick = null; btnCancel.onclick = null; dlg.onclose = null; };
+            btnOk.onclick = () => { const valores = inputs.map((_, i) => document.getElementById(`dialogInput_${i}`).value); cleanup(); dlg.close(); resolve({ confirmado: true, valores }); };
+            btnCancel.onclick = () => { cleanup(); dlg.close(); resolve({ confirmado: false, valores: [] }); };
+            dlg.onclose = () => { cleanup(); resolve({ confirmado: false, valores: [] }); };
+            if (dlg.open) dlg.close(); dlg.showModal();
+            if (inputs.length > 0) { const primeiro = document.getElementById('dialogInput_0'); if (primeiro) primeiro.focus(); }
         });
     }
 
     function iniciarEscutaTempoReal() {
         const statusEl = document.getElementById('sync-status');
-        
-        if (!window.fbDb || !window.fbOnValue || !window.uidLogado) {
-            statusEl.innerText = "(Aguardando login...)";
-            statusEl.className = "sync-status";
-            return;
-        }
-
-        statusEl.innerText = "Carregando dados...";
-        statusEl.className = "loading";
-
+        if (!window.fbDb || !window.fbOnValue || !window.uidLogado) { statusEl.innerText = "(Aguardando login...)"; statusEl.className = "sync-status"; return; }
+        statusEl.innerText = "Carregando dados..."; statusEl.className = "loading";
         window.fbOnValue(getBancoRef(), (snapshot) => {
-            if (snapshot.exists()) {
-                estado.banco = snapshot.val() || { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {}, temaEscuro: false };
-                limparHistoricoAntigoNoBanco();
-            } else {
-                estado.banco = { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {}, temaEscuro: false };
-            }
-
-            if (estado.banco.idiomaGlobal && estado.banco.idiomaGlobal !== idiomaAtual) {
-                mudarIdioma(estado.banco.idiomaGlobal);
-            }
-
-            // Aplica tema salvo
-            if (estado.banco.temaEscuro !== undefined) {
-                temaEscuro = !!estado.banco.temaEscuro;
-                aplicarTema(temaEscuro);
-            }
-
+            if (snapshot.exists()) { estado.banco = snapshot.val() || { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {}, temaEscuro: false }; limparHistoricoAntigoNoBanco(); }
+            else { estado.banco = { historicoDias: {}, idiomaGlobal: 'pt', configuracoesGlobais: {}, temaEscuro: false }; }
+            if (estado.banco.idiomaGlobal && estado.banco.idiomaGlobal !== idiomaAtual) { mudarIdioma(estado.banco.idiomaGlobal); }
+            if (estado.banco.temaEscuro !== undefined) { temaEscuro = !!estado.banco.temaEscuro; aplicarTema(temaEscuro); }
             if (estado.banco.configuracoesGlobais) {
                 const cfg = estado.banco.configuracoesGlobais;
-                if (cfg.dosePadraoLote && document.activeElement !== document.getElementById('dosePadraoLote')) {
-                    document.getElementById('dosePadraoLote').value = cfg.dosePadraoLote;
-                }
-                if (cfg.razaoRotina && document.activeElement !== document.getElementById('razaoRotina')) {
-                    document.getElementById('razaoRotina').value = cfg.razaoRotina;
-                }
-                if (cfg.razaoRIA && document.activeElement !== document.getElementById('razaoRIA')) {
-                    document.getElementById('razaoRIA').value = cfg.razaoRIA;
-                }
-                if (cfg.radiofarmaco) {
-                    document.getElementById('radiofarmaco').value = cfg.radiofarmaco;
-                    aoMudarRadiofarmaco();
-                }
-                if (cfg.meiaVidaCustom && document.activeElement !== document.getElementById('meiaVidaCustom')) {
-                    document.getElementById('meiaVidaCustom').value = cfg.meiaVidaCustom;
-                }
+                if (cfg.dosePadraoLote && document.activeElement !== document.getElementById('dosePadraoLote')) { document.getElementById('dosePadraoLote').value = cfg.dosePadraoLote; }
+                if (cfg.razaoRotina && document.activeElement !== document.getElementById('razaoRotina')) { document.getElementById('razaoRotina').value = cfg.razaoRotina; }
+                if (cfg.razaoRIA && document.activeElement !== document.getElementById('razaoRIA')) { document.getElementById('razaoRIA').value = cfg.razaoRIA; }
+                if (cfg.radiofarmaco) { document.getElementById('radiofarmaco').value = cfg.radiofarmaco; aoMudarRadiofarmaco(); }
+                if (cfg.meiaVidaCustom && document.activeElement !== document.getElementById('meiaVidaCustom')) { document.getElementById('meiaVidaCustom').value = cfg.meiaVidaCustom; }
             }
-            
-            recalcularFatorAutomatico();
-            atualizarRelatorioConsolidado();
-            
-            // BLINDAGEM: Só recarrega a data se você não estiver digitando ou salvando
+            recalcularFatorAutomatico(); atualizarRelatorioConsolidado();
             const filtroDataEl = document.getElementById('filtroData');
-            if (filtroDataEl && filtroDataEl.value && document.activeElement !== document.getElementById('listaPacientes') && !estado.salvando) {
-                carregarDadosPorData(); 
-            }
-            
-            statusEl.innerText = "(Sincronizado)";
-            statusEl.className = "sync-status";
-        }, (error) => {
-            console.error("Erro ao sincronizar com o Firebase:", error);
-            statusEl.innerText = "(Erro ao carregar)";
-            statusEl.className = "sync-status";
-        });
+            if (filtroDataEl && filtroDataEl.value && document.activeElement !== document.getElementById('listaPacientes') && !estado.salvando) { carregarDadosPorData(); }
+            statusEl.innerText = "(Sincronizado)"; statusEl.className = "sync-status";
+        }, (error) => { console.error("Erro Firebase:", error); statusEl.innerText = "(Erro ao carregar)"; statusEl.className = "sync-status"; });
     }
 
     function limparHistoricoAntigoNoBanco() {
         if (!estado.banco || !estado.banco.historicoDias) return;
-        
-        const hoje = new Date();
-        let houveRemocao = false;
-
+        const hoje = new Date(); let houveRemocao = false;
         Object.keys(estado.banco.historicoDias).forEach(dataStr => {
-            const dataReg = new Date(dataStr + 'T00:00:00');
-            const diffTime = hoje - dataReg;
-            const diffDays = diffTime / (1000 * 60 * 60 * 24);
-
-            if (diffDays > DIAS_HISTORICO) {
-                delete estado.banco.historicoDias[dataStr];
-                houveRemocao = true;
-            }
+            const dataReg = new Date(dataStr + 'T00:00:00'); const diffDays = (hoje - dataReg) / (1000 * 60 * 60 * 24);
+            if (diffDays > DIAS_HISTORICO) { delete estado.banco.historicoDias[dataStr]; houveRemocao = true; }
         });
-
         return houveRemocao;
     }
 
     async function salvarDadosNuvem() {
         if (!window.fbDb || !window.uidLogado) return;
-        
-        const dataSelecionada = document.getElementById('filtroData').value;
-        if (!dataSelecionada) return;
-
+        const dataSelecionada = document.getElementById('filtroData').value; if (!dataSelecionada) return;
         const textoPacientes = document.getElementById('listaPacientes').value;
         const radiofarmaco = document.getElementById('radiofarmaco').value;
         const razaoRotina = document.getElementById('razaoRotina').value;
@@ -981,476 +493,147 @@
         const fatorSubtle = document.getElementById('fatorSubtle').value;
         const meiaVidaCustom = document.getElementById('meiaVidaCustom').value;
         const dosePadraoLote = document.getElementById('dosePadraoLote').value;
-
-        if (!estado.banco.historicoDias) {
-            estado.banco.historicoDias = {};
-        }
-
+        if (!estado.banco.historicoDias) { estado.banco.historicoDias = {}; }
         const dadosParaAtualizar = {};
-        dadosParaAtualizar[`historicoDias/${dataSelecionada}`] = {
-            textoPacientes,
-            radiofarmaco,
-            razaoRotina,
-            razaoRIA,
-            fatorSubtle,
-            meiaVidaCustom,
-            dosePadraoLote,
-            reposicoesExtras: estado.cache.reposicoesExtras[dataSelecionada] || [],
-            overridesAuto: estado.cache.overridesAuto[dataSelecionada] || {}
-        };
-        dadosParaAtualizar['idiomaGlobal'] = idiomaAtual;
-        dadosParaAtualizar['temaEscuro'] = temaEscuro;
-
-        estado.salvando = true;
-        document.getElementById('syncStatus').innerText = "(Salvando...)";
-
+        dadosParaAtualizar[`historicoDias/${dataSelecionada}`] = { textoPacientes, radiofarmaco, razaoRotina, razaoRIA, fatorSubtle, meiaVidaCustom, dosePadraoLote, reposicoesExtras: estado.cache.reposicoesExtras[dataSelecionada] || [], overridesAuto: estado.cache.overridesAuto[dataSelecionada] || {} };
+        dadosParaAtualizar['idiomaGlobal'] = idiomaAtual; dadosParaAtualizar['temaEscuro'] = temaEscuro;
+        estado.salvando = true; document.getElementById('syncStatus').innerText = "(Salvando...)";
         try {
             await window.fbUpdate(getBancoRef(), dadosParaAtualizar);
-            document.getElementById('syncStatus').innerText = "(Salvo na nuvem)";
-            atualizarRelatorioConsolidado();
-        } catch (error) {
-            console.error("Erro ao salvar no Firebase:", error);
-            document.getElementById('syncStatus').innerText = "(Erro ao salvar)";
-        } finally {
-            estado.salvando = false;
-        }
+            document.getElementById('syncStatus').innerText = "(Salvo na nuvem)"; atualizarRelatorioConsolidado();
+        } catch (error) { console.error("Erro ao salvar:", error); document.getElementById('syncStatus').innerText = "(Erro ao salvar)"; }
+        finally { estado.salvando = false; }
     }
 
     async function salvarConfiguracoesPadrao() {
         if (!window.uidLogado) return;
-        
-        const valDose = document.getElementById('dosePadraoLote').value;
-        const valRotina = document.getElementById('razaoRotina').value;
-        const valRIA = document.getElementById('razaoRIA').value;
-        const valRadio = document.getElementById('radiofarmaco').value;
-        const valMeiaCustom = document.getElementById('meiaVidaCustom').value;
-
-        if (!valDose || isNaN(valDose) || parseFloat(valDose) <= 0) {
-            alert("Insira um valor válido para a dose padrão.");
-            return;
-        }
-
-        if (!estado.banco.configuracoesGlobais) {
-            estado.banco.configuracoesGlobais = {};
-        }
-
-        estado.banco.configuracoesGlobais = {
-            dosePadraoLote: valDose,
-            razaoRotina: valRotina,
-            razaoRIA: valRIA,
-            radiofarmaco: valRadio,
-            meiaVidaCustom: valMeiaCustom
-        };
-
-        const dadosParaAtualizar = {
-            configuracoesGlobais: estado.banco.configuracoesGlobais
-        };
-
+        const valDose = document.getElementById('dosePadraoLote').value; const valRotina = document.getElementById('razaoRotina').value; const valRIA = document.getElementById('razaoRIA').value; const valRadio = document.getElementById('radiofarmaco').value; const valMeiaCustom = document.getElementById('meiaVidaCustom').value;
+        if (!valDose || isNaN(valDose) || parseFloat(valDose) <= 0) { alert("Insira um valor válido."); return; }
+        if (!estado.banco.configuracoesGlobais) { estado.banco.configuracoesGlobais = {}; }
+        estado.banco.configuracoesGlobais = { dosePadraoLote: valDose, razaoRotina: valRotina, razaoRIA: valRIA, radiofarmaco: valRadio, meiaVidaCustom: valMeiaCustom };
         estado.salvando = true;
-        try {
-            await window.fbUpdate(getBancoRef(), dadosParaAtualizar);
-            alert("Configurações padrão salvas com sucesso no banco de dados!");
-            processarSimulacaoCompleta();
-        } catch (error) {
-            console.error("Erro ao salvar configurações:", error);
-            alert("Erro ao salvar configurações na nuvem.");
-        } finally {
-            estado.salvando = false;
-        }
+        try { await window.fbUpdate(getBancoRef(), { configuracoesGlobais: estado.banco.configuracoesGlobais }); alert("Configurações salvas!"); processarSimulacaoCompleta(); }
+        catch (error) { alert("Erro ao salvar configurações."); }
+        finally { estado.salvando = false; }
     }
 
     async function zerarBancoNuvem() {
-        const res = await abrirDialogo({
-            titulo: 'Zerar Histórico',
-            mensagem: 'ATENÇÃO: Esta ação irá apagar todo o histórico de pacientes da SUA clínica no banco de dados.\nIsso NÃO afetará outras clínicas.\n\nPara confirmar, digite a palavra abaixo:',
-            inputs: [{ placeholder: 'Digite ZERAR para confirmar' }]
-        });
-
+        const res = await abrirDialogo({ titulo: 'Zerar Histórico', mensagem: 'ATENÇÃO: Esta ação irá apagar todo o histórico de pacientes da SUA clínica.\n\nPara confirmar, digite ZERAR:', inputs: [{ placeholder: 'Digite ZERAR' }] });
         if (!res.confirmado) return;
-
-        const textoDigitado = (res.valores[0] || '').trim().toUpperCase();
-        if (textoDigitado !== 'ZERAR') {
-            alert("A palavra de confirmação está incorreta. A operação foi cancelada.");
-            return;
-        }
-
-        if (!window.uidLogado) {
-            alert("Erro: Usuário não identificado. Faça login novamente.");
-            return;
-        }
-
-        let configGlobalTemp = estado.banco.configuracoesGlobais;
-        let idiomaGlobalTemp = estado.banco.idiomaGlobal;
-        let temaTemp = temaEscuro;
-
-        estado.banco = { 
-            historicoDias: {}, 
-            idiomaGlobal: idiomaGlobalTemp || 'pt', 
-            configuracoesGlobais: configGlobalTemp || {},
-            temaEscuro: temaTemp
-        };
-        estado.cache.reposicoesExtras = {};
-        estado.cache.overridesAuto = {};
-
-        try {
-            await window.fbSet(getBancoRef(), estado.banco);
-            document.getElementById('listaPacientes').value = "";
-            processarSimulacaoCompleta();
-            atualizarRelatorioConsolidado();
-            alert("Histórico da sua clínica limpo com sucesso!");
-        } catch (error) {
-            console.error("Erro ao zerar banco:", error);
-            alert("Erro ao limpar dados no Firebase.");
-        }
+        if ((res.valores[0] || '').trim().toUpperCase() !== 'ZERAR') { alert("Palavra incorreta. Operação cancelada."); return; }
+        let configGlobalTemp = estado.banco.configuracoesGlobais; let idiomaGlobalTemp = estado.banco.idiomaGlobal; let temaTemp = temaEscuro;
+        estado.banco = { historicoDias: {}, idiomaGlobal: idiomaGlobalTemp || 'pt', configuracoesGlobais: configGlobalTemp || {}, temaEscuro: temaTemp };
+        estado.cache.reposicoesExtras = {}; estado.cache.overridesAuto = {};
+        try { await window.fbSet(getBancoRef(), estado.banco); document.getElementById('listaPacientes').value = ""; processarSimulacaoCompleta(); atualizarRelatorioConsolidado(); alert("Histórico limpo com sucesso!"); }
+        catch (error) { alert("Erro ao limpar dados."); }
     }
 
     function atualizarRelatorioConsolidado() {
-        let totalPacientes = 0;
-        let totalEconomia = 0;
-        let listaDetalhesHTML = "";
-
-        const filtroDataEl = document.getElementById('filtroData');
-        const dataConsulta = filtroDataEl ? filtroDataEl.value : '';
-
-        const dataRef = dataConsulta ? new Date(dataConsulta + 'T00:00:00') : new Date();
-        dataRef.setHours(0, 0, 0, 0);
-
+        let totalPacientes = 0; let totalEconomia = 0; let listaDetalhesHTML = "";
+        const dataConsulta = document.getElementById('filtroData').value;
+        const dataRef = dataConsulta ? new Date(dataConsulta + 'T00:00:00') : new Date(); dataRef.setHours(0, 0, 0, 0);
         if (estado.banco && estado.banco.historicoDias) {
             const datasValidas = [];
             Object.keys(estado.banco.historicoDias).forEach(dataStr => {
-                const dataReg = new Date(dataStr + 'T00:00:00');
-                dataReg.setHours(0, 0, 0, 0);
+                const dataReg = new Date(dataStr + 'T00:00:00'); dataReg.setHours(0, 0, 0, 0);
                 const diffDays = (dataRef - dataReg) / (1000 * 60 * 60 * 24);
-                if (diffDays >= 0 && diffDays <= DIAS_HISTORICO) {
-                    datasValidas.push(dataStr);
-                }
+                if (diffDays >= 0 && diffDays <= DIAS_HISTORICO) { datasValidas.push(dataStr); }
             });
-
             datasValidas.sort((a, b) => a.localeCompare(b));
-
             datasValidas.forEach(dataStr => {
                 let dia = estado.banco.historicoDias[dataStr];
                 if (dia && dia.textoPacientes) {
                     let linhas = dia.textoPacientes.split(/(?=\s\d{1,2}:\d{2})|\n/).map(l => l.trim()).filter(l => l !== '');
-                    let qtdDia = linhas.length;
-                    totalPacientes += qtdDia;
-
-                    // Mantém o cálculo original da economia (mCi) para o TOTAL do topo
-                    let fator = parseFloat(dia.fatorSubtle) || 0.667;
-                    let dosePadraoDia = parseFloat(dia.dosePadraoLote) || 10;
-                    let economiaDiaMci = qtdDia * (dosePadraoDia * (1 - fator));
-                    totalEconomia += Math.max(0, economiaDiaMci);
-
-                    // ---- INÍCIO DO CÁLCULO EXATO PARA O DIA ----
-                    let pedidosDiaExato = 0;
-                    let economiaDiaExato = 0;
-                    
+                    let qtdDia = linhas.length; totalPacientes += qtdDia;
+                    let fator = parseFloat(dia.fatorSubtle) || 0.667; let dosePadraoDia = parseFloat(dia.dosePadraoLote) || 10;
+                    totalEconomia += Math.max(0, qtdDia * (dosePadraoDia * (1 - fator)));
+                    let pedidosDiaExato = 0; let economiaDiaExato = 0;
                     if (typeof processarSimulacaoCompleta === 'function') {
-                        const backupPacientes = document.getElementById('listaPacientes').value;
-                        const backupRepo = document.getElementById('listaPedido').value;
-                        
+                        const backupPacientes = document.getElementById('listaPacientes').value; const backupRepo = document.getElementById('listaPedido').value;
                         document.getElementById('listaPacientes').value = dia.textoPacientes || '';
-                        
-                        const backupData = document.getElementById('filtroData').value;
-                        document.getElementById('filtroData').value = dataStr;
-                        estado.carregandoRemoto = true; 
-                        
-                        processarSimulacaoCompleta();
-                        
+                        const backupData = document.getElementById('filtroData').value; document.getElementById('filtroData').value = dataStr;
+                        estado.carregandoRemoto = true; processarSimulacaoCompleta();
                         const textoSimul = document.getElementById('textoResultadoSimulacao').innerHTML;
-                        const matchPedidos = textoSimul.match(/Pedidos:<\/strong>\s*(\d+)/);
-                        const matchEconomia = textoSimul.match(/Economia do dia:<\/strong>\s*(\d+)/);
-                        
-                        if (matchPedidos) pedidosDiaExato = parseInt(matchPedidos[1], 10);
-                        if (matchEconomia) economiaDiaExato = parseInt(matchEconomia[1], 10);
-                        
-                        document.getElementById('listaPacientes').value = backupPacientes;
-                        document.getElementById('filtroData').value = backupData;
-                        document.getElementById('listaPedido').value = backupRepo;
+                        const matchPedidos = textoSimul.match(/Pedidos:<\/strong>\s*(\d+)/); const matchEconomia = textoSimul.match(/Economia do dia:<\/strong>\s*(\d+)/);
+                        if (matchPedidos) pedidosDiaExato = parseInt(matchPedidos[1], 10); if (matchEconomia) economiaDiaExato = parseInt(matchEconomia[1], 10);
+                        document.getElementById('listaPacientes').value = backupPacientes; document.getElementById('filtroData').value = backupData; document.getElementById('listaPedido').value = backupRepo;
                         estado.carregandoRemoto = false;
                     }
-                    // ---- FIM DO CÁLCULO EXATO ----
-
                     let pacientesDetalheHtml = "";
-                    linhas.forEach(l => {
-                        let parsed = parseLinhaPaciente(l);
-                        if (parsed) {
-                            let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : '';
-                            pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`;
-                        }
-                    });
-
+                    linhas.forEach(l => { let parsed = parseLinhaPaciente(l); if (parsed) { let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : ''; pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`; } });
                     let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px; color:#065f46;"' : '';
-                    
                     let infoDia = `<span style="font-weight: normal; font-size: 13px; color: #475569; margin-left: 8px;">(${pedidosDiaExato} doses pedidas | Economia: ${economiaDiaExato} doses)</span>`;
-                    
                     listaDetalhesHTML += `<div${destaque} style="margin-bottom: 12px;">• <b>${dataStr}</b> - ${qtdDia} ${i18n[idiomaAtual].patientsAttended} ${infoDia}:<br>${pacientesDetalheHtml}</div>`;
                 }
             });
         }
-
         document.getElementById('stat-total').innerText = totalPacientes;
         document.getElementById('stat-economia').innerText = totalEconomia.toFixed(1) + " mCi";
         document.getElementById('lista-detalhes-print').innerHTML = listaDetalhesHTML || i18n[idiomaAtual].noRecords;
-
         const dataConsultaPrint = document.getElementById('dataConsultaPrint');
-        if (dataConsultaPrint) {
-            if (dataConsulta) {
-                dataConsultaPrint.innerText = `Data consultada: ${dataConsulta.split('-').reverse().join('/')}`;
-                dataConsultaPrint.style.display = 'block';
-            } else {
-                dataConsultaPrint.style.display = 'none';
-            }
-        }
+        if (dataConsultaPrint) { if (dataConsulta) { dataConsultaPrint.innerText = `Data consultada: ${dataConsulta.split('-').reverse().join('/')}`; dataConsultaPrint.style.display = 'block'; } else { dataConsultaPrint.style.display = 'none'; } }
     }
 
     window.onload = function() {
-        const hojeStr = obterDataAtualStr();
-        document.getElementById('dataInsercao').value = hojeStr;
-        document.getElementById('filtroData').value = hojeStr;
-
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            if (estado.banco.temaEscuro === undefined) {
-                temaEscuro = true;
-                aplicarTema(true);
-            }
-        }
-
+        const hojeStr = obterDataAtualStr(); document.getElementById('dataInsercao').value = hojeStr; document.getElementById('filtroData').value = hojeStr;
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { if (estado.banco.temaEscuro === undefined) { temaEscuro = true; aplicarTema(true); } }
         const inputHora = document.getElementById('inputHoraRapida');
-        inputHora.addEventListener('input', function(e) {
-            let v = e.target.value.replace(/\D/g, '');
-            if (v.length >= 3) {
-                v = v.substring(0, 2) + ':' + v.substring(2, 4);
-            }
-            e.target.value = v;
-        });
-
-        document.getElementById('inputPesoRapido').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') { adicionarPacienteRapido(); }
-        });
-        document.getElementById('inputExameRapido').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') { adicionarPacienteRapido(); }
-        });
-        document.getElementById('inputRiaRapida').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') { adicionarPacienteRapido(); }
-        });
-        
-        recalcularFatorAutomatico();
-        carregarDadosPorData();
+        inputHora.addEventListener('input', function(e) { let v = e.target.value.replace(/\D/g, ''); if (v.length >= 3) { v = v.substring(0, 2) + ':' + v.substring(2, 4); } e.target.value = v; });
+        ['inputPesoRapido', 'inputExameRapido', 'inputRiaRapida'].forEach(id => { document.getElementById(id).addEventListener('keypress', function(e) { if (e.key === 'Enter') { adicionarPacienteRapido(); } }); });
+        recalcularFatorAutomatico(); carregarDadosPorData();
     };
 
     function adicionarPacienteRapido() {
-        let hora = document.getElementById('inputHoraRapida').value.trim();
-        let peso = document.getElementById('inputPesoRapido').value.trim();
-        let exame = document.getElementById('inputExameRapido').value.trim();
-        let chkRia = document.getElementById('chkRiaCustom').checked;
-        let riaCustom = document.getElementById('inputRiaRapida').value.trim();
-
-        if (hora.length === 4 && !hora.includes(':')) {
-            hora = hora.substring(0, 2) + ':' + hora.substring(2, 4);
-        }
-
-        const regexHora = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (!regexHora.test(hora)) {
-            alert("Horário inválido! Use o formato HH:MM (00:00 até 23:59).");
-            return;
-        }
-
-        const pesoNum = parseFloat(peso);
-        if (isNaN(pesoNum) || pesoNum < 1 || pesoNum > 300) {
-            alert("Peso inválido! Informe um valor entre 1 e 300 kg.");
-            return;
-        }
-
-        if (chkRia && riaCustom) {
-            const riaNum = parseFloat(riaCustom);
-            if (isNaN(riaNum) || riaNum < 0.001 || riaNum > 1.0) {
-                alert("RIA inválida! Informe um valor entre 0.001 e 1.0.");
-                return;
-            }
-        }
-
-        let linhaNueva = `${hora} = ${peso}`;
-        if (exame) {
-            linhaNueva += ` | Exame: ${exame}`;
-        }
-        if (chkRia && riaCustom) {
-            linhaNueva += ` @ ${riaCustom}`;
-        }
-
+        let hora = document.getElementById('inputHoraRapida').value.trim(); let peso = document.getElementById('inputPesoRapido').value.trim(); let exame = document.getElementById('inputExameRapido').value.trim();
+        let chkRia = document.getElementById('chkRiaCustom').checked; let riaCustom = document.getElementById('inputRiaRapida').value.trim();
+        if (hora.length === 4 && !hora.includes(':')) { hora = hora.substring(0, 2) + ':' + hora.substring(2, 4); }
+        const regexHora = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/; if (!regexHora.test(hora)) { alert("Horário inválido!"); return; }
+        const pesoNum = parseFloat(peso); if (isNaN(pesoNum) || pesoNum < 1 || pesoNum > 300) { alert("Peso inválido!"); return; }
+        if (chkRia && riaCustom) { const riaNum = parseFloat(riaCustom); if (isNaN(riaNum) || riaNum < 0.001 || riaNum > 1.0) { alert("RIA inválida!"); return; } }
+        let linhaNueva = `${hora} = ${peso}`; if (exame) { linhaNueva += ` | Exame: ${exame}`; } if (chkRia && riaCustom) { linhaNueva += ` @ ${riaCustom}`; }
         let textarea = document.getElementById('listaPacientes');
-        
-        if (textarea.value.trim() === "") {
-            textarea.value = linhaNueva;
-        } else {
-            textarea.value = textarea.value.trim() + '\n' + linhaNueva;
-        }
-
-        document.getElementById('inputHoraRapida').value = "";
-        document.getElementById('inputPesoRapido').value = "";
-        document.getElementById('inputExameRapido').value = "";
-        document.getElementById('inputRiaRapida').value = "";
-        document.getElementById('chkRiaCustom').checked = false;
-        document.getElementById('inputRiaRapida').style.display = 'none';
-        document.getElementById('inputHoraRapida').focus();
-
+        textarea.value = textarea.value.trim() === "" ? linhaNueva : textarea.value.trim() + '\n' + linhaNueva;
+        ['inputHoraRapida', 'inputPesoRapido', 'inputExameRapido', 'inputRiaRapida'].forEach(id => document.getElementById(id).value = "");
+        document.getElementById('chkRiaCustom').checked = false; document.getElementById('inputRiaRapida').style.display = 'none'; document.getElementById('inputHoraRapida').focus();
         aoDigitarPacientes();
     }
 
-    function aoMudarRadiofarmaco() {
-        const sel = document.getElementById('radiofarmaco').value;
-        const boxCustom = document.getElementById('boxMeiaVidaCustom');
-        boxCustom.style.display = (sel === 'custom') ? 'block' : 'none';
-        processarSimulacaoCompleta();
-    }
+    function aoMudarRadiofarmaco() { document.getElementById('boxMeiaVidaCustom').style.display = (document.getElementById('radiofarmaco').value === 'custom') ? 'block' : 'none'; processarSimulacaoCompleta(); }
 
     function recalcularFatorAutomatico() {
-        const rotina = parseFloat(document.getElementById('razaoRotina').value);
-        const ria = parseFloat(document.getElementById('razaoRIA').value);
-        const divInfo = document.getElementById('infoFatorTexto');
-        const inputFatorOculto = document.getElementById('fatorSubtle');
-
-        if (!rotina || rotina <= 0 || !ria || ria <= 0 || isNaN(rotina) || isNaN(ria)) {
-            divInfo.innerText = "Informe valores válidos para cálculo.";
-            return;
-        }
-
-        let fatorCalculado = ria / rotina;
-        inputFatorOculto.value = fatorCalculado;
-
-        let percentualExato = ((1 - fatorCalculado) * 100).toFixed(1);
-        let fatorStr = fatorCalculado.toFixed(3);
-
-        if (parseFloat(percentualExato) > 0) {
-            divInfo.style.color = temaEscuro ? "#34d399" : "#059669";
-            divInfo.innerText = i18n[idiomaAtual].savingsText.replace('{fator}', fatorStr).replace('{val}', percentualExato.replace('.', ','));
-        } else if (parseFloat(percentualExato) < 0) {
-            let aumento = Math.abs(parseFloat(percentualExato)).toFixed(1);
-            divInfo.style.color = "#d97706";
-            divInfo.innerText = i18n[idiomaAtual].increaseText.replace('{fator}', fatorStr).replace('{val}', aumento.replace('.', ','));
-        } else {
-            divInfo.style.color = "var(--secondary-color)";
-            divInfo.innerText = i18n[idiomaAtual].standardDoseText;
-        }
+        const rotina = parseFloat(document.getElementById('razaoRotina').value); const ria = parseFloat(document.getElementById('razaoRIA').value);
+        const divInfo = document.getElementById('infoFatorTexto'); const inputFatorOculto = document.getElementById('fatorSubtle');
+        if (!rotina || rotina <= 0 || !ria || ria <= 0 || isNaN(rotina) || isNaN(ria)) { divInfo.innerText = "Informe valores válidos."; return; }
+        let fatorCalculado = ria / rotina; inputFatorOculto.value = fatorCalculado;
+        let percentualExato = ((1 - fatorCalculado) * 100).toFixed(1); let fatorStr = fatorCalculado.toFixed(3);
+        if (parseFloat(percentualExato) > 0) { divInfo.style.color = temaEscuro ? "#34d399" : "#059669"; divInfo.innerText = i18n[idiomaAtual].savingsText.replace('{fator}', fatorStr).replace('{val}', percentualExato.replace('.', ',')); }
+        else if (parseFloat(percentualExato) < 0) { divInfo.style.color = "#d97706"; divInfo.innerText = i18n[idiomaAtual].increaseText.replace('{fator}', fatorStr).replace('{val}', Math.abs(percentualExato).toFixed(1).replace('.', ',')); }
+        else { divInfo.style.color = "var(--secondary-color)"; divInfo.innerText = i18n[idiomaAtual].standardDoseText; }
     }
 
-    function obterDataAtualStr() {
-        const d = new Date();
-        return d.toISOString().split('T')[0];
-    }
-
-    function obterMeiaVidaMinutos() {
-        const sel = document.getElementById('radiofarmaco').value;
-        if (sel === 'custom') {
-            const v = parseFloat(document.getElementById('meiaVidaCustom').value);
-            if (!v || v <= 0 || isNaN(v)) return 109.8;
-            return v;
-        }
-        return parseFloat(sel);
-    }
-
-    function converterHoraParaMinutos(strHora) {
-        if (typeof strHora !== 'string') return null;
-        const limpo = strHora.trim();
-        if (!/^\d{1,2}:\d{2}$/.test(limpo)) return null;
-        const partes = limpo.split(':');
-        const h = parseInt(partes[0], 10);
-        const m = parseInt(partes[1], 10);
-        if (isNaN(h) || isNaN(m) || m < 0 || m > 59 || h < 0 || h > 47) return null;
-        return h * 60 + m;
-    }
-
-    function minutosParaHoraStr(minutosTotais) {
-        let h = Math.floor(minutosTotais / 60);
-        let m = minutosTotais % 60;
-        if (h >= 24) {
-            return `${String(h % 24).padStart(2, '0')}:${String(m).padStart(2, '0')} (+1d)`;
-        }
-        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    }
+    function obterDataAtualStr() { const d = new Date(); return d.toISOString().split('T')[0]; }
+    function obterMeiaVidaMinutos() { const sel = document.getElementById('radiofarmaco').value; if (sel === 'custom') { const v = parseFloat(document.getElementById('meiaVidaCustom').value); return (!v || v <= 0 || isNaN(v)) ? 109.8 : v; } return parseFloat(sel); }
+    function converterHoraParaMinutos(strHora) { if (typeof strHora !== 'string') return null; const limpo = strHora.trim(); if (!/^\d{1,2}:\d{2}$/.test(limpo)) return null; const partes = limpo.split(':'); const h = parseInt(partes[0], 10); const m = parseInt(partes[1], 10); if (isNaN(h) || isNaN(m) || m < 0 || m > 59 || h < 0 || h > 47) return null; return h * 60 + m; }
+    function minutosParaHoraStr(minutosTotais) { let h = Math.floor(minutosTotais / 60); let m = minutosTotais % 60; if (h >= 24) return `${String(h % 24).padStart(2, '0')}:${String(m).padStart(2, '0')} (+1d)`; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; }
 
     function parseLinhaPaciente(linha) {
-        const linhaLimpa = linha.trim();
-        if (!linhaLimpa) return null;
-
-        let riaEspecifica = null;
-        let exameEspecifico = null;
-        let partePac = linhaLimpa;
-
-        if (partePac.includes('@')) {
-            const partesRia = partePac.split('@');
-            partePac = partesRia[0].trim();
-            riaEspecifica = parseFloat(partesRia[1].trim());
-        }
-
-        if (partePac.includes('|')) {
-            const partesExame = partePac.split('|');
-            partePac = partesExame[0].trim();
-            let textoExameExtra = partesExame[1].trim();
-            if (textoExameExtra.toLowerCase().startsWith('exame:')) {
-                exameEspecifico = textoExameExtra.substring(6).trim();
-            } else {
-                exameEspecifico = textoExameExtra;
-            }
-        }
-
-        const partes = partePac.includes('=') ? partePac.split('=') : partePac.split(' ');
-        if (partes.length < 2) return null;
-
-        const horaBruta = partes[0].trim();
-
-        const regexHora = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (!regexHora.test(horaBruta)) {
-            console.warn(`Horário inválido ignorado: "${horaBruta}"`);
-            return null;
-        }
-
-        const minutos = converterHoraParaMinutos(horaBruta);
-        if (minutos === null) return null;
-
-        const pesoVal = parseFloat(partes[1].trim());
-        if (isNaN(pesoVal) || pesoVal < 1 || pesoVal > 300) {
-            console.warn(`Peso inválido ignorado: "${partes[1].trim()}" (deve ser entre 1 e 300 kg)`);
-            return null;
-        }
-
-        let riaFinal = null;
-        if (!isNaN(riaEspecifica)) {
-            if (riaEspecifica >= 0.001 && riaEspecifica <= 1.0) {
-                riaFinal = riaEspecifica;
-            } else {
-                console.warn(`RIA inválida ignorada: ${riaEspecifica} (deve ser entre 0.001 e 1.0)`);
-            }
-        }
-
-        return { 
-            minutos, 
-            horaStr: minutosParaHoraStr(minutos), 
-            peso: pesoVal, 
-            exame: exameEspecifico,
-            riaCustom: riaFinal
-        };
+        const linhaLimpa = linha.trim(); if (!linhaLimpa) return null;
+        let riaEspecifica = null; let exameEspecifico = null; let partePac = linhaLimpa;
+        if (partePac.includes('@')) { const partesRia = partePac.split('@'); partePac = partesRia[0].trim(); riaEspecifica = parseFloat(partesRia[1].trim()); }
+        if (partePac.includes('|')) { const partesExame = partePac.split('|'); partePac = partesExame[0].trim(); let textoExameExtra = partesExame[1].trim(); if (textoExameExtra.toLowerCase().startsWith('exame:')) { exameEspecifico = textoExameExtra.substring(6).trim(); } else { exameEspecifico = textoExameExtra; } }
+        const partes = partePac.includes('=') ? partePac.split('=') : partePac.split(' '); if (partes.length < 2) return null;
+        const horaBruta = partes[0].trim(); if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(horaBruta)) return null;
+        const minutos = converterHoraParaMinutos(horaBruta); if (minutos === null) return null;
+        const pesoVal = parseFloat(partes[1].trim()); if (isNaN(pesoVal) || pesoVal < 1 || pesoVal > 300) return null;
+        let riaFinal = (!isNaN(riaEspecifica) && riaEspecifica >= 0.001 && riaEspecifica <= 1.0) ? riaEspecifica : null;
+        return { minutos, horaStr: minutosParaHoraStr(minutos), peso: pesoVal, exame: exameEspecifico, riaCustom: riaFinal };
     }
 
-    function formatarPacientesParaTextarea(arrPacientes) {
-        return arrPacientes.map(p => {
-            let str = `${p.horaStr} = ${p.peso}`;
-            if (p.exame) { str += ` | Exame: ${p.exame}`; }
-            if (p.riaCustom) { str += ` @ ${p.riaCustom}`; }
-            return str;
-        }).join('\n');
-    }
+    function formatarPacientesParaTextarea(arrPacientes) { return arrPacientes.map(p => { let str = `${p.horaStr} = ${p.peso}`; if (p.exame) str += ` | Exame: ${p.exame}`; if (p.riaCustom) str += ` @ ${p.riaCustom}`; return str; }).join('\n'); }
 
     async function aoMudarDataInsercao() {
-        if (temporizadorSalvamento) {
-            clearTimeout(temporizadorSalvamento);
-            temporizadorSalvamento = null;
-            await salvarDadosNuvem();
-        }
-
-        const novaData = document.getElementById('dataInsercao').value;
-        document.getElementById('filtroData').value = novaData;
-        carregarDadosPorData();
+        if (temporizadorSalvamento) { clearTimeout(temporizadorSalvamento); temporizadorSalvamento = null; await salvarDadosNuvem(); }
+        document.getElementById('filtroData').value = document.getElementById('dataInsercao').value; carregarDadosPorData();
     }
 
     function aoDigitarPacientes() {
@@ -1458,25 +641,19 @@
         processarSimulacaoCompleta();
         clearTimeout(temporizadorSalvamento);
         document.getElementById('syncStatus').innerText = "(Digitando...)";
-        temporizadorSalvamento = setTimeout(() => {
-            salvarDadosNuvem();
-        }, 800);
+        temporizadorSalvamento = setTimeout(() => { salvarDadosNuvem(); }, 800);
     }
 
     function carregarDadosPorData() {
         estado.carregandoRemoto = true;
         const dataSelecionada = document.getElementById('filtroData').value;
-        
-        if (estado.banco.historicoDias && estado.banco.historicoDias[dataSelecionada]) {
+        if (!estado.banco || !estado.banco.historicoDias) { estado.carregandoRemoto = false; return; }
+        if (estado.banco.historicoDias[dataSelecionada]) {
             let dadosDia = estado.banco.historicoDias[dataSelecionada];
             document.getElementById('listaPacientes').value = dadosDia.textoPacientes || "";
             estado.cache.reposicoesExtras[dataSelecionada] = dadosDia.reposicoesExtras || [];
             estado.cache.overridesAuto[dataSelecionada] = dadosDia.overridesAuto || {};
-            
-            if (dadosDia.radiofarmaco) {
-                document.getElementById('radiofarmaco').value = dadosDia.radiofarmaco;
-                aoMudarRadiofarmaco();
-            }
+            if (dadosDia.radiofarmaco) { document.getElementById('radiofarmaco').value = dadosDia.radiofarmaco; aoMudarRadiofarmaco(); }
             if (dadosDia.razaoRotina) { document.getElementById('razaoRotina').value = dadosDia.razaoRotina; }
             if (dadosDia.razaoRIA) { document.getElementById('razaoRIA').value = dadosDia.razaoRIA; }
             if (dadosDia.fatorSubtle) { document.getElementById('fatorSubtle').value = dadosDia.fatorSubtle; }
@@ -1484,13 +661,10 @@
             if (dadosDia.dosePadraoLote) { document.getElementById('dosePadraoLote').value = dadosDia.dosePadraoLote; }
         } else {
             document.getElementById('listaPacientes').value = "";
-            estado.cache.reposicoesExtras[dataSelecionada] = [];
-            estado.cache.overridesAuto[dataSelecionada] = {};
+            estado.cache.reposicoesExtras[dataSelecionada] = []; estado.cache.overridesAuto[dataSelecionada] = {};
         }
-        recalcularFatorAutomatico();
-        processarSimulacaoCompleta();
-        atualizarRelatorioConsolidado();
-        estado.carregandoRemoto = false;
+        recalcularFatorAutomatico(); processarSimulacaoCompleta(); atualizarRelatorioConsolidado();
+        setTimeout(() => { estado.carregandoRemoto = false; }, 50);
     }
 
     function processarSimulacaoCompleta() {
@@ -1499,603 +673,203 @@
             const dataAtual = document.getElementById('filtroData').value;
             let reposicoesManuaisArr = estado.cache.reposicoesExtras[dataAtual] || [];
             let overridesAuto = estado.cache.overridesAuto[dataAtual] || {};
-
             const a0Inicial = parseFloat(document.getElementById('dosePadraoLote').value) || 10;
             const tetoMaximo = a0Inicial * 2.5;
             document.getElementById('tituloGraficoTeto').innerText = `${i18n[idiomaAtual].titleChart} (Lote Padrão: ${a0Inicial} mCi)`;
-
             if (!textoPacientes) {
                 estado.pacientes = [];
                 document.getElementById('textoResultadoSimulacao').innerHTML = i18n[idiomaAtual].msgWaitingData;
                 document.getElementById('listaPedido').value = "";
-                
-                // Destrói o gráfico antigo para deixar a área totalmente em branco
-                if (meuGrafico) {
-                    meuGrafico.destroy();
-                    meuGrafico = null;
-                }
-                
+                if (meuGrafico) { meuGrafico.destroy(); meuGrafico = null; }
+                const canvas = document.getElementById('graficoDecaimento');
+                if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
                 return;
             }
-
             const razaoRotinaVal = parseFloat(document.getElementById('razaoRotina').value) || 0.12;
             const razaoRIAVal = parseFloat(document.getElementById('razaoRIA').value) || 0.08;
-            
-            const fatorSubtleCalculado = razaoRIAVal / razaoRotinaVal;
-            document.getElementById('fatorSubtle').value = fatorSubtleCalculado;
-
-            const meiaVidaMin = obterMeiaVidaMinutos();
-            const lambda = 0.693 / meiaVidaMin;
-            let pacientes = [];
-            
-            const linhasProcessadas = textoPacientes
-                .split(/(?=\s\d{1,2}:\d{2})|\n/)
-                .map(l => l.trim())
-                .filter(l => l !== '');
-
+            const fatorSubtleCalculado = razaoRIAVal / razaoRotinaVal; document.getElementById('fatorSubtle').value = fatorSubtleCalculado;
+            const meiaVidaMin = obterMeiaVidaMinutos(); const lambda = 0.693 / meiaVidaMin; let pacientes = [];
+            const linhasProcessadas = textoPacientes.split(/(?=\s\d{1,2}:\d{2})|\n/).map(l => l.trim()).filter(l => l !== '');
             linhasProcessadas.forEach(linha => {
                 const p = parseLinhaPaciente(linha);
                 if (p) {
-                    let riaUtilizada = p.riaCustom ? p.riaCustom : razaoRIAVal;
-                    let fatorPaciente = riaUtilizada / razaoRotinaVal;
-                    
-                    pacientes.push({
-                        ...p,
-                        doseNecessaria: p.peso * razaoRotinaVal * fatorPaciente
-                    });
+                    let riaUtilizada = p.riaCustom ? p.riaCustom : razaoRIAVal; let fatorPaciente = riaUtilizada / razaoRotinaVal;
+                    pacientes.push({ ...p, doseNecessaria: p.peso * razaoRotinaVal * fatorPaciente });
                 }
             });
-
             if (pacientes.length === 0) return;
-            pacientes.sort((a, b) => a.minutos - b.minutos);
-            estado.pacientes = pacientes;
-
-            let minInicioLote = pacientes[0].minutos;
-            let fimSimulacao = pacientes[pacientes.length - 1].minutos + 60;
-            
-            let estoqueAtual = a0Inicial;
-            let ultimoMinutoAvaliado = minInicioLote;
-            
-            let reposicoesAutoSet = new Set();
-            reposicoesAutoSet.add(pacientes[0].horaStr);
-
-            let detalhesResiduosMap = {};
-            detalhesResiduosMap[pacientes[0].horaStr] = { doseAuto: a0Inicial, residuo: 0, totalEstoque: a0Inicial };
-
+            pacientes.sort((a, b) => a.minutos - b.minutos); estado.pacientes = pacientes;
+            let minInicioLote = pacientes[0].minutos; let fimSimulacao = pacientes[pacientes.length - 1].minutos + 60;
+            let estoqueAtual = a0Inicial; let ultimoMinutoAvaliado = minInicioLote;
+            let reposicoesAutoSet = new Set(); reposicoesAutoSet.add(pacientes[0].horaStr);
+            let detalhesResiduosMap = {}; detalhesResiduosMap[pacientes[0].horaStr] = { doseAuto: a0Inicial, residuo: 0, totalEstoque: a0Inicial };
             pacientes.forEach((pac, index) => {
-                let deltaT = pac.minutos - ultimoMinutoAvaliado;
-                if (deltaT > 0) {
-                    estoqueAtual = estoqueAtual * Math.exp(-lambda * deltaT);
-                }
-                ultimoMinutoAvaliado = pac.minutos;
-
+                let deltaT = pac.minutos - ultimoMinutoAvaliado; if (deltaT > 0) { estoqueAtual = estoqueAtual * Math.exp(-lambda * deltaT); } ultimoMinutoAvaliado = pac.minutos;
                 if (reposicoesManuaisArr.includes(pac.horaStr)) {
-                    let residuoAtual = estoqueAtual;
-                    let doseComResiduo = a0Inicial + residuoAtual;
+                    let residuoAtual = estoqueAtual; let doseComResiduo = a0Inicial + residuoAtual;
                     detalhesResiduosMap[pac.horaStr] = { doseAuto: a0Inicial, residuo: residuoAtual, totalEstoque: doseComResiduo };
-                    estoqueAtual = doseComResiduo;
-                    if (estoqueAtual > tetoMaximo) estoqueAtual = tetoMaximo;
+                    estoqueAtual = doseComResiduo; if (estoqueAtual > tetoMaximo) estoqueAtual = tetoMaximo;
                 }
-
-                if (index === 0) {
-                    // Primeiro paciente consome do lote inicial
-                } else if (estoqueAtual < pac.doseNecessaria) {
+                if (index > 0 && estoqueAtual < pac.doseNecessaria) {
                     let horarioAlvo = overridesAuto[pac.horaStr] !== undefined ? overridesAuto[pac.horaStr] : pac.horaStr;
                     reposicoesAutoSet.add(horarioAlvo);
-                    
-                    let residuoAtual = estoqueAtual;
-                    let doseComResiduo = a0Inicial + residuoAtual;
+                    let residuoAtual = estoqueAtual; let doseComResiduo = a0Inicial + residuoAtual;
                     detalhesResiduosMap[horarioAlvo] = { doseAuto: a0Inicial, residuo: residuoAtual, totalEstoque: doseComResiduo };
-
-                    estoqueAtual = doseComResiduo; 
-                    if (estoqueAtual > tetoMaximo) estoqueAtual = tetoMaximo;
+                    estoqueAtual = doseComResiduo; if (estoqueAtual > tetoMaximo) estoqueAtual = tetoMaximo;
                 }
-                estoqueAtual -= pac.doseNecessaria;
-                if (estoqueAtual < 0) estoqueAtual = 0;
+                estoqueAtual -= pac.doseNecessaria; if (estoqueAtual < 0) estoqueAtual = 0;
             });
-
-            let reposicoesAutoArr = Array.from(reposicoesAutoSet);
-            let todasReposicoes = [...reposicoesAutoArr, ...reposicoesManuaisArr];
-            let repositorioUnicoSet = new Set(todasReposicoes);
-            let pedidosReposicao = Array.from(repositorioUnicoSet);
+            let reposicoesAutoArr = Array.from(reposicoesAutoSet); let todasReposicoes = [...reposicoesAutoArr, ...reposicoesManuaisArr];
+            let repositorioUnicoSet = new Set(todasReposicoes); let pedidosReposicao = Array.from(repositorioUnicoSet);
             pedidosReposicao.sort((a, b) => converterHoraParaMinutos(a) - converterHoraParaMinutos(b));
-
             let minutosUnicos = new Set();
-            for (let m = minInicioLote; m <= fimSimulacao; m += 5) {
-                minutosUnicos.add(m);
-            }
-            pacientes.forEach(p => minutosUnicos.add(p.minutos));
-            pedidosReposicao.forEach(h => minutosUnicos.add(converterHoraParaMinutos(h)));
+            for (let m = minInicioLote; m <= fimSimulacao; m += 5) { minutosUnicos.add(m); }
+            pacientes.forEach(p => minutosUnicos.add(p.minutos)); pedidosReposicao.forEach(h => minutosUnicos.add(converterHoraParaMinutos(h)));
             let minutosArray = Array.from(minutosUnicos).sort((a, b) => a - b);
-
-            let dadosCurva = [];
-            let dadosAtividadePre = [];
-            let dadosPacientesPuntos = [];
-            let dadosDosesAutoAcima = [];
-            let dadosDosesExtrasAcima = [];
-            let dadosDosesAplicadasPuntos = []; // DADOS DA BOLINHA VERDE
-
-            let minutosPacientes = pacientes.map(p => p.minutos);
-            let minutosAuto = reposicoesAutoArr.map(h => converterHoraParaMinutos(h));
-            let minutosExtras = reposicoesManuaisArr.map(h => converterHoraParaMinutos(h));
-
-            let estoqueSim = a0Inicial;
-            let tempoCursor = minInicioLote;
-
+            let dadosCurva = []; let dadosAtividadePre = []; let dadosPacientesPuntos = []; let dadosDosesAutoAcima = []; let dadosDosesExtrasAcima = []; let dadosDosesAplicadasPuntos = [];
+            let minutosPacientes = pacientes.map(p => p.minutos); let minutosAuto = reposicoesAutoArr.map(h => converterHoraParaMinutos(h)); let minutosExtras = reposicoesManuaisArr.map(h => converterHoraParaMinutos(h));
+            let estoqueSim = a0Inicial; let tempoCursor = minInicioLote;
             minutosArray.forEach(m => {
-                let dt = m - tempoCursor;
-                if (dt > 0) {
-                    estoqueSim = estoqueSim * Math.exp(-lambda * dt);
-                    tempoCursor = m;
-                }
-
-                let horaStrM = minutosParaHoraStr(m);
-                let ehMomentoDeReposicao = repositorioUnicoSet.has(horaStrM) && m !== minInicioLote;
-
-                if (ehMomentoDeReposicao) {
-                    let infoR = detalhesResiduosMap[horaStrM];
-                    let doseAdicionada = infoR ? infoR.doseAuto : a0Inicial;
-                    estoqueSim += doseAdicionada;
-                    if (estoqueSim > tetoMaximo) estoqueSim = tetoMaximo;
-                }
-
+                let dt = m - tempoCursor; if (dt > 0) { estoqueSim = estoqueSim * Math.exp(-lambda * dt); tempoCursor = m; }
+                let horaStrM = minutosParaHoraStr(m); let ehMomentoDeReposicao = repositorioUnicoSet.has(horaStrM) && m !== minInicioLote;
+                if (ehMomentoDeReposicao) { let infoR = detalhesResiduosMap[horaStrM]; let doseAdicionada = infoR ? infoR.doseAuto : a0Inicial; estoqueSim += doseAdicionada; if (estoqueSim > tetoMaximo) estoqueSim = tetoMaximo; }
                 let picoEstoqueNoMinuto = estoqueSim;
-
-                pacientes.forEach(pac => {
-                    if (pac.minutos === m) {
-                        estoqueSim -= pac.doseNecessaria;
-                        if (estoqueSim < 0) estoqueSim = 0;
-                    }
-                });
-
-                let valorAtivRestante = estoqueSim > 0 ? parseFloat(estoqueSim.toFixed(2)) : 0;
-                dadosCurva.push({ x: m, y: valorAtivRestante });
-
+                pacientes.forEach(pac => { if (pac.minutos === m) { estoqueSim -= pac.doseNecessaria; if (estoqueSim < 0) estoqueSim = 0; } });
+                let valorAtivRestante = estoqueSim > 0 ? parseFloat(estoqueSim.toFixed(2)) : 0; dadosCurva.push({ x: m, y: valorAtivRestante });
                 if (minutosPacientes.includes(m)) {
                     let pacObj = pacientes.find(p => p.minutos === m);
                     dadosPacientesPuntos.push({ x: m, y: valorAtivRestante });
-                    dadosAtividadePre.push({
-                        ativPre: parseFloat(picoEstoqueNoMinuto.toFixed(2)),
-                        dosePaciente: pacObj ? pacObj.doseNecessaria : 0,
-                        peso: pacObj ? pacObj.peso : 0,
-                        exame: pacObj ? pacObj.exame : null,
-                        riaCustom: pacObj ? pacObj.riaCustom : null
-                    });
-                    // Preenche a bolinha verde com a dose aplicada
+                    dadosAtividadePre.push({ ativPre: parseFloat(picoEstoqueNoMinuto.toFixed(2)), dosePaciente: pacObj ? pacObj.doseNecessaria : 0, peso: pacObj ? pacObj.peso : 0, exame: pacObj ? pacObj.exame : null, riaCustom: pacObj ? pacObj.riaCustom : null });
                     dadosDosesAplicadasPuntos.push({ x: m, y: pacObj ? parseFloat(pacObj.doseNecessaria.toFixed(2)) : 0 });
-                } else {
-                    dadosPacientesPuntos.push({ x: m, y: null });
-                    dadosAtividadePre.push(null);
-                    dadosDosesAplicadasPuntos.push({ x: m, y: null });
-                }
-
-                if (minutosAuto.includes(m)) {
-                    dadosDosesAutoAcima.push({ x: m, y: parseFloat(picoEstoqueNoMinuto.toFixed(2)) });
-                } else {
-                    dadosDosesAutoAcima.push({ x: m, y: null });
-                }
-
-                if (minutosExtras.includes(m)) {
-                    dadosDosesExtrasAcima.push({ x: m, y: parseFloat(picoEstoqueNoMinuto.toFixed(2)) });
-                } else {
-                    dadosDosesExtrasAcima.push({ x: m, y: null });
-                }
+                } else { dadosPacientesPuntos.push({ x: m, y: null }); dadosAtividadePre.push(null); dadosDosesAplicadasPuntos.push({ x: m, y: null }); }
+                if (minutosAuto.includes(m)) { dadosDosesAutoAcima.push({ x: m, y: parseFloat(picoEstoqueNoMinuto.toFixed(2)) }); } else { dadosDosesAutoAcima.push({ x: m, y: null }); }
+                if (minutosExtras.includes(m)) { dadosDosesExtrasAcima.push({ x: m, y: parseFloat(picoEstoqueNoMinuto.toFixed(2)) }); } else { dadosDosesExtrasAcima.push({ x: m, y: null }); }
             });
-
             if (meuGrafico) meuGrafico.destroy();
-
-            const gridColor = temaEscuro ? '#334155' : '#e2e8f0';
-            const textColor = temaEscuro ? '#e2e8f0' : '#1e293b';
-
+            const gridColor = temaEscuro ? '#334155' : '#e2e8f0'; const textColor = temaEscuro ? '#e2e8f0' : '#1e293b';
             const ctx = document.getElementById('graficoDecaimento').getContext('2d');
             meuGrafico = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    datasets: [
-                        {
-                            label: i18n[idiomaAtual].datasetRemaining,
-                            data: dadosCurva,
-                            infoPacientePre: dadosAtividadePre,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.2,
-                            pointRadius: 0,
-                            pointHitRadius: 1,
-                            pointHoverRadius: 4
-                        },
-                        {
-                            label: i18n[idiomaAtual].datasetPatients,
-                            data: dadosPacientesPuntos,
-                            borderColor: 'transparent',
-                            backgroundColor: '#ef4444',
-                            pointBackgroundColor: '#ef4444',
-                            pointBorderColor: '#ef4444',
-                            pointRadius: 7,
-                            pointHoverRadius: 9,
-                            showLine: false
-                        },
-                        {
-                            label: i18n[idiomaAtual].datasetStock,
-                            data: dadosDosesAutoAcima,
-                            borderColor: 'transparent',
-                            backgroundColor: '#3b82f6',
-                            pointBackgroundColor: '#3b82f6',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 1.5,
-                            pointRadius: 7,
-                            pointHoverRadius: 9,
-                            showLine: false
-                        },
-                        {
-                            label: i18n[idiomaAtual].datasetExtra,
-                            data: dadosDosesExtrasAcima,
-                            borderColor: 'transparent',
-                            backgroundColor: '#f59e0b',
-                            pointBackgroundColor: '#f59e0b',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 1.5,
-                            pointRadius: 7,
-                            pointHoverRadius: 9,
-                            showLine: false
-                        },
-                        // NOVO DATASET DA BOLINHA VERDE
-                        {
-                            label: 'Dose Aplicada (Verde)',
-                            data: dadosDosesAplicadasPuntos,
-                            borderColor: 'transparent',
-                            backgroundColor: '#10b981', 
-                            pointBackgroundColor: '#10b981',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 1.5,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            showLine: false
-                        }
-                    ]
-                },
+                data: { datasets: [
+                    { label: i18n[idiomaAtual].datasetRemaining, data: dadosCurva, infoPacientePre: dadosAtividadePre, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, fill: true, tension: 0.2, pointRadius: 0, pointHitRadius: 1, pointHoverRadius: 4 },
+                    { label: i18n[idiomaAtual].datasetPatients, data: dadosPacientesPuntos, borderColor: 'transparent', backgroundColor: '#ef4444', pointBackgroundColor: '#ef4444', pointBorderColor: '#ef4444', pointRadius: 7, pointHoverRadius: 9, showLine: false },
+                    { label: i18n[idiomaAtual].datasetStock, data: dadosDosesAutoAcima, borderColor: 'transparent', backgroundColor: '#3b82f6', pointBackgroundColor: '#3b82f6', pointBorderColor: '#ffffff', pointBorderWidth: 1.5, pointRadius: 7, pointHoverRadius: 9, showLine: false },
+                    { label: i18n[idiomaAtual].datasetExtra, data: dadosDosesExtrasAcima, borderColor: 'transparent', backgroundColor: '#f59e0b', pointBackgroundColor: '#f59e0b', pointBorderColor: '#ffffff', pointBorderWidth: 1.5, pointRadius: 7, pointHoverRadius: 9, showLine: false },
+                    { label: 'Dose Aplicada (Verde)', data: dadosDosesAplicadasPuntos, borderColor: 'transparent', backgroundColor: '#10b981', pointBackgroundColor: '#10b981', pointBorderColor: '#ffffff', pointBorderWidth: 1.5, pointRadius: 6, pointHoverRadius: 8, showLine: false }
+                ]},
                 plugins: [pluginLinhasTracejadasVertical],
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    // AQUI ESTÁ O SEGREDO: O MODO 'nearest' garante que ele pegue a bolinha mais próxima do mouse
-                    interaction: {
-                        mode: 'nearest',
-                        intersect: true,
-                    },
-                    plugins: {
-                        tooltip: {
-                            titleFont: { size: 12 },
-                            bodyFont: { size: 11 },
-                            padding: 8,
-                            callbacks: {
-                                title: function(context) {
-                                    let minutosTotais = context[0].parsed.x;
-                                    return minutosParaHoraStr(minutosTotais);
-                                },
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    let minutosTotais = context.parsed.x;
-                                    let horarioStr = minutosParaHoraStr(minutosTotais);
-
-                                    // 1. ESCONDE A "ATIVIDADE RESTANTE" SE HOUVER UM PACIENTE NO MESMO HORÁRIO
-                                    if (label === i18n[idiomaAtual].datasetRemaining) {
-                                        const pacientesNoHorario = context.chart.data.datasets[1].data;
-                                        const temPaciente = pacientesNoHorario.some(p => p.x === minutosTotais && p.y !== null);
-                                        
-                                        if (temPaciente) {
-                                            return null;
-                                        }
-                                        
-                                        if (context.parsed.y !== null) {
-                                            let val = context.parsed.y < 0 ? 0 : context.parsed.y;
-                                            return `Estoque Atual: ${val.toFixed(2).replace('.', ',')} mCi`;
-                                        }
-                                        return null;
-                                    }
-
-                                    // 2. A BOLINHA VERDE AGORA MOSTRA A DOSE + O PESO
-                                    if (label === 'Dose Aplicada (Verde)') {
-                                        const index = context.dataIndex;
-                                        const dataset0 = context.chart.data.datasets[0];
-                                        const infoP = dataset0.infoPacientePre ? dataset0.infoPacientePre[index] : null;
-                                        
-                                        let strRia = (infoP && infoP.riaCustom) ? ` | RIA Custom: ${infoP.riaCustom}` : '';
-                                        let pesoStr = infoP ? ` (Peso: ${infoP.peso} kg${strRia})` : '';
-                                        let exameStr = (infoP && infoP.exame) ? `\nExame: ${infoP.exame}` : '';
-
-                                        return `Dose Aplicada: ${context.parsed.y.toFixed(2).replace('.', ',')} mCi${pesoStr}${exameStr}`;
-                                    }
-
-                                    // 3. MOSTRA AS DOSES DE ESTOQUE (AZUL) E EXTRAS (LARANJA)
-                                    if (label === i18n[idiomaAtual].datasetStock || label === i18n[idiomaAtual].datasetExtra) {
-                                        let infoRes = detalhesResiduosMap[horarioStr];
-                                        if (infoRes) {
-                                            return [
-                                                `${i18n[idiomaAtual].datasetStock}: ${infoRes.totalEstoque.toFixed(2).replace('.', ',')} mCi`,
-                                                `• Auto: ${infoRes.doseAuto.toFixed(2).replace('.', ',')} mCi`,
-                                                `• Resíduo: ${infoRes.residuo.toFixed(2).replace('.', ',')} mCi`
-                                            ];
-                                        }
-                                        let valY = context.parsed.y;
-                                        return `${i18n[idiomaAtual].datasetStock}: ${valY.toFixed(2).replace('.', ',')} mCi`;
-                                    }
-
-                                    // 4. MOSTRA OS DADOS DO PACIENTE (BOLINHA VERMELHA) SEM A DOSE APLICADA REPETIDA
-                                    if (label === i18n[idiomaAtual].datasetPatients) {
-                                        const index = context.dataIndex;
-                                        const dataset0 = context.chart.data.datasets[0];
-                                        const infoP = dataset0.infoPacientePre ? dataset0.infoPacientePre[index] : null;
-                                        
-                                        let ativRestante = context.parsed.y < 0 ? 0 : context.parsed.y;
-                                        let linhasTooltip = [`Estoque Restante: ${ativRestante.toFixed(2).replace('.', ',')} mCi`];
-                                        
-                                        if (infoP) {
-                                            let h = Math.floor(minutosTotais / 60);
-                                            let m = minutosTotais % 60;
-                                            let minAnt = m - 1 < 0 ? 59 : m - 1;
-                                            let hAnt = m - 1 < 0 ? (h - 1 + 24) % 24 : h;
-                                            let hFormat = `${String(hAnt).padStart(2, '0')}:${String(minAnt).padStart(2, '0')}`;
-                                            linhasTooltip.push(`Pré-Aplicação (${hFormat}): ${infoP.ativPre.toFixed(2).replace('.', ',')} mCi`);
-                                        }
-                                        return linhasTooltip;
-                                    }
-
-                                    return null;
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'nearest', intersect: true },
+                    plugins: { tooltip: {
+                        titleFont: { size: 12 }, bodyFont: { size: 11 }, padding: 8,
+                        callbacks: {
+                            title: function(context) { return minutosParaHoraStr(context[0].parsed.x); },
+                            label: function(context) {
+                                let label = context.dataset.label || ''; let minutosTotais = context.parsed.x;
+                                if (label === i18n[idiomaAtual].datasetRemaining) {
+                                    const pacientesNoHorario = context.chart.data.datasets[1].data; const temPaciente = pacientesNoHorario.some(p => p.x === minutosTotais && p.y !== null);
+                                    if (temPaciente) return null; if (context.parsed.y !== null) { return `Estoque Atual: ${(context.parsed.y < 0 ? 0 : context.parsed.y).toFixed(2).replace('.', ',')} mCi`; } return null;
                                 }
+                                if (label === 'Dose Aplicada (Verde)') {
+                                    const index = context.dataIndex; const dataset0 = context.chart.data.datasets[0]; const infoP = dataset0.infoPacientePre ? dataset0.infoPacientePre[index] : null;
+                                    let strRia = (infoP && infoP.riaCustom) ? ` | RIA: ${infoP.riaCustom}` : ''; let pesoStr = infoP ? ` (Peso: ${infoP.peso} kg${strRia})` : '';
+                                    let exameStr = (infoP && infoP.exame) ? `\nExame: ${infoP.exame}` : '';
+                                    return `Dose Aplicada: ${context.parsed.y.toFixed(2).replace('.', ',')} mCi${pesoStr}${exameStr}`;
+                                }
+                                if (label === i18n[idiomaAtual].datasetStock || label === i18n[idiomaAtual].datasetExtra) {
+                                    let horaStr = minutosParaHoraStr(minutosTotais); let infoRes = detalhesResiduosMap[horaStr];
+                                    if (infoRes) { return [`${i18n[idiomaAtual].datasetStock}: ${infoRes.totalEstoque.toFixed(2).replace('.', ',')} mCi`, `• Auto: ${infoRes.doseAuto.toFixed(2).replace('.', ',')} mCi`, `• Resíduo: ${infoRes.residuo.toFixed(2).replace('.', ',')} mCi`]; }
+                                    return `${i18n[idiomaAtual].datasetStock}: ${context.parsed.y.toFixed(2).replace('.', ',')} mCi`;
+                                }
+                                if (label === i18n[idiomaAtual].datasetPatients) {
+                                    const index = context.dataIndex; const dataset0 = context.chart.data.datasets[0]; const infoP = dataset0.infoPacientePre ? dataset0.infoPacientePre[index] : null;
+                                    let ativRestante = context.parsed.y < 0 ? 0 : context.parsed.y; let linhasTooltip = [`Estoque Restante: ${ativRestante.toFixed(2).replace('.', ',')} mCi`];
+                                    if (infoP) { let h = Math.floor(minutosTotais / 60); let m = minutosTotais % 60; let minAnt = m - 1 < 0 ? 59 : m - 1; let hAnt = m - 1 < 0 ? (h - 1 + 24) % 24 : h; let hFormat = `${String(hAnt).padStart(2, '0')}:${String(minAnt).padStart(2, '0')}`; linhasTooltip.push(`Pré-Aplicação (${hFormat}): ${infoP.ativPre.toFixed(2).replace('.', ',')} mCi`); } return linhasTooltip;
+                                }
+                                return null;
                             }
                         }
-                    },
+                    }},
                     onClick: async (e, elements) => {
                         const dataAtual = document.getElementById('filtroData').value;
                         if (!estado.cache.reposicoesExtras[dataAtual]) estado.cache.reposicoesExtras[dataAtual] = [];
                         if (!estado.cache.overridesAuto[dataAtual]) estado.cache.overridesAuto[dataAtual] = {};
-
                         if (elements && elements.length > 0) {
-                            // Como mudamos para 'nearest', ele vai pegar a bolinha exata que você clicou
-                            const hit = elements[0];
-                            const datasetIndex = hit.datasetIndex;
-                            const index = hit.index;
-                            const minutosClicados = meuGrafico.data.datasets[datasetIndex].data[index].x;
-                            let horarioClicado = minutosParaHoraStr(minutosClicados);
-
-                            if (datasetIndex === 2) { // Bola Azul (Estoque)
-                                const res = await abrirDialogo({
-                                    titulo: i18n[idiomaAtual].datasetStock,
-                                    mensagem: `Dose Automática às ${horarioClicado}.\nDigite o NOVO HORÁRIO (HH:MM):`,
-                                    inputs: [{ value: horarioClicado, placeholder: 'HH:MM' }]
-                                });
-                                if (res.confirmado && res.valores[0]) {
-                                    let novoH = res.valores[0].trim();
-                                    let pacAlvo = pacientes.find(p => p.horaStr === horarioClicado) || pacientes[0];
-                                    if (pacAlvo) {
-                                        estado.cache.overridesAuto[dataAtual][pacAlvo.horaStr] = novoH;
-                                        aoDigitarPacientes();
-                                    }
-                                }
+                            const hit = elements[0]; const datasetIndex = hit.datasetIndex; const index = hit.index;
+                            const minutosClicados = meuGrafico.data.datasets[datasetIndex].data[index].x; let horarioClicado = minutosParaHoraStr(minutosClicados);
+                            if (datasetIndex === 2) { // Bola Azul
+                                const res = await abrirDialogo({ titulo: i18n[idiomaAtual].datasetStock, mensagem: `Dose Automática às ${horarioClicado}.\nDigite o NOVO HORÁRIO (HH:MM):`, inputs: [{ value: horarioClicado, placeholder: 'HH:MM' }] });
+                                if (res.confirmado && res.valores[0]) { let novoH = res.valores[0].trim(); let pacAlvo = pacientes.find(p => p.horaStr === horarioClicado) || pacientes[0]; if (pacAlvo) { estado.cache.overridesAuto[dataAtual][pacAlvo.horaStr] = novoH; aoDigitarPacientes(); } }
                                 return;
                             }
-
-                            if (datasetIndex === 3) { // Bola Laranja (Dose Extra)
-                                const res = await abrirDialogo({
-                                    titulo: i18n[idiomaAtual].datasetExtra,
-                                    mensagem: `Dose Extra às ${horarioClicado}.\nO que deseja fazer?`,
-                                    inputs: [{ value: '', placeholder: '1-Alterar / 2-Remover' }]
-                                });
+                            if (datasetIndex === 3) { // Bola Laranja
+                                const res = await abrirDialogo({ titulo: i18n[idiomaAtual].datasetExtra, mensagem: `Dose Extra às ${horarioClicado}.\nO que deseja fazer?`, inputs: [{ value: '', placeholder: '1-Alterar / 2-Remover' }] });
                                 if (res.confirmado) {
-                                    if (res.valores[0] === '1') {
-                                        const resH = await abrirDialogo({
-                                            titulo: 'Alterar Horário',
-                                            mensagem: 'Digite o novo horário (HH:MM):',
-                                            inputs: [{ value: horarioClicado }]
-                                        });
-                                        if (resH.confirmado && resH.valores[0]) {
-                                            estado.cache.reposicoesExtras[dataAtual] = estado.cache.reposicoesExtras[dataAtual].filter(h => h !== horarioClicado);
-                                            estado.cache.reposicoesExtras[dataAtual].push(resH.valores[0].trim());
-                                            aoDigitarPacientes();
-                                        }
-                                    } else if (res.valores[0] === '2') {
-                                        // REMOVE A DOSE EXTRA
-                                        estado.cache.reposicoesExtras[dataAtual] = estado.cache.reposicoesExtras[dataAtual].filter(h => h !== horarioClicado);
-                                        aoDigitarPacientes();
-                                    }
+                                    if (res.valores[0] === '1') { const resH = await abrirDialogo({ titulo: 'Alterar Horário', mensagem: 'Digite o novo horário (HH:MM):', inputs: [{ value: horarioClicado }] }); if (resH.confirmado && resH.valores[0]) { estado.cache.reposicoesExtras[dataAtual] = estado.cache.reposicoesExtras[dataAtual].filter(h => h !== horarioClicado); estado.cache.reposicoesExtras[dataAtual].push(resH.valores[0].trim()); aoDigitarPacientes(); } }
+                                    else if (res.valores[0] === '2') { estado.cache.reposicoesExtras[dataAtual] = estado.cache.reposicoesExtras[dataAtual].filter(h => h !== horarioClicado); aoDigitarPacientes(); }
                                 }
                                 return;
                             }
-
                             let pacEncontrado = pacientes.find(p => p.minutos === minutosClicados);
                             if (pacEncontrado) {
-                                const res = await abrirDialogo({
-                                    titulo: `Paciente às ${pacEncontrado.horaStr}`,
-                                    mensagem: 'Escolha a ação:\n1 - Alterar Dados (Horário, Peso, RIA)\n2 - Remover Paciente',
-                                    inputs: [{ value: '1', placeholder: '1 ou 2' }]
-                                });
+                                const res = await abrirDialogo({ titulo: `Paciente às ${pacEncontrado.horaStr}`, mensagem: '1 - Alterar Dados (Horário, Peso, RIA)\n2 - Remover Paciente', inputs: [{ value: '1', placeholder: '1 ou 2' }] });
                                 if (res.confirmado) {
                                     if (res.valores[0] === '1') {
-                                        const resEdit = await abrirDialogo({
-                                            titulo: 'Editar Paciente',
-                                            mensagem: 'Informe as novas informações (Deixe RIA em branco para usar o padrão):',
-                                            inputs: [
-                                                { label: 'Horário (HH:MM)', value: pacEncontrado.horaStr },
-                                                { label: 'Peso (kg)', value: pacEncontrado.peso, type: 'number' },
-                                                { label: 'RIA Customizada (opcional)', value: pacEncontrado.riaCustom || '', type: 'number' }
-                                            ]
-                                        });
+                                        const resEdit = await abrirDialogo({ titulo: 'Editar Paciente', mensagem: 'Informe as novas informações:', inputs: [{ label: 'Horário (HH:MM)', value: pacEncontrado.horaStr }, { label: 'Peso (kg)', value: pacEncontrado.peso, type: 'number' }, { label: 'RIA Customizada (opcional)', value: pacEncontrado.riaCustom || '', type: 'number' }] });
                                         if (resEdit.confirmado) {
-                                            let novoM = converterHoraParaMinutos(resEdit.valores[0]);
-                                            let novoP = parseFloat(resEdit.valores[1]);
-                                            let novaRia = parseFloat(resEdit.valores[2]);
-                                            
-                                            if (novoM !== null && !isNaN(novoP)) {
-                                                pacEncontrado.minutos = novoM;
-                                                pacEncontrado.horaStr = minutosParaHoraStr(novoM);
-                                                pacEncontrado.peso = novoP;
-                                                pacEncontrado.riaCustom = (!isNaN(novaRia) && novaRia > 0) ? novaRia : null;
-                                                
-                                                pacientes.sort((a, b) => a.minutos - b.minutos);
-                                                document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes);
-                                                aoDigitarPacientes();
-                                            }
+                                            let novoM = converterHoraParaMinutos(resEdit.valores[0]); let novoP = parseFloat(resEdit.valores[1]); let novaRia = parseFloat(resEdit.valores[2]);
+                                            if (novoM !== null && !isNaN(novoP)) { pacEncontrado.minutos = novoM; pacEncontrado.horaStr = minutosParaHoraStr(novoM); pacEncontrado.peso = novoP; pacEncontrado.riaCustom = (!isNaN(novaRia) && novaRia > 0) ? novaRia : null; pacientes.sort((a, b) => a.minutos - b.minutos); document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes); aoDigitarPacientes(); }
                                         }
-                                    } else if (res.valores[0] === '2') {
-                                        pacientes = pacientes.filter(p => p.minutos !== pacEncontrado.minutos);
-                                        document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes);
-                                        aoDigitarPacientes();
-                                    }
+                                    } else if (res.valores[0] === '2') { pacientes = pacientes.filter(p => p.minutos !== pacEncontrado.minutos); document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes); aoDigitarPacientes(); }
                                 }
                                 return;
                             }
                         }
-
-                        // Se clicou em área vazia, abre o menu de adicionar
-                        const canvasPosition = Chart.helpers.getRelativePosition(e, meuGrafico);
-                        const dataX = meuGrafico.scales.x.getValueForPixel(canvasPosition.x);
+                        const canvasPosition = Chart.helpers.getRelativePosition(e, meuGrafico); const dataX = meuGrafico.scales.x.getValueForPixel(canvasPosition.x);
                         if (dataX !== undefined) {
-                            let minutosArredondados = Math.round(dataX / 5) * 5;
-                            let horarioSugerido = minutosParaHoraStr(minutosArredondados);
-
-                            const resAdd = await abrirDialogo({
-                                titulo: 'Adicionar Evento',
-                                mensagem: `Adicionar às ${horarioSugerido}?\n1 - Paciente\n2 - Dose Extra (${a0Inicial} mCi)`,
-                                inputs: [{ value: '1', placeholder: '1 ou 2' }]
-                            });
-
+                            let minutosArredondados = Math.round(dataX / 5) * 5; let horarioSugerido = minutosParaHoraStr(minutosArredondados);
+                            const resAdd = await abrirDialogo({ titulo: 'Adicionar Evento', mensagem: `Adicionar às ${horarioSugerido}?\n1 - Paciente\n2 - Dose Extra`, inputs: [{ value: '1', placeholder: '1 ou 2' }] });
                             if (resAdd.confirmado) {
                                 if (resAdd.valores[0] === '1') {
-                                    const resPac = await abrirDialogo({
-                                        titulo: 'Novo Paciente',
-                                        mensagem: 'Informe os dados do paciente:',
-                                        inputs: [
-                                            { label: 'Horário (HH:MM)', value: horarioSugerido },
-                                            { label: 'Peso (kg)', value: '80', type: 'number' },
-                                            { label: 'RIA Custom (opcional)', value: '', type: 'number' }
-                                        ]
-                                    });
-                                    if (resPac.confirmado && resPac.valores[0] && resPac.valores[1]) {
-                                        let textarea = document.getElementById('listaPacientes');
-                                        let hStr = resPac.valores[0].trim();
-                                        let pStr = resPac.valores[1].trim();
-                                        let rStr = resPac.valores[2] ? resPac.valores[2].trim() : '';
-
-                                        let linhaNova = `${hStr} = ${pStr}`;
-                                        if (rStr && !isNaN(rStr) && parseFloat(rStr) > 0) {
-                                            linhaNova += ` @ ${rStr}`;
-                                        }
-
-                                        textarea.value = textarea.value.trim() ? textarea.value.trim() + '\n' + linhaNova : linhaNova;
-                                        aoDigitarPacientes();
-                                    }
-                                } else if (resAdd.valores[0] === '2') {
-                                    estado.cache.reposicoesExtras[dataAtual].push(horarioSugerido);
-                                    aoDigitarPacientes();
-                                }
+                                    const resPac = await abrirDialogo({ titulo: 'Novo Paciente', mensagem: 'Informe os dados:', inputs: [{ label: 'Horário (HH:MM)', value: horarioSugerido }, { label: 'Peso (kg)', value: '80', type: 'number' }, { label: 'RIA Custom (opcional)', value: '', type: 'number' }] });
+                                    if (resPac.confirmado && resPac.valores[0] && resPac.valores[1]) { let textarea = document.getElementById('listaPacientes'); let hStr = resPac.valores[0].trim(); let pStr = resPac.valores[1].trim(); let rStr = resPac.valores[2] ? resPac.valores[2].trim() : ''; let linhaNova = `${hStr} = ${pStr}`; if (rStr && !isNaN(rStr) && parseFloat(rStr) > 0) { linhaNova += ` @ ${rStr}`; } textarea.value = textarea.value.trim() ? textarea.value.trim() + '\n' + linhaNova : linhaNova; aoDigitarPacientes(); }
+                                } else if (resAdd.valores[0] === '2') { estado.cache.reposicoesExtras[dataAtual].push(horarioSugerido); aoDigitarPacientes(); }
                             }
                         }
                     },
                     scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            max: tetoMaximo * 1.15, 
-                            title: { display: true, text: i18n[idiomaAtual].chartYTitle, color: textColor },
-                            ticks: { color: textColor },
-                            grid: { color: gridColor }
-                        },
-                        x: { 
-                            type: 'linear',
-                            position: 'bottom',
-                            title: { display: true, text: i18n[idiomaAtual].chartXTitle, color: textColor },
-                            ticks: {
-                                callback: function(value) { return minutosParaHoraStr(value); },
-                                stepSize: 30,
-                                color: textColor
-                            },
-                            grid: { color: gridColor }
-                        }
+                        y: { beginAtZero: true, max: tetoMaximo * 1.15, title: { display: true, text: i18n[idiomaAtual].chartYTitle, color: textColor }, ticks: { color: textColor }, grid: { color: gridColor } },
+                        x: { type: 'linear', position: 'bottom', title: { display: true, text: i18n[idiomaAtual].chartXTitle, color: textColor }, ticks: { callback: function(value) { return minutosParaHoraStr(value); }, stepSize: 30, color: textColor }, grid: { color: gridColor } }
                     }
                 }
             });
-
-            let totalQtdPedidos = pedidosReposicao.length;
-            let totalPacientesAtual = pacientes.length;
-            let economiaDia = totalPacientesAtual - totalQtdPedidos;
-            if (economiaDia < 0) economiaDia = 0;
-
-            let textoSimul = i18n[idiomaAtual].simCompleted
-                .replace('{rotina}', razaoRotinaVal)
-                .replace('{ria}', razaoRIAVal)
-                .replace('{a0}', a0Inicial)
-                .replace('{qtd}', totalQtdPedidos)
-                .replace('{econ}', economiaDia);
-
+            let totalQtdPedidos = pedidosReposicao.length; let totalPacientesAtual = pacientes.length; let economiaDia = totalPacientesAtual - totalQtdPedidos; if (economiaDia < 0) economiaDia = 0;
+            let textoSimul = i18n[idiomaAtual].simCompleted.replace('{rotina}', razaoRotinaVal).replace('{ria}', razaoRIAVal).replace('{a0}', a0Inicial).replace('{qtd}', totalQtdPedidos).replace('{econ}', economiaDia);
             document.getElementById('textoResultadoSimulacao').innerHTML = textoSimul;
-
             gerarListaPedido(pacientes, pedidosReposicao);
-
-        } catch (e) {
-            console.error("Erro na simulação:", e);
-        }
+        } catch (e) { console.error("Erro na simulação:", e); }
     }
 
     function gerarListaPedido(pacientes, pedidosReposicao) {
-        const modo = document.getElementById('modoHorarioPedido').value;
-        let textoTxt = "";
-
+        const modo = document.getElementById('modoHorarioPedido').value; let textoTxt = "";
         if (modo === "horaEmHora") {
             let agrupadoPorHora = {};
-            pedidosReposicao.forEach(horarioStr => {
-                let partes = horarioStr.split(':');
-                let horaCheia = `${partes[0]}:00`;
-                if (!agrupadoPorHora[horaCheia]) {
-                    agrupadoPorHora[horaCheia] = 0;
-                }
-                agrupadoPorHora[horaCheia]++;
-            });
-
+            pedidosReposicao.forEach(horarioStr => { let partes = horarioStr.split(':'); let horaCheia = `${partes[0]}:00`; if (!agrupadoPorHora[horaCheia]) agrupadoPorHora[horaCheia] = 0; agrupadoPorHora[horaCheia]++; });
             let linhasFormatadas = [];
-            Object.keys(agrupadoPorHora).sort().forEach(h => {
-                let qtd = agrupadoPorHora[h];
-                if (qtd > 1) {
-                    linhasFormatadas.push(`${h} (${qtd} doses)`);
-                } else {
-                    linhasFormatadas.push(h);
-                }
-            });
+            Object.keys(agrupadoPorHora).sort().forEach(h => { let qtd = agrupadoPorHora[h]; linhasFormatadas.push(qtd > 1 ? `${h} (${qtd} doses)` : h); });
             textoTxt = linhasFormatadas.join('\n');
-        } else {
-            textoTxt = pedidosReposicao.join('\n');
-        }
-
+        } else { textoTxt = pedidosReposicao.join('\n'); }
         document.getElementById('listaPedido').value = textoTxt;
     }
 
     function baixarTxtPedido() {
-        const conteudo = document.getElementById('listaPedido').value;
-        if (!conteudo) {
-            alert("Nenhum pedido para baixar.");
-            return;
-        }
-        let blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
-        let url = URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = `Pedido_Radiofarmacos_${document.getElementById('filtroData').value}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const conteudo = document.getElementById('listaPedido').value; if (!conteudo) { alert("Nenhum pedido para baixar."); return; }
+        let blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' }); let url = URL.createObjectURL(blob); let a = document.createElement('a'); a.href = url; a.download = `Pedido_Radiofarmacos_${document.getElementById('filtroData').value}.txt`; a.click(); URL.revokeObjectURL(url);
     }
 
     function imprimirPedido() {
-        const conteudo = document.getElementById('listaPedido').value;
-        if (!conteudo) {
-            alert("Nenhum pedido para imprimir.");
-            return;
-        }
-        let w = window.open('', '_blank');
-        w.document.write(`<html><head><title>Pedido de Radiofármacos</title>
-            <style>body{font-family:monospace; padding:20px;} h3{margin-bottom:10px;} pre{font-size:14px; line-height:1.6;}</style>
-            </head><body><h3>Pedido de Radiofármacos</h3><pre>${conteudo}</pre></body></html>`);
-        w.document.close();
-        w.print();
+        const conteudo = document.getElementById('listaPedido').value; if (!conteudo) { alert("Nenhum pedido para imprimir."); return; }
+        let w = window.open('', '_blank'); w.document.write(`<html><head><title>Pedido de Radiofármacos</title><style>body{font-family:monospace; padding:20px;} h3{margin-bottom:10px;} pre{font-size:14px; line-height:1.6;}</style></head><body><h3>Pedido de Radiofármacos</h3><pre>${conteudo}</pre></body></html>`); w.document.close(); w.print();
     }
 </script>
 </body>
