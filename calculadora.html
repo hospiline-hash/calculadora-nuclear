@@ -1501,15 +1501,49 @@
             const tetoMaximo = a0Inicial * 2.5;
             document.getElementById('tituloGraficoTeto').innerText = `${i18n[idiomaAtual].titleChart} (Lote Padrão: ${a0Inicial} mCi)`;
 
-            if (!textoPacientes) {
+                if (!textoPacientes) {
                 estado.pacientes = [];
                 document.getElementById('textoResultadoSimulacao').innerHTML = i18n[idiomaAtual].msgWaitingData;
                 document.getElementById('listaPedido').value = "";
+                
+                // CORREÇÃO: Destrói o gráfico antigo e cria um vazio para limpar a tela
                 if (meuGrafico) {
                     meuGrafico.destroy();
-                    meuGrafico = null;
-            }
-            return;
+                }
+                const ctxVazio = document.getElementById('graficoDecaimento').getContext('2d');
+                const gridColorVazio = temaEscuro ? '#334155' : '#e2e8f0';
+                const textColorVazio = temaEscuro ? '#e2e8f0' : '#1e293b';
+                
+                meuGrafico = new Chart(ctxVazio, {
+                    type: 'line',
+                    data: { datasets: [] },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { 
+                                beginAtZero: true, 
+                                max: tetoMaximo * 1.15, 
+                                title: { display: true, text: i18n[idiomaAtual].chartYTitle, color: textColorVazio },
+                                ticks: { color: textColorVazio },
+                                grid: { color: gridColorVazio }
+                            },
+                            x: { 
+                                type: 'linear',
+                                position: 'bottom',
+                                title: { display: true, text: i18n[idiomaAtual].chartXTitle, color: textColorVazio },
+                                ticks: {
+                                    callback: function(value) { return minutosParaHoraStr(value); },
+                                    stepSize: 30,
+                                    color: textColorVazio
+                                },
+                                grid: { color: gridColorVazio }
+                            }
+                        }
+                    }
+                });
+                
+                return;
             }
 
             const razaoRotinaVal = parseFloat(document.getElementById('razaoRotina').value) || 0.12;
