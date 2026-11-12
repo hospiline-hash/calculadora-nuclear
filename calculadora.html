@@ -1502,10 +1502,14 @@
             document.getElementById('tituloGraficoTeto').innerText = `${i18n[idiomaAtual].titleChart} (Lote Padrão: ${a0Inicial} mCi)`;
 
             if (!textoPacientes) {
+                estado.pacientes = [];
                 document.getElementById('textoResultadoSimulacao').innerHTML = i18n[idiomaAtual].msgWaitingData;
                 document.getElementById('listaPedido').value = "";
-                if (meuGrafico) meuGrafico.destroy();
-                return;
+                if (meuGrafico) {
+                    meuGrafico.destroy();
+                    meuGrafico = null;
+            }
+            return;
             }
 
             const razaoRotinaVal = parseFloat(document.getElementById('razaoRotina').value) || 0.12;
@@ -1692,7 +1696,7 @@
                             fill: true,
                             tension: 0.2,
                             pointRadius: 0,
-                            pointHitRadius: 15,
+                            pointHitRadius: 1,
                             pointHoverRadius: 4
                         },
                         {
@@ -1871,7 +1875,7 @@
                                 const res = await abrirDialogo({
                                     titulo: i18n[idiomaAtual].datasetExtra,
                                     mensagem: `Dose Extra às ${horarioClicado}.\nO que deseja fazer?`,
-                                    inputs: [{ value: '1', placeholder: '1-Alterar / 2-Remover' }]
+                                    inputs: [{ value: '', placeholder: '1-Alterar / 2-Remover' }]
                                 });
                                 if (res.confirmado) {
                                     if (res.valores[0] === '1') {
