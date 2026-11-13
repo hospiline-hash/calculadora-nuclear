@@ -301,6 +301,7 @@
     <h3><span data-i18n="titleConsolidated">Relatório Consolidado</span> <span id="sync-status" class="loading">Carregando dados...</span></h3>
     <p><strong data-i18n="lblTotalPatients">Total de Pacientes Atendidos (7 dias):</strong> <span id="stat-total">0</span></p>
     <p><strong data-i18n="lblSavedDoses">Doses Economizadas (Estimativa):</strong> <span id="stat-economia">0</span></p>
+    <p><strong data-i18n="lblOrderedSaved">Doses Pedidas e Economizadas (7 dias):</strong> <span id="stat-pedidas-econ">0</span></p>
     <p id="dataConsultaPrint" style="display: none; font-weight: 600; color: #065f46; margin-top: 10px;"></p>
     <div id="detalhes-diarios-print">
         <h4 style="color: #065f46; margin-bottom: 10px;" data-i18n="titleDailyDetails">Detalhamento Diário (Últimos 7 Dias):</h4>
@@ -337,7 +338,7 @@
             lblFullList: "Lista Completa (Somente Leitura - Somente Editar e Excluir):", msgWaitingData: "Aguardando inserção de dados dos pacientes...",
             titleChart: "Curva do Decaimento e Reposições", legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.",
             titleOrderList: "Lista para Pedido (Distribuidora - TXT)", lblOrderRule: "Regra de Horário para Distribuidora:", optExactTime: "Horário Exato (Ex: 08:00, 09:00, 09:30)", optHourly: "De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))", btnDownloadTxt: "Baixar Lista em TXT", btnPrintOrder: "Imprimir Apenas o Pedido",
-            titleConsolidated: "Relatório Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 dias):", lblSavedDoses: "Doses Economizadas (Estimativa):", titleDailyDetails: "Detalhamento Diário (Últimos 7 Dias):", btnPrintPdf: "Imprimir / Salvar Resumo (PDF)", btnClearHistory: "Zerar / Limpar Histórico Antigo",
+            titleConsolidated: "Relatório Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 dias):", lblSavedDoses: "Doses Economizadas (Estimativa):", lblOrderedSaved: "Doses Pedidas e Economizadas (7 dias):", titleDailyDetails: "Detalhamento Diário (Últimos 7 Dias):", btnPrintPdf: "Imprimir / Salvar Resumo (PDF)", btnClearHistory: "Zerar / Limpar Histórico Antigo",
             footerCopyright: "Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6", btnCancel: "Cancelar", btnOk: "OK", btnDarkMode: "🌙 Escuro", btnLightMode: "☀️ Claro",
             saving: "(Salvando...)", saved: "(Salvo na nuvem)", typing: "(Digitando...)", synchronized: "(Sincronizado)", loading: "Carregando dados...", errSave: "(Erro ao salvar)", errLoad: "(Erro ao carregar)",
             savingsText: "Fator: {fator} (Economia de {val}% da dose)", increaseText: "Fator: {fator} (Aumento de {val}% da dose)", standardDoseText: "Factor: 1.00 (Dose Padrão)",
@@ -354,7 +355,7 @@
             lblFullList: "Lista Completa (Solo Lectura - Solo Edita y Elimina):", msgWaitingData: "Esperando ingreso de datos de pacientes...",
             titleChart: "Curva de Decaimiento y Reposiciones", legendChart: "🔴 <b>Bolas Rojas:</b> Pacientes.<br>🟢 <b>Bolas Verdes:</b> Dosis Aplicada en el Paciente (mCi).<br>🔵 <b>Bolas Azules (Arriba):</b> Dosis Stock.<br>🟠 <b>Bolas Naranjas (Arriba):</b> Dosis Extras Manuales.<br>✨ <b>Pase el cursor en el gráfico</b> para ver hora y stock exacto.",
             titleOrderList: "Lista para Pedido (Distribuidora - TXT)", lblOrderRule: "Regra de Horario para Distribuidora:", optExactTime: "Horario Exacto", optHourly: "Cada Hora (Consolidado)", btnDownloadTxt: "Descargar Lista en TXT", btnPrintOrder: "Imprimir Solo Pedido",
-            titleConsolidated: "Informe Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 días):", lblSavedDoses: "Dosis Ahorradas (Estimación):", titleDailyDetails: "Detalle Diario (Últimos 7 Días):", btnPrintPdf: "Imprimir / Guardar Resumen (PDF)", btnClearHistory: "Borrar / Limpiar Historial Antiguo",
+            titleConsolidated: "Informe Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 días):", lblSavedDoses: "Dosis Ahorradas (Estimación):", lblOrderedSaved: "Dosis Pedidas y Ahorradas (7 días):", titleDailyDetails: "Detalle Diario (Últimos 7 Días):", btnPrintPdf: "Imprimir / Guardar Resumen (PDF)", btnClearHistory: "Borrar / Limpiar Historial Antiguo",
             footerCopyright: "Copyright © 2026 Hospiline. Todos los derechos reservados - Versão 4.9.6", btnCancel: "Cancelar", btnOk: "Aceptar", btnDarkMode: "🌙 Oscuro", btnLightMode: "☀️ Claro",
             saving: "(Guardando...)", saved: "(Guardado en la nube)", typing: "(Escribiendo...)", synchronized: "(Sincronizado)", loading: "Cargando datos...", errSave: "(Error al guardar)", errLoad: "(Error al cargar)",
             savingsText: "Factor: {fator} (Ahorro de {val}% de la dosis)", increaseText: "Factor: {fator} (Aumento de {val}% de la dosis)", standardDoseText: "Factor: 1.00 (Dosis Estándar)",
@@ -523,7 +524,7 @@
     }
 
     function atualizarRelatorioConsolidado() {
-        let simulouTemporario = false;
+        let simulouTemporario = false; let somaPedidasDias = 0; let somaEconomiaDosesDias = 0;
         let totalPacientes = 0; let totalEconomia = 0; let listaDetalhesHTML = "";
         const dataConsulta = document.getElementById('filtroData').value;
         const dataRef = dataConsulta ? new Date(dataConsulta + 'T00:00:00') : new Date(); dataRef.setHours(0, 0, 0, 0);
@@ -554,6 +555,7 @@
                         document.getElementById('listaPacientes').value = backupPacientes; document.getElementById('filtroData').value = backupData; document.getElementById('listaPedido').value = backupRepo;
                         estado.carregandoRemoto = false;
                     }
+                    somaPedidasDias += pedidosDiaExato; somaEconomiaDosesDias += economiaDiaExato;
                     let pacientesDetalheHtml = "";
                     linhas.forEach(l => { let parsed = parseLinhaPaciente(l); if (parsed) { let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : ''; pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`; } });
                     let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px; color:#065f46;"' : '';
@@ -565,6 +567,7 @@
         if (simulouTemporario) { processarSimulacaoCompleta(); }
         document.getElementById('stat-total').innerText = totalPacientes;
         document.getElementById('stat-economia').innerText = totalEconomia.toFixed(1) + " mCi";
+        const elPedEcon = document.getElementById('stat-pedidas-econ'); if (elPedEcon) { elPedEcon.innerText = `${somaPedidasDias} ${idiomaAtual === 'es' ? 'pedidas' : 'pedidas'} - ${somaEconomiaDosesDias} ${idiomaAtual === 'es' ? 'ahorradas' : 'economizadas'}`; }
         document.getElementById('lista-detalhes-print').innerHTML = listaDetalhesHTML || i18n[idiomaAtual].noRecords;
         const dataConsultaPrint = document.getElementById('dataConsultaPrint');
         if (dataConsultaPrint) { if (dataConsulta) { dataConsultaPrint.innerText = `Data consultada: ${dataConsulta.split('-').reverse().join('/')}`; dataConsultaPrint.style.display = 'block'; } else { dataConsultaPrint.style.display = 'none'; } }
