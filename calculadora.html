@@ -523,6 +523,7 @@
     }
 
     function atualizarRelatorioConsolidado() {
+        let simulouTemporario = false;
         let totalPacientes = 0; let totalEconomia = 0; let listaDetalhesHTML = "";
         const dataConsulta = document.getElementById('filtroData').value;
         const dataRef = dataConsulta ? new Date(dataConsulta + 'T00:00:00') : new Date(); dataRef.setHours(0, 0, 0, 0);
@@ -533,7 +534,7 @@
                 const diffDays = (dataRef - dataReg) / (1000 * 60 * 60 * 24);
                 if (diffDays >= 0 && diffDays <= DIAS_HISTORICO) { datasValidas.push(dataStr); }
             });
-            datasValidas.sort((a, b) => a.localeCompare(b));
+            datasValidas.sort((a, b) => a.localeCompare(b)); 
             datasValidas.forEach(dataStr => {
                 let dia = estado.banco.historicoDias[dataStr];
                 if (dia && dia.textoPacientes) {
@@ -546,7 +547,7 @@
                         const backupPacientes = document.getElementById('listaPacientes').value; const backupRepo = document.getElementById('listaPedido').value;
                         document.getElementById('listaPacientes').value = dia.textoPacientes || '';
                         const backupData = document.getElementById('filtroData').value; document.getElementById('filtroData').value = dataStr;
-                        estado.carregandoRemoto = true; processarSimulacaoCompleta();
+                        estado.carregandoRemoto = true; simulouTemporario = true; processarSimulacaoCompleta();
                         const textoSimul = document.getElementById('textoResultadoSimulacao').innerHTML;
                         const matchPedidos = textoSimul.match(/Pedidos:<\/strong>\s*(\d+)/); const matchEconomia = textoSimul.match(/Economia do dia:<\/strong>\s*(\d+)/);
                         if (matchPedidos) pedidosDiaExato = parseInt(matchPedidos[1], 10); if (matchEconomia) economiaDiaExato = parseInt(matchEconomia[1], 10);
@@ -561,6 +562,7 @@
                 }
             });
         }
+        if (simulouTemporario) { processarSimulacaoCompleta(); }
         document.getElementById('stat-total').innerText = totalPacientes;
         document.getElementById('stat-economia').innerText = totalEconomia.toFixed(1) + " mCi";
         document.getElementById('lista-detalhes-print').innerHTML = listaDetalhesHTML || i18n[idiomaAtual].noRecords;
@@ -645,7 +647,7 @@
         
         estado.carregandoRemoto = true;
         const dataSelecionada = document.getElementById('filtroData').value;
-        if (!estado.banco || !estado.banco.historicoDias) { estado.carregandoRemoto = false; return; }
+        if (!estado.banco || !estado.banco.historicoDias) { document.getElementById('listaPacientes').value = ""; processarSimulacaoCompleta(); estado.carregandoRemoto = false; return; }
         
         if (estado.banco.historicoDias[dataSelecionada]) {
             let dadosDia = estado.banco.historicoDias[dataSelecionada];
@@ -709,7 +711,7 @@
                     pacientes.push({ ...p, doseNecessaria: p.peso * razaoRotinaVal * fatorPaciente });
                 }
             });
-            if (pacientes.length === 0) return;
+            if (pacientes.length === 0) { if (meuGrafico) { meuGrafico.destroy(); meuGrafico = null; } canvasGrafico.classList.add('grafico-oculto'); document.getElementById('textoResultadoSimulacao').innerHTML = i18n[idiomaAtual].msgWaitingData; document.getElementById('listaPedido').value = ""; return; }
             pacientes.sort((a, b) => a.minutos - b.minutos); estado.pacientes = pacientes;
             let minInicioLote = pacientes[0].minutos; let fimSimulacao = pacientes[pacientes.length - 1].minutos + 60;
             let estoqueAtual = a0Inicial; let ultimoMinutoAvaliado = minInicioLote;
