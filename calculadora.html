@@ -54,9 +54,12 @@
                     
                     if (snapshot.exists()) {
                         const dados = snapshot.val();
+                        const nomeFinal = dados.nomeClinica || dados.nome || "Clínica sem Nome";
                         if (nomeDiv) {
-                            nomeDiv.innerText = dados.nomeClinica || dados.nome || "Clínica sem Nome";
+                            nomeDiv.innerText = nomeFinal;
                         }
+                        const nomeRelatorio = document.getElementById('nomeClinicaRelatorio');
+                        if (nomeRelatorio) { nomeRelatorio.innerText = nomeFinal; }
                     }
                 } catch (e) {
                     console.error("Erro ao buscar dados da clínica:", e);
@@ -298,6 +301,7 @@
 </div>
 
 <div class="card stats">
+    <div id="nomeClinicaRelatorio" style="font-size: 18px; font-weight: 700; color: var(--text-color); margin-bottom: 5px;"></div>
     <h3><span data-i18n="titleConsolidated">Relatório Consolidado</span> <span id="sync-status" class="loading">Carregando dados...</span></h3>
     <p><strong data-i18n="lblTotalPatients">Total de Pacientes Atendidos (7 dias):</strong> <span id="stat-total">0</span></p>
     <p><strong data-i18n="lblSavedDoses">Doses Economizadas (Estimativa):</strong> <span id="stat-economia">0</span></p>
