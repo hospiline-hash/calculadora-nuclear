@@ -562,7 +562,7 @@
                     }
                     somaPedidasDias += pedidosDiaExato; somaEconomiaDosesDias += economiaDiaExato;
                     let pacientesDetalheHtml = "";
-                    linhas.forEach(l => { let parsed = parseLinhaPaciente(l); if (parsed) { let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : ''; pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}</div>`; } });
+                    linhas.forEach(l => { let parsed = parseLinhaPaciente(l); if (parsed) { let txtExame = parsed.exame ? ` - <b>Exame:</b> ${parsed.exame}` : ''; let txtRia = parsed.riaCustom ? ` - <b>RIA:</b> ${parsed.riaCustom}` : ''; pacientesDetalheHtml += `<div style="font-size: 12px; margin-left: 15px; color: var(--text-color);">• ${parsed.horaStr} - Peso: ${parsed.peso} kg${txtExame}${txtRia}</div>`; } });
                     let destaque = (dataStr === dataConsulta) ? ' style="background:#dcfce7; padding:6px; border-radius:4px; color:#065f46;"' : '';
                     let infoDia = `<span style="font-weight: normal; font-size: 13px; color: #475569; margin-left: 8px;">(${pedidosDiaExato} doses pedidas | Economia: ${economiaDiaExato} doses)</span>`;
                     listaDetalhesHTML += `<div${destaque} style="margin-bottom: 12px;">• <b>${dataStr}</b> - ${qtdDia} ${i18n[idiomaAtual].patientsAttended} ${infoDia}:<br>${pacientesDetalheHtml}</div>`;
