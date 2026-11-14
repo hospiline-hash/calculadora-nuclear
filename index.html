@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel de Autenticação - Calculadora F-18</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3b82f6">
+<link rel="apple-touch-icon" href="icon-192.png">
 
 <style>
     :root {
@@ -156,6 +159,13 @@
 <div class="tab-buttons">
     <button type="button" id="tabBtnLogin" class="active" onclick="mudarAba('login')">Entrar / Cadastrar</button>
     <button type="button" id="tabBtnAdmin" onclick="mudarAba('admin')">Painel Admin</button>
+</div>
+
+<!-- ============== BOTÃO INSTALAR APP (PWA) ============== -->
+<div id="blocoInstalarApp" class="card hidden" style="text-align:center;">
+    <p style="margin:0 0 10px 0; font-size:14px; color:#64748b;">Prefere usar como aplicativo no celular?</p>
+    <button type="button" id="btnInstalarApp" class="btn-secondary" style="width:auto; padding:8px 18px;">📲 Instalar Aplicativo</button>
+    <div id="instalarAppMsg" class="msg" style="font-size:13px;"></div>
 </div>
 
 <!-- ============== ABA LOGIN / CADASTRO ============== -->
@@ -568,6 +578,58 @@
         sessionStorage.removeItem('admin_logado');
         window.fbSignOut(window.fbAuth);
         mudarAba('admin');
+    }
+</script>
+<script>
+    // ============== INSTALAÇÃO COMO APP (PWA) ==============
+    // Não interfere em login, cadastro ou qualquer dado do sistema.
+    // Só controla o aparecimento do botão "Instalar Aplicativo".
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+    }
+
+    let eventoInstalacaoPWA = null;
+    const blocoInstalarApp = document.getElementById('blocoInstalarApp');
+    const btnInstalarApp = document.getElementById('btnInstalarApp');
+    const instalarAppMsg = document.getElementById('instalarAppMsg');
+
+    const jaInstalado = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    // Android/Chrome e a maioria dos Android dispara este evento quando pode instalar.
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        eventoInstalacaoPWA = e;
+        if (!jaInstalado && blocoInstalarApp) {
+            blocoInstalarApp.classList.remove('hidden');
+        }
+    });
+
+    const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    // iPhone/iPad (Safari) não dispara o evento acima, então mostramos
+    // o botão também nesse caso, com instrução manual ao clicar.
+    if (ehIOS && !jaInstalado && blocoInstalarApp) {
+        blocoInstalarApp.classList.remove('hidden');
+    }
+
+    if (btnInstalarApp) {
+        btnInstalarApp.addEventListener('click', async () => {
+            if (eventoInstalacaoPWA) {
+                eventoInstalacaoPWA.prompt();
+                const resultado = await eventoInstalacaoPWA.userChoice;
+                if (resultado.outcome === 'accepted') {
+                    blocoInstalarApp.classList.add('hidden');
+                }
+                eventoInstalacaoPWA = null;
+            } else if (ehIOS) {
+                instalarAppMsg.innerText = 'No iPhone/iPad: toque no ícone de compartilhar (□↑) na barra do Safari e escolha "Adicionar à Tela de Início".';
+            } else {
+                instalarAppMsg.innerText = 'Seu navegador ainda não liberou a instalação automática. Use o menu do navegador e procure por "Instalar aplicativo" ou "Adicionar à tela inicial".';
+            }
+        });
     }
 </script>
 </body>

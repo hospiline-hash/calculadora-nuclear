@@ -126,7 +126,8 @@
         .historico-box { background: var(--historico-bg); padding: 18px; border-radius: 6px; border: 1px solid var(--historico-border); margin-bottom: 15px; }
         .config-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; align-items: start; }
         .input-rapido-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 5px; align-items: end; }
-        @media (max-width: 768px) { .config-grid { grid-template-columns: 1fr; } .input-rapido-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .config-grid { grid-template-columns: 1fr; } .input-rapido-grid { grid-template-columns: 1fr; } .chart-container { height: 320px; } }
+        @media (max-width: 480px) { .chart-container { height: 260px; } body { padding: 12px; } }
         .footer-copyright { text-align: center; margin-top: 30px; margin-bottom: 20px; font-size: 13px; color: var(--secondary-color); border-top: 1px solid var(--footer-border); padding-top: 15px; }
         .info-status-fator { font-size: 11px; margin-top: 4px; font-weight: 600; color: #059669; }
         body.dark-mode .info-status-fator { color: #34d399; }
