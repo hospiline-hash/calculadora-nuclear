@@ -316,7 +316,7 @@
     <button class="btn-danger" onclick="zerarBancoNuvem()" style="margin-top: 10px;" data-i18n="btnClearHistory">Zerar / Limpar Histórico Antigo</button>
 </div>
 
-<div class="footer-copyright" data-i18n="footerCopyright">Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.10.0</div>
+<div class="footer-copyright" data-i18n="footerCopyright">Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6</div>
 
 <script>
     document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
@@ -344,7 +344,7 @@
             titleChart: "Curva do Decaimento e Reposições", legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.",
             titleOrderList: "Lista para Pedido (Distribuidora - TXT)", lblOrderRule: "Regra de Horário para Distribuidora:", optExactTime: "Horário Exato (Ex: 08:00, 09:00, 09:30)", optHourly: "De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))", btnDownloadTxt: "Baixar Lista em TXT", btnPrintOrder: "Imprimir Apenas o Pedido",
             titleConsolidated: "Relatório Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 dias):", lblSavedDoses: "Doses Economizadas (Estimativa):", lblOrderedSaved: "Doses Pedidas e Economizadas (7 dias):", titleDailyDetails: "Detalhamento Diário (Últimos 7 Dias):", btnPrintPdf: "Imprimir / Salvar Resumo (PDF)", btnClearHistory: "Zerar / Limpar Histórico Antigo",
-            footerCopyright: "Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.10.0", btnCancel: "Cancelar", btnOk: "OK", btnDarkMode: "🌙 Escuro", btnLightMode: "☀️ Claro",
+            footerCopyright: "Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6", btnCancel: "Cancelar", btnOk: "OK", btnDarkMode: "🌙 Escuro", btnLightMode: "☀️ Claro",
             saving: "(Salvando...)", saved: "(Salvo na nuvem)", typing: "(Digitando...)", synchronized: "(Sincronizado)", loading: "Carregando dados...", errSave: "(Erro ao salvar)", errLoad: "(Erro ao carregar)",
             savingsText: "Fator: {fator} (Economia de {val}% da dose)", increaseText: "Fator: {fator} (Aumento de {val}% da dose)", standardDoseText: "Factor: 1.00 (Dose Padrão)",
             simCompleted: "Simulação concluída! (Razão Rotina: <strong>{rotina}</strong> | RIA: <strong>{ria}</strong> | Lote: <strong>{a0} mCi</strong>)<br><strong>Pedidos:</strong> {qtd} | <strong>Economia do dia:</strong> {econ}",
@@ -445,10 +445,11 @@
                 if (inp.placeholder) el.placeholder = inp.placeholder; el.id = `dialogInput_${i}`; div.appendChild(el); container.appendChild(div);
             });
             const btnOk = document.getElementById('dialogBtnOk'); const btnCancel = document.getElementById('dialogBtnCancelar');
-            const cleanup = () => { btnOk.onclick = null; btnCancel.onclick = null; dlg.onclose = null; };
+            const cleanup = () => { btnOk.onclick = null; btnCancel.onclick = null; dlg.onclose = null; dlg.onclick = null; };
             btnOk.onclick = () => { const valores = inputs.map((_, i) => document.getElementById(`dialogInput_${i}`).value); cleanup(); dlg.close(); resolve({ confirmado: true, valores }); };
             btnCancel.onclick = () => { cleanup(); dlg.close(); resolve({ confirmado: false, valores: [] }); };
             dlg.onclose = () => { cleanup(); resolve({ confirmado: false, valores: [] }); };
+            dlg.onclick = (ev) => { if (ev.target === dlg) { cleanup(); dlg.close(); resolve({ confirmado: false, valores: [] }); } };
             if (dlg.open) dlg.close(); dlg.showModal();
             if (inputs.length > 0) { const primeiro = document.getElementById('dialogInput_0'); if (primeiro) primeiro.focus(); }
         });
@@ -824,6 +825,9 @@
                                 if (res.confirmado && res.valores[0]) { let novoH = res.valores[0].trim(); let pacAlvo = pacientes.find(p => p.horaStr === horarioClicado) || pacientes[0]; if (pacAlvo) { estado.cache.overridesAuto[dataAtual][pacAlvo.horaStr] = novoH; aoDigitarPacientes(); } }
                                 return;
                             }
+                            if (datasetIndex === 4) { // Bola Verde (Dose Aplicada) - somente informativa, não abre edição
+                                return;
+                            }
                             if (datasetIndex === 3) { // Bola Laranja
                                 const res = await abrirDialogo({ titulo: i18n[idiomaAtual].datasetExtra, mensagem: `Dose Extra às ${horarioClicado}.\nO que deseja fazer?`, inputs: [{ value: '', placeholder: '1-Alterar / 2-Remover' }] });
                                 if (res.confirmado) {
@@ -837,10 +841,12 @@
                                 const res = await abrirDialogo({ titulo: `Paciente às ${pacEncontrado.horaStr}`, mensagem: '1 - Alterar Dados (Horário, Peso, RIA)\n2 - Remover Paciente', inputs: [{ value: '1', placeholder: '1 ou 2' }] });
                                 if (res.confirmado) {
                                     if (res.valores[0] === '1') {
-                                        const resEdit = await abrirDialogo({ titulo: 'Editar Paciente', mensagem: 'Informe as novas informações:', inputs: [{ label: 'Horário (HH:MM)', value: pacEncontrado.horaStr }, { label: 'Peso (kg)', value: pacEncontrado.peso, type: 'number' }, { label: 'RIA Customizada (opcional)', value: pacEncontrado.riaCustom || '', type: 'number' }] });
+                                        const riaPadraoAtual = document.getElementById('razaoRIA').value || '0.08';
+                                        const resEdit = await abrirDialogo({ titulo: 'Editar Paciente', mensagem: `Informe as novas informações (Deixe RIA em branco para usar o padrão atual: ${riaPadraoAtual}):`, inputs: [{ label: 'Horário (HH:MM)', value: pacEncontrado.horaStr }, { label: 'Peso (kg)', value: pacEncontrado.peso, type: 'number' }, { label: 'Exame (opcional)', value: pacEncontrado.exame || '' }, { label: `RIA Customizada (opcional - padrão: ${riaPadraoAtual})`, value: pacEncontrado.riaCustom || '', type: 'number', placeholder: riaPadraoAtual }] });
                                         if (resEdit.confirmado) {
-                                            let novoM = converterHoraParaMinutos(resEdit.valores[0]); let novoP = parseFloat(resEdit.valores[1]); let novaRia = parseFloat(resEdit.valores[2]);
-                                            if (novoM !== null && !isNaN(novoP)) { pacEncontrado.minutos = novoM; pacEncontrado.horaStr = minutosParaHoraStr(novoM); pacEncontrado.peso = novoP; pacEncontrado.riaCustom = (!isNaN(novaRia) && novaRia > 0) ? novaRia : null; pacientes.sort((a, b) => a.minutos - b.minutos); document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes); aoDigitarPacientes(); }
+                                            let novoM = converterHoraParaMinutos(resEdit.valores[0]); let novoP = parseFloat(resEdit.valores[1]); let novoExame = (resEdit.valores[2] || '').trim(); let novaRia = parseFloat(resEdit.valores[3]);
+                                            if (novoM !== null && !isNaN(novoP)) { pacEncontrado.minutos = novoM; pacEncontrado.horaStr = minutosParaHoraStr(novoM); pacEncontrado.peso = novoP; pacEncontrado.exame = novoExame || null; pacEncontrado.riaCustom = (!isNaN(novaRia) && novaRia > 0) ? novaRia : null; pacientes.sort((a, b) => a.minutos - b.minutos); document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes); aoDigitarPacientes(); }
+                                            else { alert('Horário ou peso inválido. Nenhuma alteração foi salva.'); }
                                         }
                                     } else if (res.valores[0] === '2') { pacientes = pacientes.filter(p => p.minutos !== pacEncontrado.minutos); document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes); aoDigitarPacientes(); }
                                 }
