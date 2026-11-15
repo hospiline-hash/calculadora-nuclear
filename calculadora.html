@@ -280,11 +280,11 @@
 <div class="card">
     <h3 id="tituloGraficoTeto" data-i18n="titleChart">Curva do Decaimento e Reposições</h3>
     <p style="font-size: 13px; color: var(--secondary-color); margin-top: -5px; line-height: 1.4;" data-i18n="legendChart">
-        🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>
+        🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante).<br>
         🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>
         🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>
         🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>
-        ✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.
+        ✨ <b>Passe o mouse na linha azul:</b> Para ver a hora e o estoque exato.
     </p>
     <div class="chart-container"><canvas id="graficoDecaimento"></canvas></div>
 </div>
@@ -341,7 +341,7 @@
             lblHalfLifeCustom: "Meia-Vida Custom (min):", lblRazaoRotina: "Clínica - Razão (Rrotina) [mCi/kg]:", lblRazaoRIA: "IA - Razão (RIA Padrão) [mCi/kg]:", lblBatchDose: "Dose Inicial do Lote (mCi):", btnSaveDefaults: "Salvar Configuração Padrão",
             lblQuickAdd: "Adicionar Paciente Rápido (Máscara automática):", phQuickTime: "Horário (Ex: 0730)", phQuickWeight: "Peso em kg (Ex: 80)", phQuickExam: "Exame (Opcional)", btnAddQuick: "+ Adicionar Paciente", hintQuickAdd: "Dica: Digite apenas os números do horário (ex: 0800) que os dois-pontos entram sozinhos.",
             lblFullList: "Lista Completa (Clique em um paciente para Alterar ou Excluir):", msgWaitingData: "Aguardando inserção de dados dos pacientes...",
-            titleChart: "Curva do Decaimento e Reposições", legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.",
+            titleChart: "Curva do Decaimento e Reposições", legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante).<br>🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>✨ <b>Passe o mouse na linha azul:fico</b> Para ver a hora e o estoque exato.",
             titleOrderList: "Lista para Pedido (Distribuidora - TXT)", lblOrderRule: "Regra de Horário para Distribuidora:", optExactTime: "Horário Exato (Ex: 08:00, 09:00, 09:30)", optHourly: "De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))", btnDownloadTxt: "Baixar Lista em TXT", btnPrintOrder: "Imprimir Apenas o Pedido",
             titleConsolidated: "Relatório Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 dias):", lblSavedDoses: "Doses Economizadas (Estimativa):", lblOrderedSaved: "Doses Pedidas e Economizadas (7 dias):", titleDailyDetails: "Detalhamento Diário (Últimos 7 Dias):", btnPrintPdf: "Imprimir / Salvar Resumo (PDF)", btnClearHistory: "Zerar / Limpar Histórico Antigo",
             footerCopyright: "Copyright © 2026 Hospiline. Todos os direitos Reservados - Versão 4.9.6", btnCancel: "Cancelar", btnOk: "OK", btnDarkMode: "🌙 Escuro", btnLightMode: "☀️ Claro",
@@ -358,7 +358,7 @@
             lblHalfLifeCustom: "Semivida Personalizada (min):", lblRazaoRotina: "Clínica - Relación actividad/masa (Rrotina) [mCi/kg]:", lblRazaoRIA: "IA - Relación actividad/masa (RIA Estándar) [mCi/kg]:", lblBatchDose: "Dosis Inicial del Lote (mCi):", btnSaveDefaults: "Guardar Config en BD",
             lblQuickAdd: "Agregar Paciente Rápido (Máscara auto):", phQuickTime: "Hora (Ej: 0730)", phQuickWeight: "Peso en kg (Ej: 80)", phQuickExam: "Estudio (Opcional)", btnAddQuick: "+ Agregar Paciente", hintQuickAdd: "Consejo: Ingrese solo números de hora (ej: 0800) y dos puntos se añaden solos.",
             lblFullList: "Lista Completa (Haga clic en un paciente para Editar o Eliminar):", msgWaitingData: "Esperando ingreso de datos de pacientes...",
-            titleChart: "Curva de Decaimiento y Reposiciones", legendChart: "🔴 <b>Bolas Rojas:</b> Pacientes.<br>🟢 <b>Bolas Verdes:</b> Dosis Aplicada en el Paciente (mCi).<br>🔵 <b>Bolas Azules (Arriba):</b> Dosis Stock.<br>🟠 <b>Bolas Naranjas (Arriba):</b> Dosis Extras Manuales.<br>✨ <b>Pase el cursor en el gráfico</b> para ver hora y stock exacto.",
+            titleChart: "Curva de Decaimiento y Reposiciones", legendChart: "🔴 <b>Bolas Rojas:</b> Pacientes (Muestra peso, dosis aplicada y actividad restante).<br>🟢 <b>Bolas Verdes:</b> Dosis Aplicada en el Paciente (mCi).<br>🔵 <b>Bolas Azules (Arriba):</b> Dosis Stock.<br>🟠 <b>Bolas Naranjas (Arriba):</b> Dosis Extras Manuales.<br>✨ <b>Pase el cursor sobre la línia azul:</b> Para ver hora y stock exacto.",
             titleOrderList: "Lista para Pedido (Distribuidora - TXT)", lblOrderRule: "Regra de Horario para Distribuidora:", optExactTime: "Horario Exacto", optHourly: "Cada Hora (Consolidado)", btnDownloadTxt: "Descargar Lista en TXT", btnPrintOrder: "Imprimir Solo Pedido",
             titleConsolidated: "Informe Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 días):", lblSavedDoses: "Dosis Ahorradas (Estimación):", lblOrderedSaved: "Dosis Pedidas y Ahorradas (7 días):", titleDailyDetails: "Detalle Diario (Últimos 7 Días):", btnPrintPdf: "Imprimir / Guardar Resumen (PDF)", btnClearHistory: "Borrar / Limpiar Historial Antiguo",
             footerCopyright: "Copyright © 2026 Hospiline. Todos los derechos reservados - Versão 4.9.6", btnCancel: "Cancelar", btnOk: "Aceptar", btnDarkMode: "🌙 Oscuro", btnLightMode: "☀️ Claro",
