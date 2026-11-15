@@ -268,7 +268,7 @@
 
     <span style="font-size: 11px; color: var(--secondary-color); display: block; margin-top: 8px;" data-i18n="hintQuickAdd">Dica: Digite apenas os números do horário (ex: 0800) que os dois-pontos entram sozinhos.</span>
 
-    <label for="listaPacientes" style="margin-top: 15px;" data-i18n="lblFullList">Lista Completa (Somente Leitura - Somente Editar e Excluir):</label>
+    <label for="listaPacientes" style="margin-top: 15px;" data-i18n="lblFullList">Lista Completa (Clique em um paciente para Alterar ou Excluir):</label>
     <textarea id="listaPacientes" rows="5" oninput="aoDigitarPacientes()" onkeydown="if(event.key==='Enter'){ event.preventDefault(); alert('Para inserir novos pacientes, utilize o botão Adicionar acima.'); }" style="background: var(--card-bg);" placeholder="Os pacientes inseridos aparecerão aqui..."></textarea>
 
     <div class="result" id="resultado">
@@ -340,7 +340,7 @@
             lblRadiopharm: "Radiofármaco (Isótopo):", optFDG: "¹⁸F-FDG (Meia-vida: 109.8 min)", optTc: "⁹⁹ᵐTc - Tecnécio (Meia-vida: 360 min)", optGa: "⁶⁸Ga - Gálio (Meia-vida: 68 min)", optI: "¹³¹I - Iodo (Meia-vida: 8 dias)", optLu: "¹⁷⁷Lu - Lutécio (Meia-vida: 6.64 dias)", optCustom: "Outro (Meia-Vida personalizada)",
             lblHalfLifeCustom: "Meia-Vida Custom (min):", lblRazaoRotina: "Clínica - Razão (Rrotina) [mCi/kg]:", lblRazaoRIA: "IA - Razão (RIA Padrão) [mCi/kg]:", lblBatchDose: "Dose Inicial do Lote (mCi):", btnSaveDefaults: "Salvar Configuração Padrão",
             lblQuickAdd: "Adicionar Paciente Rápido (Máscara automática):", phQuickTime: "Horário (Ex: 0730)", phQuickWeight: "Peso em kg (Ex: 80)", phQuickExam: "Exame (Opcional)", btnAddQuick: "+ Adicionar Paciente", hintQuickAdd: "Dica: Digite apenas os números do horário (ex: 0800) que os dois-pontos entram sozinhos.",
-            lblFullList: "Lista Completa (Somente Leitura - Somente Editar e Excluir):", msgWaitingData: "Aguardando inserção de dados dos pacientes...",
+            lblFullList: "Lista Completa (Clique em um paciente para Alterar ou Excluir):", msgWaitingData: "Aguardando inserção de dados dos pacientes...",
             titleChart: "Curva do Decaimento e Reposições", legendChart: "🔴 <b>Bolas Vermelhas:</b> Pacientes (Mostra peso, dose aplicada e atividade restante). Clicar na Bola Vermelha Remove paciente e Altera Dados.<br>🟢 <b>Bolas Verdes:</b> Dose Aplicada no Paciente (mCi).<br>🔵 <b>Bolas Azuis (Acima):</b> Dose Estoque (Soma a Dose Automática + Resíduo Anterior).<br>🟠 <b>Bolas Laranjas (Acima):</b> Doses Extras Manuais. Clicar em qualquer área do gráfico adiciona dose extra.<br>✨ <b>Passe o mouse em qualquer área do gráfico</b> para ver a hora e o estoque exato. Clique para adicionar ou gerenciar eventos.",
             titleOrderList: "Lista para Pedido (Distribuidora - TXT)", lblOrderRule: "Regra de Horário para Distribuidora:", optExactTime: "Horário Exato (Ex: 08:00, 09:00, 09:30)", optHourly: "De Hora em Hora (Antecipado / Consolidado - Ex: 09:00 (2 doses))", btnDownloadTxt: "Baixar Lista em TXT", btnPrintOrder: "Imprimir Apenas o Pedido",
             titleConsolidated: "Relatório Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 dias):", lblSavedDoses: "Doses Economizadas (Estimativa):", lblOrderedSaved: "Doses Pedidas e Economizadas (7 dias):", titleDailyDetails: "Detalhamento Diário (Últimos 7 Dias):", btnPrintPdf: "Imprimir / Salvar Resumo (PDF)", btnClearHistory: "Zerar / Limpar Histórico Antigo",
@@ -357,7 +357,7 @@
             lblRadiopharm: "Radiofármaco (Isótopo):", optFDG: "¹⁸F-FDG (Semivida: 109.8 min)", optTc: "⁹⁹ᵐTc - Tecnecio (Semivida: 360 min)", optGa: "⁶⁸Ga - Galio (Semivida: 68 min)", optI: "¹³¹I - Yodo (Semivida: 8 días)", optLu: "¹⁷⁷Lu - Lutecio (Semivida: 6.64 días)", optCustom: "Otro (Semivida personalizada)",
             lblHalfLifeCustom: "Semivida Personalizada (min):", lblRazaoRotina: "Clínica - Relación actividad/masa (Rrotina) [mCi/kg]:", lblRazaoRIA: "IA - Relación actividad/masa (RIA Estándar) [mCi/kg]:", lblBatchDose: "Dosis Inicial del Lote (mCi):", btnSaveDefaults: "Guardar Config en BD",
             lblQuickAdd: "Agregar Paciente Rápido (Máscara auto):", phQuickTime: "Hora (Ej: 0730)", phQuickWeight: "Peso en kg (Ej: 80)", phQuickExam: "Estudio (Opcional)", btnAddQuick: "+ Agregar Paciente", hintQuickAdd: "Consejo: Ingrese solo números de hora (ej: 0800) y dos puntos se añaden solos.",
-            lblFullList: "Lista Completa (Solo Lectura - Solo Edita y Elimina):", msgWaitingData: "Esperando ingreso de datos de pacientes...",
+            lblFullList: "Lista Completa (Haga clic en un paciente para Editar o Eliminar):", msgWaitingData: "Esperando ingreso de datos de pacientes...",
             titleChart: "Curva de Decaimiento y Reposiciones", legendChart: "🔴 <b>Bolas Rojas:</b> Pacientes.<br>🟢 <b>Bolas Verdes:</b> Dosis Aplicada en el Paciente (mCi).<br>🔵 <b>Bolas Azules (Arriba):</b> Dosis Stock.<br>🟠 <b>Bolas Naranjas (Arriba):</b> Dosis Extras Manuales.<br>✨ <b>Pase el cursor en el gráfico</b> para ver hora y stock exacto.",
             titleOrderList: "Lista para Pedido (Distribuidora - TXT)", lblOrderRule: "Regra de Horario para Distribuidora:", optExactTime: "Horario Exacto", optHourly: "Cada Hora (Consolidado)", btnDownloadTxt: "Descargar Lista en TXT", btnPrintOrder: "Imprimir Solo Pedido",
             titleConsolidated: "Informe Consolidado", lblTotalPatients: "Total de Pacientes Atendidos (7 días):", lblSavedDoses: "Dosis Ahorradas (Estimación):", lblOrderedSaved: "Dosis Pedidas y Ahorradas (7 días):", titleDailyDetails: "Detalle Diario (Últimos 7 Días):", btnPrintPdf: "Imprimir / Guardar Resumen (PDF)", btnClearHistory: "Borrar / Limpiar Historial Antiguo",
@@ -720,6 +720,42 @@
                     pacientes.push({ ...p, doseNecessaria: p.peso * razaoRotinaVal * fatorPaciente });
                 }
             });
+
+            // Abre a caixa de Alterar/Remover para um paciente (reaproveitada pela bola
+            // vermelha do gráfico e pelo clique na Lista Completa). Alterar horário ou
+            // peso aqui recalcula o mCi automaticamente, pois aoDigitarPacientes() reprocessa tudo.
+            async function abrirEdicaoRemocaoPaciente(pacEncontrado) {
+                const res = await abrirDialogo({ titulo: `Paciente às ${pacEncontrado.horaStr}`, mensagem: '1 - Alterar Dados (Horário, Peso, Exame, RIA)\n2 - Remover Paciente', inputs: [{ value: '1', placeholder: '1 ou 2' }] });
+                if (res.confirmado) {
+                    if (res.valores[0] === '1') {
+                        const riaPadraoAtual = document.getElementById('razaoRIA').value || '0.08';
+                        const resEdit = await abrirDialogo({ titulo: 'Editar Paciente', mensagem: `Informe as novas informações (Deixe RIA em branco para usar o padrão atual: ${riaPadraoAtual}):`, inputs: [{ label: 'Horário (HH:MM)', value: pacEncontrado.horaStr }, { label: 'Peso (kg)', value: pacEncontrado.peso, type: 'number' }, { label: 'Exame (opcional)', value: pacEncontrado.exame || '' }, { label: `RIA Customizada (opcional - padrão: ${riaPadraoAtual})`, value: pacEncontrado.riaCustom || '', type: 'number', placeholder: riaPadraoAtual }] });
+                        if (resEdit.confirmado) {
+                            let novoM = converterHoraParaMinutos(resEdit.valores[0]); let novoP = parseFloat(resEdit.valores[1]); let novoExame = (resEdit.valores[2] || '').trim(); let novaRia = parseFloat(resEdit.valores[3]);
+                            if (novoM !== null && !isNaN(novoP)) { pacEncontrado.minutos = novoM; pacEncontrado.horaStr = minutosParaHoraStr(novoM); pacEncontrado.peso = novoP; pacEncontrado.exame = novoExame || null; pacEncontrado.riaCustom = (!isNaN(novaRia) && novaRia > 0) ? novaRia : null; pacientes.sort((a, b) => a.minutos - b.minutos); document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes); aoDigitarPacientes(); }
+                            else { alert('Horário ou peso inválido. Nenhuma alteração foi salva.'); }
+                        }
+                    } else if (res.valores[0] === '2') { pacientes = pacientes.filter(p => p.minutos !== pacEncontrado.minutos); document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes); aoDigitarPacientes(); }
+                }
+            }
+
+            // Clicar em cima de uma linha da Lista Completa abre a mesma caixa de
+            // Alterar/Remover usada na bola vermelha do gráfico.
+            const elListaPacientes = document.getElementById('listaPacientes');
+            elListaPacientes.readOnly = true;
+            elListaPacientes.style.cursor = 'pointer';
+            elListaPacientes.onclick = async function (ev) {
+                const ta = ev.target; const pos = ta.selectionStart; const texto = ta.value;
+                let inicio = texto.lastIndexOf('\n', pos - 1) + 1;
+                let fim = texto.indexOf('\n', pos); if (fim === -1) fim = texto.length;
+                const linhaClicada = texto.substring(inicio, fim).trim();
+                if (!linhaClicada) return;
+                const parsedClicado = parseLinhaPaciente(linhaClicada);
+                if (!parsedClicado) return;
+                const minClicados = converterHoraParaMinutos(parsedClicado.horaStr);
+                const pacClicado = pacientes.find(p => p.minutos === minClicados);
+                if (pacClicado) { await abrirEdicaoRemocaoPaciente(pacClicado); }
+            };
             if (pacientes.length === 0) { if (meuGrafico) { meuGrafico.destroy(); meuGrafico = null; } canvasGrafico.classList.add('grafico-oculto'); document.getElementById('textoResultadoSimulacao').innerHTML = i18n[idiomaAtual].msgWaitingData; document.getElementById('listaPedido').value = ""; return; }
             pacientes.sort((a, b) => a.minutos - b.minutos); estado.pacientes = pacientes;
             let minInicioLote = pacientes[0].minutos; let fimSimulacao = pacientes[pacientes.length - 1].minutos + 60;
@@ -836,33 +872,17 @@
                                 }
                                 return;
                             }
-                            let pacEncontrado = pacientes.find(p => p.minutos === minutosClicados);
-                            if (pacEncontrado) {
-                                const res = await abrirDialogo({ titulo: `Paciente às ${pacEncontrado.horaStr}`, mensagem: '1 - Alterar Dados (Horário, Peso, RIA)\n2 - Remover Paciente', inputs: [{ value: '1', placeholder: '1 ou 2' }] });
-                                if (res.confirmado) {
-                                    if (res.valores[0] === '1') {
-                                        const riaPadraoAtual = document.getElementById('razaoRIA').value || '0.08';
-                                        const resEdit = await abrirDialogo({ titulo: 'Editar Paciente', mensagem: `Informe as novas informações (Deixe RIA em branco para usar o padrão atual: ${riaPadraoAtual}):`, inputs: [{ label: 'Horário (HH:MM)', value: pacEncontrado.horaStr }, { label: 'Peso (kg)', value: pacEncontrado.peso, type: 'number' }, { label: 'Exame (opcional)', value: pacEncontrado.exame || '' }, { label: `RIA Customizada (opcional - padrão: ${riaPadraoAtual})`, value: pacEncontrado.riaCustom || '', type: 'number', placeholder: riaPadraoAtual }] });
-                                        if (resEdit.confirmado) {
-                                            let novoM = converterHoraParaMinutos(resEdit.valores[0]); let novoP = parseFloat(resEdit.valores[1]); let novoExame = (resEdit.valores[2] || '').trim(); let novaRia = parseFloat(resEdit.valores[3]);
-                                            if (novoM !== null && !isNaN(novoP)) { pacEncontrado.minutos = novoM; pacEncontrado.horaStr = minutosParaHoraStr(novoM); pacEncontrado.peso = novoP; pacEncontrado.exame = novoExame || null; pacEncontrado.riaCustom = (!isNaN(novaRia) && novaRia > 0) ? novaRia : null; pacientes.sort((a, b) => a.minutos - b.minutos); document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes); aoDigitarPacientes(); }
-                                            else { alert('Horário ou peso inválido. Nenhuma alteração foi salva.'); }
-                                        }
-                                    } else if (res.valores[0] === '2') { pacientes = pacientes.filter(p => p.minutos !== pacEncontrado.minutos); document.getElementById('listaPacientes').value = formatarPacientesParaTextarea(pacientes); aoDigitarPacientes(); }
-                                }
-                                return;
-                            }
+                            // Bola vermelha (paciente): somente informativa no gráfico.
+                            // Alterar ou remover paciente agora é feito só pela Lista Completa.
+                            return;
                         }
                         const canvasPosition = Chart.helpers.getRelativePosition(e, meuGrafico); const dataX = meuGrafico.scales.x.getValueForPixel(canvasPosition.x);
                         if (dataX !== undefined) {
+                            // Clicar em área vazia do gráfico serve só para incluir Dose Extra.
+                            // Pacientes são adicionados pelo formulário "Adicionar Paciente Rápido" acima.
                             let minutosArredondados = Math.round(dataX / 5) * 5; let horarioSugerido = minutosParaHoraStr(minutosArredondados);
-                            const resAdd = await abrirDialogo({ titulo: 'Adicionar Evento', mensagem: `Adicionar às ${horarioSugerido}?\n1 - Paciente\n2 - Dose Extra`, inputs: [{ value: '1', placeholder: '1 ou 2' }] });
-                            if (resAdd.confirmado) {
-                                if (resAdd.valores[0] === '1') {
-                                    const resPac = await abrirDialogo({ titulo: 'Novo Paciente', mensagem: 'Informe os dados:', inputs: [{ label: 'Horário (HH:MM)', value: horarioSugerido }, { label: 'Peso (kg)', value: '80', type: 'number' }, { label: 'RIA Custom (opcional)', value: '', type: 'number' }] });
-                                    if (resPac.confirmado && resPac.valores[0] && resPac.valores[1]) { let textarea = document.getElementById('listaPacientes'); let hStr = resPac.valores[0].trim(); let pStr = resPac.valores[1].trim(); let rStr = resPac.valores[2] ? resPac.valores[2].trim() : ''; let linhaNova = `${hStr} = ${pStr}`; if (rStr && !isNaN(rStr) && parseFloat(rStr) > 0) { linhaNova += ` @ ${rStr}`; } textarea.value = textarea.value.trim() ? textarea.value.trim() + '\n' + linhaNova : linhaNova; aoDigitarPacientes(); }
-                                } else if (resAdd.valores[0] === '2') { estado.cache.reposicoesExtras[dataAtual].push(horarioSugerido); aoDigitarPacientes(); }
-                            }
+                            const resAdd = await abrirDialogo({ titulo: 'Adicionar Dose Extra', mensagem: 'Confirme o horário da Dose Extra:', inputs: [{ label: 'Horário (HH:MM)', value: horarioSugerido }] });
+                            if (resAdd.confirmado && resAdd.valores[0]) { estado.cache.reposicoesExtras[dataAtual].push(resAdd.valores[0].trim()); aoDigitarPacientes(); }
                         }
                     },
                     scales: {
