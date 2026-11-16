@@ -810,7 +810,7 @@
             meuGrafico = new Chart(ctx, {
                 type: 'line',
                 data: { datasets: [
-                    { label: i18n[idiomaAtual].datasetRemaining, data: dadosCurva, infoPacientePre: dadosAtividadePre, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, fill: true, tension: 0.2, pointRadius: 0, pointHitRadius: 1, pointHoverRadius: 4 },
+                    { label: i18n[idiomaAtual].datasetRemaining, data: dadosCurva, infoPacientePre: dadosAtividadePre, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, fill: true, tension: 0.2, pointRadius: 0, pointHitRadius: 3, pointHoverRadius: 4 },
                     { label: i18n[idiomaAtual].datasetPatients, data: dadosPacientesPuntos, borderColor: 'transparent', backgroundColor: '#ef4444', pointBackgroundColor: '#ef4444', pointBorderColor: '#ef4444', pointRadius: 7, pointHoverRadius: 9, showLine: false },
                     { label: i18n[idiomaAtual].datasetStock, data: dadosDosesAutoAcima, borderColor: 'transparent', backgroundColor: '#3b82f6', pointBackgroundColor: '#3b82f6', pointBorderColor: '#ffffff', pointBorderWidth: 1.5, pointRadius: 7, pointHoverRadius: 9, showLine: false },
                     { label: i18n[idiomaAtual].datasetExtra, data: dadosDosesExtrasAcima, borderColor: 'transparent', backgroundColor: '#f59e0b', pointBackgroundColor: '#f59e0b', pointBorderColor: '#ffffff', pointBorderWidth: 1.5, pointRadius: 7, pointHoverRadius: 9, showLine: false },
